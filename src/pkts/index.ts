@@ -1,6 +1,3 @@
-import { installGlobal, sendAppMessage } from "../pktslib";
-installGlobal({ force: true });
-
 import { ClayConstructor } from "../pktslib/Clay";
 // @ts-ignore
 const Clay: ClayConstructor = require("pebble-clay");
