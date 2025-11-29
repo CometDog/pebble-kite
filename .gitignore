@@ -1,0 +1,7 @@
+build
+node_modules
+src/pkjs
+.lock-*
+.DS_Store
+/.vscode
+!/.vscode/c_cpp_properties.json

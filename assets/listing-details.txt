@@ -1,0 +1,26 @@
+App Name: Kagi News
+—
+Category: Daily
+—
+Description:
+
+About the App:
+Unofficial Pebble front end for Kagi News.
+
+Daily press review from Kagi News with support for all features practical on the Pebble Watch.
+
+Select a news category and go through the list of news stories available for that day. Click through to see additional details (Historical Background, Highlights, Quick Questions, etc). Each section has sources cited, each with a QR code you can scan with your phone to read the full source articles.
+
+Please submit any issues on GitHub:
+https://github.com/CometDog/pebble-kite
+
+About Kagi News (excerpt of description from official Kagi News listing):
+Kagi News uses AI to read thousands of community-curated RSS feeds from publications worldwide and distills them into a single, thoughtful press review.
+
+Every review cites the sources it pulled from, so you can diver deeper with one tap.
+
+Community Contributions:
+Contribute sources to broaden perspectives
+Open source platform with community-curated feeds
+
+https://help.kagi.com/kagi/news/
