@@ -1,29 +1,69 @@
 interface FetchOptions {
   url: string;
   responseType?: "text" | "arraybuffer";
+  timeout?: number;
 }
 
 function baseFetch({
   url,
   responseType,
+  timeout = 30000,
 }: FetchOptions): Promise<XMLHttpRequest> {
   return new Promise((resolve, reject) => {
     const req = new XMLHttpRequest();
-    req.responseType = responseType || "";
+    let settled = false;
+
+    const settle = (fn: () => void) => {
+      if (!settled) {
+        settled = true;
+        clearTimeout(timeoutId);
+        fn();
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      settle(() => {
+        req.abort();
+        reject(new Error("Request timeout (manual)"));
+      });
+    }, timeout);
+
+    req.onreadystatechange = () => {
+      if (req.readyState === 4) {
+        if (req.status >= 200 && req.status < 300) {
+          settle(() => resolve(req));
+        } else if (req.status > 0) {
+          settle(() =>
+            reject(new Error(`Request failed with status ${req.status}`)),
+          );
+        } else {
+          settle(() => reject(new Error("Network error (status 0)")));
+        }
+      }
+    };
 
     req.onload = () => {
       if (req.status >= 200 && req.status < 300) {
-        resolve(req);
+        settle(() => resolve(req));
       } else {
-        reject(new Error(`Request failed with status ${req.status} `));
+        settle(() =>
+          reject(new Error(`Request failed with status ${req.status}`)),
+        );
       }
     };
 
     req.onerror = () => {
-      reject(new Error("Network error"));
+      settle(() => reject(new Error("Network error")));
+    };
+
+    req.ontimeout = () => {
+      settle(() => reject(new Error("Request timeout")));
     };
 
     req.open("GET", url, true);
+    if (responseType) {
+      req.responseType = responseType;
+    }
     req.send();
   });
 }
