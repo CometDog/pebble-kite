@@ -15,75 +15,91 @@ export default [
         messageKey: "UserCategories",
         label: "Categories",
         defaultValue: [
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          // false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
-          false,
+          false, // AI
+          false, // Africa
+          false, // Apple
+          false, // Australia
+          false, // Austria
+          false, // Bay
+          false, // Belgium
+          false, // Bitcoin
+          false, // Brazil
+          false, // Business
+          false, // Canada
+          false, // Catholic
+          false, // China
+          false, // Coffee
+          false, // Colombia
+          false, // Costa Rica
+          false, // Croatia
+          false, // Cryptocurrency
+          false, // Cybersecurity
+          false, // Czech Republic
+          false, // Denmark
+          false, // Economy
+          false, // Estonia
+          false, // Europe
+          false, // Finland
+          false, // Formula 1
+          false, // France
+          false, // Gaming
+          false, // Germany | Hesse
+          false, // Germany
+          false, // Greece
+          false, // Hungary
+          false, // India
+          false, // Iran
+          false, // Ireland
+          false, // Israel
+          false, // Italy
+          false, // Japan
+          false, // Linux & OSS
+          false, // Lithuania
+          false, // Mexico
+          false, // Middle East
+          false, // NFL
+          false, // NHL
+          false, // New Zealand
+          false, // Nintendo
+          false, // Norway
+          false, // Pakistan
+          false, // Palestine
+          false, // Philippines
+          false, // Podcasting
+          false, // Poland
+          false, // Portugal
+          false, // Romania
+          false, // Russia
+          false, // Science
+          false, // Serbia
+          false, // Singapore
+          false, // Slovakia
+          false, // Slovenia
+          false, // South Korea
+          false, // Spain
+          false, // Sports
+          false, // Sweden
+          false, // Switzerland (DE)
+          false, // Switzerland (FR)
+          false, // Taiwan
+          false, // Technology
+          false, // Thailand
+          false, // The Netherlands
+          false, // Turkey
+          false, // UK
+          false, // Ukraine
+          false, // USA | Austin, TX
+          false, // USA | Chicago
+          false, // USA | Colorado
+          false, // USA | Michigan
+          false, // USA | Minnesota
+          false, // USA | New York City
+          false, // USA | Ohio
+          false, // USA | Utah
+          false, // USA | Virginia
+          false, // USA
+          false, // iRacing & Sim Racing
+          false, // World
         ],
         options: [
           "AI",
@@ -156,7 +172,6 @@ export default [
           "Technology",
           "Thailand",
           "The Netherlands",
-          // "Today in History",
           "Turkey",
           "UK",
           "Ukraine",
@@ -173,6 +188,22 @@ export default [
           "iRacing & Sim Racing",
           "World",
         ],
+      },
+    ],
+  },
+  {
+    type: "section",
+    items: [
+      {
+        type: "heading",
+        defaultValue: "Developer",
+      },
+      {
+        type: "toggle",
+        messageKey: "DebugMode",
+        label: "Debug Mode",
+        description: "Show notifications for warnings and errors",
+        defaultValue: false,
       },
     ],
   },

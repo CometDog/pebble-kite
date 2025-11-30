@@ -42,3 +42,8 @@ void handle_get_story_detail_message(DictionaryIterator *iter);
  * @param iter Dictionary iterator containing the message
  */
 void handle_get_story_detail_sources_message(DictionaryIterator *iter);
+/**
+ * Handler for "set_debug_mode" message from phone
+ * @param iter Dictionary iterator containing the message
+ */
+void handle_set_debug_mode_message(DictionaryIterator *iter);

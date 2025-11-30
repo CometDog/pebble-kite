@@ -21,6 +21,7 @@
 #include "ui/timeline/timeline_detail_list_window.h"
 #include "ui/timeline/timeline_detail_text_window.h"
 #include "ui/travel_advisory/travel_advisory_detail_text_window.h"
+#include "utils/debug_logger.h"
 #include "utils/string_utils.h"
 
 #include <string.h>
@@ -378,8 +379,7 @@ void set_detail_type(char *type, void (*callback)(void))
 
 void set_detail_options(char *options_string, void (*callback)(void))
 {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "[KNCData] set_detail_options called with: %s",
-            options_string ? options_string : "NULL");
+    DEBUG_LOG("KNCData", "set_detail_options called with: %s", options_string ? options_string : "NULL");
     if (level_4_selected_detail.detail_options_count > 0)
     {
         clear_detail_list_data();
@@ -396,9 +396,8 @@ const DetailListData *get_detail_list_data(void)
 {
     static DetailListData data;
     data.detail_type = level_4_selected_detail.detail_type;
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "[KNCData] get_detail_list_data: count=%d, type=%s",
-            level_4_selected_detail.detail_options_count,
-            level_4_selected_detail.detail_type ? level_4_selected_detail.detail_type : "NULL");
+    DEBUG_LOG("KNCData", "get_detail_list_data: count=%d, type=%s", level_4_selected_detail.detail_options_count,
+              level_4_selected_detail.detail_type ? level_4_selected_detail.detail_type : "NULL");
     if (level_4_selected_detail.detail_options_count == 0)
     {
         static char *loading_arr[1] = {LOADING_TEXT};
@@ -415,7 +414,7 @@ const DetailListData *get_detail_list_data(void)
 
 void clear_detail_list_data(void)
 {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "[KNCData] clear_detail_list_data called");
+    DEBUG_LOG("KNCData", "clear_detail_list_data called");
     // NOTE: We do NOT clear detail_type here because it needs to persist
     // when transitioning from detail list (tier 4 list) to detail text (tier 4 text).
     // The detail_type is cleared by clear_available_details_data() when going back to tier 3.
@@ -514,8 +513,9 @@ const DetailSourcesData *get_detail_sources_data(void)
 {
     static DetailSourcesData data;
     data.has_sources = level_4_selected_detail.has_sources;
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "[KNCData] get_detail_sources_data: count=%d, has_sources=%d",
-            level_4_selected_detail.sources_count, level_4_selected_detail.has_sources);
+    DEBUG_LOG("KNCData", "get_detail_sources_data: count=%d, has_sources=%d", level_4_selected_detail.sources_count,
+              level_4_selected_detail.has_sources);
+    ;
     if (level_4_selected_detail.sources_count == 0)
     {
         static char *loading_arr[1] = {LOADING_TEXT};
@@ -532,8 +532,7 @@ const DetailSourcesData *get_detail_sources_data(void)
 
 void clear_detail_sources_data(void)
 {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "[KNCData] clear_detail_sources_data called, count was: %d",
-            level_4_selected_detail.sources_count);
+    DEBUG_LOG("KNCData", "clear_detail_sources_data called, count was: %d", level_4_selected_detail.sources_count);
     level_4_selected_detail.has_sources = false;
     for (int i = 0; i < level_4_selected_detail.sources_count; ++i)
     {
@@ -549,7 +548,7 @@ void clear_detail_sources_data(void)
 void push_qr_code_chunk(uint8_t *chunk, uint16_t chunk_length)
 {
     uint16_t offset = level_4_selected_detail.qr_code_chunks_count;
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "[KNCData] push_qr_code_chunk: offset=%d, chunk_length=%d", offset, chunk_length);
+    DEBUG_LOG("KNCData", "push_qr_code_chunk: offset=%d, chunk_length=%d", offset, chunk_length);
 
     for (uint16_t i = 0; i < chunk_length && (offset + i) < sizeof(level_4_selected_detail.qr_code_chunks); i++)
     {
@@ -562,7 +561,7 @@ void push_qr_code_chunk(uint8_t *chunk, uint16_t chunk_length)
 void set_qr_size(uint8_t size)
 {
     level_4_selected_detail.qr_size = size;
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "[KNCData] QR size set to: %d", size);
+    DEBUG_LOG("KNCData", "QR size set to: %d", size);
 }
 
 const QRCodeData *get_qr_code_data(void)
@@ -577,15 +576,13 @@ const QRCodeData *get_qr_code_data(void)
 bool qr_code_loaded(void)
 {
     bool loaded = level_4_selected_detail.qr_code_chunks_count > 0;
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "[KNCData] qr_code_loaded check: %d (count=%d)", loaded,
-            level_4_selected_detail.qr_code_chunks_count);
+    DEBUG_LOG("KNCData", "qr_code_loaded check: %d (count=%d)", loaded, level_4_selected_detail.qr_code_chunks_count);
     return loaded;
 }
 
 void clear_qr_code_data(void)
 {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "[KNCData] clear_qr_code_data called, count was: %d",
-            level_4_selected_detail.qr_code_chunks_count);
+    DEBUG_LOG("KNCData", "clear_qr_code_data called, count was: %d", level_4_selected_detail.qr_code_chunks_count);
     memset(level_4_selected_detail.qr_code_chunks, 0, sizeof(level_4_selected_detail.qr_code_chunks));
     level_4_selected_detail.qr_code_chunks_count = 0;
     level_4_selected_detail.qr_size = 0;

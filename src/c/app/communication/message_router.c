@@ -1,4 +1,5 @@
 #include "message_router.h"
+#include "../utils/debug_logger.h"
 #include <pebble-events/pebble-events.h>
 
 #define MAX_HANDLERS 20
@@ -28,7 +29,7 @@ void message_router_register(const char *type_name, MessageHandler handler)
 {
     if (s_handler_count >= MAX_HANDLERS)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageRouting]: Cannot register handler: maximum handlers reached");
+        ERROR_LOG("KNCMessageRouting", "Cannot register handler: maximum handlers reached");
         return;
     }
 
@@ -44,7 +45,7 @@ void message_router_handle_message(DictionaryIterator *iter)
     Tuple *type_tuple = dict_find(iter, MESSAGE_KEY_type);
     if (!type_tuple)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageRouting]: Message received without type");
+        ERROR_LOG("KNCMessageRouting", "Message received without type");
         return;
     }
 
@@ -57,6 +58,5 @@ void message_router_handle_message(DictionaryIterator *iter)
         }
     }
 
-    APP_LOG(APP_LOG_LEVEL_WARNING, "[KNCMessageRouting]: No handler found for message type: %s",
-            type_tuple->value->cstring);
+    WARN_LOG("KNCMessageRouting", "No handler found for message type: %s", type_tuple->value->cstring);
 }

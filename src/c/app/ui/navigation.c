@@ -2,6 +2,7 @@
 #include "../communication.h"
 #include "../data.h"
 #include "../detail_types.h"
+#include "../utils/debug_logger.h"
 #include "./action_items/action_items_detail_list_window.h"
 #include "./action_items/action_items_detail_text_window.h"
 #include "./background/background_detail_text_window.h"
@@ -138,14 +139,14 @@ void navigation_open_detail_content(const char *detail_type)
     const DetailTypeInfo *info = detail_type_from_api_name(detail_type);
     if (!info)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCNavigation] Unknown detail type: %s", detail_type);
+        ERROR_LOG("KNCNavigation", "Unknown detail type: %s", detail_type);
         return;
     }
 
     const DetailNavRoute *route = find_route_for_type(info->detail_type);
     if (!route)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCNavigation] No route for detail type: %s", detail_type);
+        ERROR_LOG("KNCNavigation", "No route for detail type: %s", detail_type);
         return;
     }
 
@@ -172,7 +173,7 @@ void navigation_open_detail_text(const char *detail_type, const char *detail_tit
     const DetailTypeInfo *info = detail_type_from_api_name(detail_type);
     if (!info)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCNavigation] Unknown detail type for text: %s", detail_type);
+        ERROR_LOG("KNCNavigation", "Unknown detail type for text: %s", detail_type);
         return;
     }
 
@@ -202,9 +203,8 @@ void navigation_open_qr_code(const char *source_domain)
 void navigation_proceed(NavigationTier current_tier, const char *detail_type, bool has_list, bool has_text,
                         bool has_sources)
 {
-    APP_LOG(APP_LOG_LEVEL_DEBUG,
-            "[KNCNavigation] navigation_proceed from tier=%d, detail_type=%s, list=%d, text=%d, sources=%d",
-            current_tier, detail_type ? detail_type : "NULL", has_list, has_text, has_sources);
+    DEBUG_LOG("KNCNavigation", "navigation_proceed from tier=%d, detail_type=%s, list=%d, text=%d, sources=%d",
+              current_tier, detail_type ? detail_type : "NULL", has_list, has_text, has_sources);
 
     // This function can be used for dynamic routing based on data availability
     // Currently not used but kept for future extensibility

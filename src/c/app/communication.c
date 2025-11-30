@@ -1,6 +1,7 @@
 #include "communication.h"
 #include "communication/message_handlers.h"
 #include "communication/message_router.h"
+#include "utils/debug_logger.h"
 #include <pebble-events/pebble-events.h>
 #include <stdlib.h>
 #include <string.h>
@@ -81,7 +82,7 @@ bool communication_enqueue_message(const char *request, const ExtraRequestKeyVal
 {
     if (g_queue_count >= COMMUNICATION_QUEUE_MAX)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCCommunication] Queue full, cannot enqueue message");
+        ERROR_LOG("KNCCommunication", "Queue full, cannot enqueue message");
         return false;
     }
 
@@ -136,13 +137,13 @@ static bool communication_try_send_next(void)
     }
     if (begin_res != APP_MSG_OK)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCCommunication] Outbox begin failed when flushing queue: %d", begin_res);
+        ERROR_LOG("KNCCommunication", "Outbox begin failed when flushing queue: %d", begin_res);
         return false;
     }
 
     if (dict_write_cstring(iter, MESSAGE_KEY_type, qm->request) != DICT_OK)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCCommunication] Queue write request type failed");
+        ERROR_LOG("KNCCommunication", "Queue write request type failed");
         communication_free_queued(qm); // Drop the message to avoid infinite loop
         g_queue[g_queue_head] = NULL;
         g_queue_head = (g_queue_head + 1) % COMMUNICATION_QUEUE_MAX;
@@ -159,7 +160,7 @@ static bool communication_try_send_next(void)
             {
                 if (dict_write_cstring(iter, pair->key, pair->value.str) != DICT_OK)
                 {
-                    APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCCommunication] Queue write string failed");
+                    ERROR_LOG("KNCCommunication", "Queue write string failed");
                     communication_free_queued(qm);
                     g_queue[g_queue_head] = NULL;
                     g_queue_head = (g_queue_head + 1) % COMMUNICATION_QUEUE_MAX;
@@ -171,7 +172,7 @@ static bool communication_try_send_next(void)
             {
                 if (dict_write_int(iter, pair->key, &pair->value.num, sizeof(int32_t), true) != DICT_OK)
                 {
-                    APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCCommunication] Queue write int failed");
+                    ERROR_LOG("KNCCommunication", "Queue write int failed");
                     communication_free_queued(qm);
                     g_queue[g_queue_head] = NULL;
                     g_queue_head = (g_queue_head + 1) % COMMUNICATION_QUEUE_MAX;
@@ -186,7 +187,7 @@ static bool communication_try_send_next(void)
 
     if (send_res != APP_MSG_OK)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCCommunication] Outbox send failed when flushing queue: %d", send_res);
+        ERROR_LOG("KNCCommunication", "Outbox send failed when flushing queue: %d", send_res);
     }
 
     // Do not drop the message if busy; drop otherwise
@@ -227,22 +228,22 @@ static bool send_request_with_extra(char *request, const ExtraRequestKeyValuePai
         enq_ok = communication_enqueue_message(request, extra_pairs, pair_count);
         if (!enq_ok)
         {
-            APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCCommunication] Queue enqueue failed when busy");
+            ERROR_LOG("KNCCommunication", "Queue enqueue failed when busy");
             return false;
         }
-        APP_LOG(APP_LOG_LEVEL_INFO, "[KNCCommunication] Outbox busy - queued message: %s", request);
+        INFO_LOG("KNCCommunication", "Outbox busy - queued message: %s", request);
         return true;
     }
 
     if (appMessageResult != APP_MSG_OK)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCCommunication] Outbox begin failed: %d", appMessageResult);
+        ERROR_LOG("KNCCommunication", "Outbox begin failed: %d", appMessageResult);
         return false;
     }
 
     if (dict_write_cstring(iter, MESSAGE_KEY_type, request) != DICT_OK)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCCommunication] Request type write failed");
+        ERROR_LOG("KNCCommunication", "Request type write failed");
         return false;
     }
 
@@ -257,8 +258,7 @@ static bool send_request_with_extra(char *request, const ExtraRequestKeyValuePai
             case VALUE_TYPE_STRING:
                 if (dict_write_cstring(iter, pair->key, pair->value.str) != DICT_OK)
                 {
-                    APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCCommunication] String write failed (key: %lu)",
-                            (unsigned long)pair->key);
+                    ERROR_LOG("KNCCommunication", "String write failed (key: %lu)", (unsigned long)pair->key);
                     return false;
                 }
                 break;
@@ -266,15 +266,15 @@ static bool send_request_with_extra(char *request, const ExtraRequestKeyValuePai
             case VALUE_TYPE_INT:
                 if (dict_write_int(iter, pair->key, &pair->value.num, sizeof(int32_t), true) != DICT_OK)
                 {
-                    APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCCommunication] Int write failed (key: %lu, value: %ld)",
-                            (unsigned long)pair->key, (long)pair->value.num);
+                    ERROR_LOG("KNCCommunication", "Int write failed (key: %lu, value: %ld)", (unsigned long)pair->key,
+                              (long)pair->value.num);
+                    ;
                     return false;
                 }
                 break;
 
             default:
-                APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCCommunication] Unsupported value type (key: %lu)",
-                        (unsigned long)pair->key);
+                ERROR_LOG("KNCCommunication", "Unsupported value type (key: %lu)", (unsigned long)pair->key);
                 return false;
             }
         }
@@ -282,7 +282,7 @@ static bool send_request_with_extra(char *request, const ExtraRequestKeyValuePai
 
     if (app_message_outbox_send() != APP_MSG_OK)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCCommunication] Outbox send failed");
+        ERROR_LOG("KNCCommunication", "Outbox send failed");
         return false;
     }
 
@@ -367,6 +367,23 @@ bool send_get_current_detail_text(char *type, char *key)
     return send_request_with_extra("get_story_detail", extras, 2);
 }
 
+bool send_debug_log(int32_t level, const char *tag, const char *message)
+{
+    ExtraRequestKeyValuePair extras[] = {
+        {.key = MESSAGE_KEY_logLevel, .type = VALUE_TYPE_INT, .value.num = level},
+        {.key = MESSAGE_KEY_logTag, .type = VALUE_TYPE_STRING, .value.str = tag},
+        {.key = MESSAGE_KEY_logMessage, .type = VALUE_TYPE_STRING, .value.str = message}};
+    return send_request_with_extra("debug_log", extras, 3);
+}
+
+bool send_debug_notify(const char *title, const char *message)
+{
+    ExtraRequestKeyValuePair extras[] = {
+        {.key = MESSAGE_KEY_logTag, .type = VALUE_TYPE_STRING, .value.str = title},
+        {.key = MESSAGE_KEY_logMessage, .type = VALUE_TYPE_STRING, .value.str = message}};
+    return send_request_with_extra("debug_notify", extras, 2);
+}
+
 void communication_init(void)
 {
     message_router_init();
@@ -380,6 +397,7 @@ void communication_init(void)
     message_router_register("get_available_details", handle_get_story_available_details_message);
     message_router_register("get_story_detail", handle_get_story_detail_message);
     message_router_register("get_story_detail_sources", handle_get_story_detail_sources_message);
+    message_router_register("set_debug_mode", handle_set_debug_mode_message);
 
     // Use the lesser of requested size and maximum allowed size.
     // However sizes smaller than requested will probably break things
@@ -390,8 +408,9 @@ void communication_init(void)
         {
             requested_inbox = max_inbox;
         }
-        APP_LOG(APP_LOG_LEVEL_INFO, "[KNCCommunication] Requesting inbox size: %lu (max: %lu)",
-                (unsigned long)requested_inbox, (unsigned long)max_inbox);
+        INFO_LOG("KNCCommunication", "Requesting inbox size: %lu (max: %lu)", (unsigned long)requested_inbox,
+                 (unsigned long)max_inbox);
+        ;
         events_app_message_request_inbox_size(requested_inbox);
     }
     {
@@ -400,17 +419,21 @@ void communication_init(void)
         {
             requested_outbox = APP_MESSAGE_OUTBOX_SIZE_MAXIMUM;
         }
-        APP_LOG(APP_LOG_LEVEL_INFO, "[KNCCommunication] Requesting outbox size: %lu (max: %lu)",
-                (unsigned long)requested_outbox, (unsigned long)APP_MESSAGE_OUTBOX_SIZE_MAXIMUM);
+        INFO_LOG("KNCCommunication", "Requesting outbox size: %lu (max: %lu)", (unsigned long)requested_outbox,
+                 (unsigned long)APP_MESSAGE_OUTBOX_SIZE_MAXIMUM);
+        ;
         events_app_message_request_outbox_size(requested_outbox);
     }
     events_app_message_register_inbox_received(inbox_received_callback, NULL);
     events_app_message_register_outbox_sent(outbox_sent_callback, NULL);
     events_app_message_register_outbox_failed(outbox_failed_callback, NULL);
     events_app_message_open();
+
+    debug_logger_init();
 }
 
 void communication_deinit(void)
 {
+    debug_logger_deinit();
     message_router_deinit();
 }

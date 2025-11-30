@@ -12,20 +12,33 @@ import {
   defaultCategories,
   StoryDetailEnum,
 } from "./types";
+import {
+  createLogger,
+  initDebugMode,
+  setDebugMode,
+  isDebugMode,
+} from "../pktslib/logger";
+
+const log = createLogger("KNJS");
 
 Pebble.addEventListener("ready", async () => {
-  console.log("[KNJS]: PebbleKit JS ready");
+  initDebugMode();
+  log.info("PebbleKit JS ready");
+
+  PebbleTS.sendAppMessage({
+    type: "set_debug_mode",
+    data: isDebugMode() ? 1 : 0,
+  });
+
   try {
     const response = await healthRequest();
     if (response.health === true) {
-      console.log("[KNJS]: Kagi News API is healthy");
+      log.info("Kagi News API is healthy");
 
       const storedCategoryNames = localStorage.getItem("selectedCategoryNames");
       if (storedCategoryNames) {
         const names: string[] = JSON.parse(storedCategoryNames);
-        console.log(
-          `[KNJS]: Found saved selected categories: ${names.length} items`,
-        );
+        log.info(`Found saved selected categories: ${names.length} items`);
 
         handlers.setSelectedCategories(names);
       } else {
@@ -33,13 +46,13 @@ Pebble.addEventListener("ready", async () => {
       }
 
       await handlers.handleUpdateCategories();
-      console.log("[KNJS]: Notifying watch that data is ready");
+      log.info("Notifying watch that data is ready");
       PebbleTS.sendAppMessage({ type: "update_categories", state: "success" });
     } else {
-      console.log("[KNJS]: Kagi News API is unhealthy");
+      log.warn("Kagi News API is unhealthy");
     }
   } catch (err) {
-    console.log("[KNJS]: Something went wrong with initial setup", err);
+    log.error("Something went wrong with initial setup", err);
   }
 });
 
@@ -60,16 +73,13 @@ Pebble.addEventListener("showConfiguration", () => {
 
     const claySettings: Record<string, any> = {
       UserCategories: booleanCategories,
+      DebugMode: isDebugMode(),
     };
     localStorage.setItem("clay-settings", JSON.stringify(claySettings));
-    console.log(
-      "[KNJS]: Set clay-settings before opening config:",
-      JSON.stringify(claySettings).substring(0, 200),
-    );
 
     Pebble.openURL(clay.generateUrl());
   } catch (e) {
-    console.error("Failed to open Clay configuration", e);
+    log.error("Failed to open Clay configuration", e);
   }
 });
 
@@ -77,12 +87,22 @@ Pebble.addEventListener("webviewclosed", async (event) => {
   try {
     if (!event || !event.response) return;
     const settings = clay.getSettings(event.response);
+    // DebugMode is at key 10100 (after all category checkbox keys)
+    const debugModeKey = "10100";
+    const rawDebugValue = settings[debugModeKey];
+    const debugModeValue = rawDebugValue === true || rawDebugValue === 1;
+
+    setDebugMode(debugModeValue);
+    PebbleTS.sendAppMessage({
+      type: "set_debug_mode",
+      data: debugModeValue ? 1 : 0,
+    });
+
+    // Categories are at keys 10000-10099
     const newSelected: boolean[] = availableCategories.map((_, idx) => {
       const key = (10000 + idx).toString();
       const val = settings[key];
-      if (typeof val === "boolean") return val;
-      if (typeof val === "string") return val.toLowerCase() === "true";
-      return false;
+      return val === true || val === 1;
     });
     handlers.setSelectedCategoriesFromBoolean(newSelected);
 
@@ -92,12 +112,15 @@ Pebble.addEventListener("webviewclosed", async (event) => {
       "selectedCategoryNames",
       JSON.stringify(selectedNames),
     );
-    console.log(`[KNJS]: Saved ${selectedNames.length} selected categories`);
+    log.info(`Saved ${selectedNames.length} selected categories`);
 
     await handlers.handleUpdateCategories();
     PebbleTS.sendAppMessage({ type: "update_categories", state: "success" });
   } catch (err) {
-    console.error("Error parsing Clay settings", err);
+    log.error(
+      "Error in webviewclosed handler",
+      err instanceof Error ? err.message : String(err),
+    );
   }
 });
 
@@ -192,10 +215,7 @@ Pebble.addEventListener("appmessage", async (event) => {
       }
       break;
     case "get_qr_code_bitmap":
-      console.log(
-        "Received get_qr_code_bitmap request",
-        JSON.stringify(payload),
-      );
+      log.debug("Received get_qr_code_bitmap request", payload);
       if ("articleDomain" in payload) {
         if (payload.articleDomain === "Type_Quote") {
           handlers.handleUpdateQrCodeForQuote();
@@ -220,6 +240,28 @@ Pebble.addEventListener("appmessage", async (event) => {
           state: "error",
           error: "chunk required for get_next_qr_code_bitmap but none provided",
         });
+      }
+      break;
+    case "debug_log":
+      if (
+        "logLevel" in payload &&
+        "logTag" in payload &&
+        "logMessage" in payload
+      ) {
+        const level = payload.logLevel as number;
+        const tag = payload.logTag as string;
+        const message = payload.logMessage as string;
+        const cLog = createLogger(tag);
+
+        if (level === 0) cLog.debug(message);
+        else if (level === 1) cLog.info(message);
+        else if (level === 2) cLog.warn(message);
+        else if (level === 3) cLog.error(message);
+      }
+      break;
+    case "debug_notify":
+      if ("logTag" in payload && "logMessage" in payload) {
+        log.notify(payload.logTag as string, payload.logMessage as string);
       }
       break;
     default:

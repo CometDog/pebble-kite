@@ -1,6 +1,7 @@
 #include "detail_text_window.h"
 #include "../data.h"
 #include "../detail_types.h"
+#include "../utils/debug_logger.h"
 #include "detail_text.h"
 #include "navigation.h"
 
@@ -64,7 +65,7 @@ void detail_text_window_ui_init_with_default_handlers(Window **window, DetailTyp
     const char *api_name = detail_type_get_api_name(detail_type);
     if (!api_name)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCDetailText] Unknown detail type: %d", detail_type);
+        ERROR_LOG("KNCDetailText", "Unknown detail type: %d", detail_type);
         return;
     }
 

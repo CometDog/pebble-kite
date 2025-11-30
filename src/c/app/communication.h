@@ -63,6 +63,22 @@ bool send_get_current_detail_text(char *type, char *key);
 bool send_get_story_detail_sources(char *type, char *key);
 
 /**
+ * Send a debug log message to the phone
+ * @param level The log level (0=debug, 1=info, 2=warn, 3=error)
+ * @param tag The tag/category for the log message
+ * @param message The log message content
+ * @return true if the request was successfully queued/sent, false otherwise
+ */
+bool send_debug_log(int32_t level, const char *tag, const char *message);
+/**
+ * Send a debug notification to the phone
+ * @param title The notification title
+ * @param message The notification message
+ * @return true if the request was successfully queued/sent, false otherwise
+ */
+bool send_debug_notify(const char *title, const char *message);
+
+/**
  * Initialize the communication module, setting up message routing and handlers
  */
 void communication_init(void);

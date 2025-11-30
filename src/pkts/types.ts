@@ -139,7 +139,6 @@ export const availableCategories = [
   "Technology",
   "Thailand",
   "The Netherlands",
-  // "Today in History",
   "Turkey",
   "UK",
   "Ukraine",

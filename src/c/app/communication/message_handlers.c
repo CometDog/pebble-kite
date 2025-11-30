@@ -31,13 +31,14 @@
 #include "../ui/timeline/timeline_detail_text_window.h"
 #include "../ui/travel_advisory/travel_advisory_detail_list_window.h"
 #include "../ui/travel_advisory/travel_advisory_detail_text_window.h"
+#include "../utils/debug_logger.h"
 
 void handle_update_categories_message(DictionaryIterator *iter)
 {
     Tuple *state_tuple = dict_find(iter, MESSAGE_KEY_state);
     if (!state_tuple)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Update categories message missing state");
+        ERROR_LOG("KNCMessageHandling", "Update categories message missing state");
         return;
     }
 
@@ -48,8 +49,7 @@ void handle_update_categories_message(DictionaryIterator *iter)
     }
     else
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Update categories failed with state: %s",
-                state_tuple->value->cstring);
+        ERROR_LOG("KNCMessageHandling", "Update categories failed with state: %s", state_tuple->value->cstring);
     }
 }
 
@@ -58,7 +58,7 @@ void handle_get_category_names_message(DictionaryIterator *iter)
     Tuple *state_tuple = dict_find(iter, MESSAGE_KEY_state);
     if (!state_tuple)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Get category names message missing state");
+        ERROR_LOG("KNCMessageHandling", "Get category names message missing state");
         return;
     }
 
@@ -67,7 +67,7 @@ void handle_get_category_names_message(DictionaryIterator *iter)
         Tuple *category_names_tuple = dict_find(iter, MESSAGE_KEY_data);
         if (!category_names_tuple)
         {
-            APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Category names message missing data");
+            ERROR_LOG("KNCMessageHandling", "Category names message missing data");
             return;
         }
 
@@ -81,8 +81,7 @@ void handle_get_category_names_message(DictionaryIterator *iter)
     }
     else
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Get category names failed with state: %s",
-                state_tuple->value->cstring);
+        ERROR_LOG("KNCMessageHandling", "Get category names failed with state: %s", state_tuple->value->cstring);
     }
 }
 
@@ -91,7 +90,7 @@ void handle_get_story_titles_message(DictionaryIterator *iter)
     Tuple *state_tuple = dict_find(iter, MESSAGE_KEY_state);
     if (!state_tuple)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Get story titles message missing state");
+        ERROR_LOG("KNCMessageHandling", "Get story titles message missing state");
         return;
     }
 
@@ -104,7 +103,7 @@ void handle_get_story_titles_message(DictionaryIterator *iter)
 
         if (!story_titles || !category_name_tuple)
         {
-            APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Story titles message missing required data");
+            ERROR_LOG("KNCMessageHandling", "Story titles message missing required data");
             return;
         }
 
@@ -119,8 +118,7 @@ void handle_get_story_titles_message(DictionaryIterator *iter)
     }
     else
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Get story titles failed with state: %s",
-                state_tuple->value->cstring);
+        ERROR_LOG("KNCMessageHandling", "Get story titles failed with state: %s", state_tuple->value->cstring);
     }
 }
 
@@ -129,7 +127,7 @@ void handle_get_short_summary_message(DictionaryIterator *iter)
     Tuple *state_tuple = dict_find(iter, MESSAGE_KEY_state);
     if (!state_tuple)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Get full data message missing state");
+        ERROR_LOG("KNCMessageHandling", "Get full data message missing state");
         return;
     }
 
@@ -140,8 +138,7 @@ void handle_get_short_summary_message(DictionaryIterator *iter)
         Tuple *story_id_tuple = dict_find(iter, MESSAGE_KEY_data3);
         if (!full_title_tuple || !full_short_summary_tuple || !story_id_tuple)
         {
-            APP_LOG(APP_LOG_LEVEL_ERROR,
-                    "[KNCMessageHandling]: Full data message missing title, short summary, or story ID");
+            ERROR_LOG("KNCMessageHandling", "Full data message missing title, short summary, or story ID");
             return;
         }
         set_story_full_title(full_title_tuple->value->cstring);
@@ -150,8 +147,7 @@ void handle_get_short_summary_message(DictionaryIterator *iter)
     }
     else
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Get full data failed with state: %s",
-                state_tuple->value->cstring);
+        ERROR_LOG("KNCMessageHandling", "Get full data failed with state: %s", state_tuple->value->cstring);
     }
 }
 
@@ -160,7 +156,7 @@ void handle_get_qr_code_bitmap_message(DictionaryIterator *iter)
     Tuple *state_tuple = dict_find(iter, MESSAGE_KEY_state);
     if (!state_tuple)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Get QR code bitmap message missing state");
+        ERROR_LOG("KNCMessageHandling", "Get QR code bitmap message missing state");
         return;
     }
 
@@ -171,7 +167,7 @@ void handle_get_qr_code_bitmap_message(DictionaryIterator *iter)
         Tuple *qr_size_tuple = dict_find(iter, MESSAGE_KEY_qrSize);
         if (!bitmap_data_tuple)
         {
-            APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: QR code bitmap message missing data");
+            ERROR_LOG("KNCMessageHandling", "QR code bitmap message missing data");
             return;
         }
 
@@ -199,8 +195,7 @@ void handle_get_qr_code_bitmap_message(DictionaryIterator *iter)
     }
     else
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Get QR code bitmap failed with state: %s",
-                state_tuple->value->cstring);
+        ERROR_LOG("KNCMessageHandling", "Get QR code bitmap failed with state: %s", state_tuple->value->cstring);
     }
 }
 
@@ -209,7 +204,7 @@ void handle_get_story_available_details_message(DictionaryIterator *iter)
     Tuple *state_tuple = dict_find(iter, MESSAGE_KEY_state);
     if (!state_tuple)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Get available details message missing state");
+        ERROR_LOG("KNCMessageHandling", "Get available details message missing state");
         return;
     }
 
@@ -218,7 +213,7 @@ void handle_get_story_available_details_message(DictionaryIterator *iter)
         Tuple *available_details_tuple = dict_find(iter, MESSAGE_KEY_data);
         if (!available_details_tuple)
         {
-            APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Available details message missing data");
+            ERROR_LOG("KNCMessageHandling", "Available details message missing data");
             return;
         }
 
@@ -226,8 +221,7 @@ void handle_get_story_available_details_message(DictionaryIterator *iter)
     }
     else
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Get available details failed with state: %s",
-                state_tuple->value->cstring);
+        ERROR_LOG("KNCMessageHandling", "Get available details failed with state: %s", state_tuple->value->cstring);
     }
 }
 
@@ -236,7 +230,7 @@ void handle_get_story_detail_message(DictionaryIterator *iter)
     Tuple *state_tuple = dict_find(iter, MESSAGE_KEY_state);
     if (!state_tuple)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Get story detail message missing state");
+        ERROR_LOG("KNCMessageHandling", "Get story detail message missing state");
         return;
     }
 
@@ -248,7 +242,7 @@ void handle_get_story_detail_message(DictionaryIterator *iter)
         Tuple *story_detail_sources_tuple = dict_find(iter, MESSAGE_KEY_data4);
         if (!story_detail_type_tuple || !story_detail_tuple)
         {
-            APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Story detail message missing data");
+            ERROR_LOG("KNCMessageHandling", "Story detail message missing data");
             return;
         }
 
@@ -280,13 +274,13 @@ void handle_get_story_detail_message(DictionaryIterator *iter)
                 }
                 else
                 {
-                    APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Unknown Perspective detail key: %s",
-                            story_detail_extra_tuple->value->cstring);
+                    ERROR_LOG("KNCMessageHandling", "Unknown Perspective detail key: %s",
+                              story_detail_extra_tuple->value->cstring);
                 }
             }
             else
             {
-                APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Missing data for PerspectivePovs detail");
+                ERROR_LOG("KNCMessageHandling", "Missing data for PerspectivePovs detail");
             }
         }
         else if (strcmp(story_detail_type_tuple->value->cstring, "TalkingPoints") == 0)
@@ -305,13 +299,13 @@ void handle_get_story_detail_message(DictionaryIterator *iter)
                 }
                 else
                 {
-                    APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Unknown Talking Points detail key: %s",
-                            story_detail_extra_tuple->value->cstring);
+                    ERROR_LOG("KNCMessageHandling", "Unknown Talking Points detail key: %s",
+                              story_detail_extra_tuple->value->cstring);
                 }
             }
             else
             {
-                APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Missing data for Talking Points detail");
+                ERROR_LOG("KNCMessageHandling", "Missing data for Talking Points detail");
             }
         }
         else if (strcmp(story_detail_type_tuple->value->cstring, "TechnicalDetails") == 0)
@@ -330,13 +324,13 @@ void handle_get_story_detail_message(DictionaryIterator *iter)
                 }
                 else
                 {
-                    APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Unknown Technical Details detail key: %s",
-                            story_detail_extra_tuple->value->cstring);
+                    ERROR_LOG("KNCMessageHandling", "Unknown Technical Details detail key: %s",
+                              story_detail_extra_tuple->value->cstring);
                 }
             }
             else
             {
-                APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Missing data for Technical Details detail");
+                ERROR_LOG("KNCMessageHandling", "Missing data for Technical Details detail");
             }
         }
         else if (strcmp(story_detail_type_tuple->value->cstring, "IndustryImpact") == 0)
@@ -355,13 +349,13 @@ void handle_get_story_detail_message(DictionaryIterator *iter)
                 }
                 else
                 {
-                    APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Unknown Industry Impact detail key: %s",
-                            story_detail_extra_tuple->value->cstring);
+                    ERROR_LOG("KNCMessageHandling", "Unknown Industry Impact detail key: %s",
+                              story_detail_extra_tuple->value->cstring);
                 }
             }
             else
             {
-                APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Missing data for Industry Impact detail");
+                ERROR_LOG("KNCMessageHandling", "Missing data for Industry Impact detail");
             }
         }
         else if (strcmp(story_detail_type_tuple->value->cstring, "QnA") == 0)
@@ -380,13 +374,13 @@ void handle_get_story_detail_message(DictionaryIterator *iter)
                 }
                 else
                 {
-                    APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Unknown QnA detail key: %s",
-                            story_detail_extra_tuple->value->cstring);
+                    ERROR_LOG("KNCMessageHandling", "Unknown QnA detail key: %s",
+                              story_detail_extra_tuple->value->cstring);
                 }
             }
             else
             {
-                APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Missing data for QnA detail");
+                ERROR_LOG("KNCMessageHandling", "Missing data for QnA detail");
             }
         }
         else if (strcmp(story_detail_type_tuple->value->cstring, "Timeline") == 0)
@@ -405,13 +399,13 @@ void handle_get_story_detail_message(DictionaryIterator *iter)
                 }
                 else
                 {
-                    APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Unknown Timeline detail key: %s",
-                            story_detail_extra_tuple->value->cstring);
+                    ERROR_LOG("KNCMessageHandling", "Unknown Timeline detail key: %s",
+                              story_detail_extra_tuple->value->cstring);
                 }
             }
             else
             {
-                APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Missing data for Timeline detail");
+                ERROR_LOG("KNCMessageHandling", "Missing data for Timeline detail");
             }
         }
         else if (strcmp(story_detail_type_tuple->value->cstring, "HumanitarianImpact") == 0)
@@ -435,13 +429,13 @@ void handle_get_story_detail_message(DictionaryIterator *iter)
                 }
                 else
                 {
-                    APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Unknown Travel Advisory detail key: %s",
-                            story_detail_extra_tuple->value->cstring);
+                    ERROR_LOG("KNCMessageHandling", "Unknown Travel Advisory detail key: %s",
+                              story_detail_extra_tuple->value->cstring);
                 }
             }
             else
             {
-                APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Missing data for Travel Advisory detail");
+                ERROR_LOG("KNCMessageHandling", "Missing data for Travel Advisory detail");
             }
         }
         else if (strcmp(story_detail_type_tuple->value->cstring, "DidYouKnow") == 0)
@@ -480,13 +474,13 @@ void handle_get_story_detail_message(DictionaryIterator *iter)
                 }
                 else
                 {
-                    APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Unknown International Reactions detail key: %s",
-                            story_detail_extra_tuple->value->cstring);
+                    ERROR_LOG("KNCMessageHandling", "Unknown International Reactions detail key: %s",
+                              story_detail_extra_tuple->value->cstring);
                 }
             }
             else
             {
-                APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Missing data for International Reactions detail");
+                ERROR_LOG("KNCMessageHandling", "Missing data for International Reactions detail");
             }
         }
         else if (strcmp(story_detail_type_tuple->value->cstring, "UserActionItems") == 0)
@@ -505,13 +499,13 @@ void handle_get_story_detail_message(DictionaryIterator *iter)
                 }
                 else
                 {
-                    APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Unknown Action Items detail key: %s",
-                            story_detail_extra_tuple->value->cstring);
+                    ERROR_LOG("KNCMessageHandling", "Unknown Action Items detail key: %s",
+                              story_detail_extra_tuple->value->cstring);
                 }
             }
             else
             {
-                APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Missing data for Action Items detail");
+                ERROR_LOG("KNCMessageHandling", "Missing data for Action Items detail");
             }
         }
         else if (strcmp(story_detail_type_tuple->value->cstring, "PerformanceStatistics") == 0)
@@ -530,13 +524,13 @@ void handle_get_story_detail_message(DictionaryIterator *iter)
                 }
                 else
                 {
-                    APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Unknown Performance Statistics detail key: %s",
-                            story_detail_extra_tuple->value->cstring);
+                    ERROR_LOG("KNCMessageHandling", "Unknown Performance Statistics detail key: %s",
+                              story_detail_extra_tuple->value->cstring);
                 }
             }
             else
             {
-                APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Missing data for Performance Statistics detail");
+                ERROR_LOG("KNCMessageHandling", "Missing data for Performance Statistics detail");
             }
         }
         else if (strcmp(story_detail_type_tuple->value->cstring, "ScientificSignificance") == 0)
@@ -555,19 +549,18 @@ void handle_get_story_detail_message(DictionaryIterator *iter)
                 }
                 else
                 {
-                    APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Unknown Scientific Significance detail key: %s",
-                            story_detail_extra_tuple->value->cstring);
+                    ERROR_LOG("KNCMessageHandling", "Unknown Scientific Significance detail key: %s",
+                              story_detail_extra_tuple->value->cstring);
                 }
             }
             else
             {
-                APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Missing data for Scientific Significance detail");
+                ERROR_LOG("KNCMessageHandling", "Missing data for Scientific Significance detail");
             }
         }
         else
         {
-            APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Unknown story detail type: %s",
-                    story_detail_type_tuple->value->cstring);
+            ERROR_LOG("KNCMessageHandling", "Unknown story detail type: %s", story_detail_type_tuple->value->cstring);
         }
         if (set_detail && ui_update_callback)
         {
@@ -580,8 +573,7 @@ void handle_get_story_detail_message(DictionaryIterator *iter)
     }
     else
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Get story detail failed with state: %s",
-                state_tuple->value->cstring);
+        ERROR_LOG("KNCMessageHandling", "Get story detail failed with state: %s", state_tuple->value->cstring);
     }
 }
 
@@ -590,7 +582,7 @@ void handle_get_story_detail_sources_message(DictionaryIterator *iter)
     Tuple *state_tuple = dict_find(iter, MESSAGE_KEY_state);
     if (!state_tuple)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Get story detail sources message missing state");
+        ERROR_LOG("KNCMessageHandling", "Get story detail sources message missing state");
         return;
     }
 
@@ -599,7 +591,7 @@ void handle_get_story_detail_sources_message(DictionaryIterator *iter)
         Tuple *story_detail_sources_tuple = dict_find(iter, MESSAGE_KEY_data);
         if (!story_detail_sources_tuple)
         {
-            APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Story detail sources message missing data");
+            ERROR_LOG("KNCMessageHandling", "Story detail sources message missing data");
             return;
         }
 
@@ -607,7 +599,19 @@ void handle_get_story_detail_sources_message(DictionaryIterator *iter)
     }
     else
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCMessageHandling]: Get story detail sources failed with state: %s",
-                state_tuple->value->cstring);
+        ERROR_LOG("KNCMessageHandling", "Get story detail sources failed with state: %s", state_tuple->value->cstring);
     }
+}
+
+void handle_set_debug_mode_message(DictionaryIterator *iter)
+{
+    Tuple *enabled_tuple = dict_find(iter, MESSAGE_KEY_data);
+    if (!enabled_tuple)
+    {
+        ERROR_LOG("KNCMessageHandling", "Set debug mode message missing data");
+        return;
+    }
+
+    bool enabled = enabled_tuple->value->int32 != 0;
+    debug_logger_set_enabled(enabled);
 }

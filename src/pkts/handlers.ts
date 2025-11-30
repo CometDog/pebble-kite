@@ -1,3 +1,4 @@
+import { createLogger } from "../pktslib";
 import { getCategoryBatchMap, updateCategories } from "./api";
 import { updateQrCodeBitmap, getQrCodeChunk } from "./qr";
 import {
@@ -8,6 +9,8 @@ import {
   StoryDetailEnum,
 } from "./types";
 import type { SimpleStory, StoryDetailType } from "./types";
+
+const log = createLogger("KNJSHandler");
 
 let selectedCategoryNames: string[] = defaultCategories;
 let currentStory: SimpleStory | null = null;
@@ -653,7 +656,7 @@ const handleUpdateQrCodeFromUrl = async (url?: string) => {
       ...(totalChunks > 0 && { nextChunk: 1 }),
     });
   } catch (err) {
-    console.error("QR update failed", err);
+    log.error("QR update failed", err);
     sendAppMessage({
       type: "get_qr_code_bitmap",
       state: "error",

@@ -1,6 +1,7 @@
 #include "qr_view.h"
 #include "../data.h"
 #include "../data_manager.h"
+#include "../utils/debug_logger.h"
 
 #define LOADING_TEXT "Loading..."
 
@@ -17,7 +18,7 @@ static void draw_micro_qr(GContext *ctx)
 
     if (width == 0)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCQRView] draw_micro_qr: QR size is 0, cannot draw");
+        ERROR_LOG("KNCQRView", "draw_micro_qr : QR size is 0, cannot draw");
         return;
     }
 
@@ -34,7 +35,7 @@ static void draw_micro_qr(GContext *ctx)
 
     if (scale == 0)
     {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[KNCQRView] draw_micro_qr: Cannot fit QR code on screen");
+        ERROR_LOG("KNCQRView", "draw_micro_qr : Cannot fit QR code on screen");
         return;
     }
 
@@ -43,8 +44,8 @@ static void draw_micro_qr(GContext *ctx)
     const int offset_x = (bounds.size.w - qr_total_size) / 2;
     const int offset_y = ((bounds.size.h - QR_Y_FUDGE) - qr_total_size) / 2;
 
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "[KNCQRView] width=%d, scale=%d, size=%d, offset=(%d,%d)", width, scale, qr_total_size,
-            offset_x, offset_y);
+    DEBUG_LOG("KNCQRView", "width=%d, scale=%d, size=%d, offset=(%d,%d)", width, scale, qr_total_size, offset_x,
+              offset_y);
 
     // Draw the QR code
     for (int y = 0; y < width; y++)
