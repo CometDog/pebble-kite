@@ -2,13 +2,12 @@
 #include "../data.h"
 #include "../data_manager.h"
 #include "../utils/debug_logger.h"
+#include "ui_config.h"
 
 #define LOADING_TEXT "Loading..."
 
 static Window *s_qr_window;
 static DataRegistrationHandle s_registration = NULL;
-
-#define QR_Y_FUDGE 24
 
 static void draw_micro_qr(GContext *ctx)
 {
@@ -42,7 +41,7 @@ static void draw_micro_qr(GContext *ctx)
     // Center the QR code on screen (with fudge for domain text)
     const int qr_total_size = width * scale;
     const int offset_x = (bounds.size.w - qr_total_size) / 2;
-    const int offset_y = ((bounds.size.h - QR_Y_FUDGE) - qr_total_size) / 2;
+    const int offset_y = ((bounds.size.h - UI_QR_Y_FUDGE) - qr_total_size) / 2;
 
     DEBUG_LOG("KNCQRView", "width=%d, scale=%d, size=%d, offset=(%d,%d)", width, scale, qr_total_size, offset_x,
               offset_y);
@@ -61,7 +60,7 @@ static void draw_micro_qr(GContext *ctx)
             if (is_black)
             {
                 GRect rect = GRect(offset_x + (x * scale), offset_y + (y * scale), scale, scale);
-                graphics_context_set_fill_color(ctx, GColorBlack);
+                graphics_context_set_fill_color(ctx, UI_COLOR_TEXT_PRIMARY);
                 graphics_fill_rect(ctx, rect, 0, GCornerNone);
             }
         }
@@ -71,9 +70,9 @@ static void draw_micro_qr(GContext *ctx)
     const DetailTextData *detail_data = get_detail_text_data();
     if (detail_data && detail_data->detail_title)
     {
-        GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
-        GRect text_bounds = GRect(0, bounds.size.h - QR_Y_FUDGE, bounds.size.w, QR_Y_FUDGE);
-        graphics_context_set_text_color(ctx, GColorBlack);
+        GFont font = ui_get_system_font_caption();
+        GRect text_bounds = GRect(0, bounds.size.h - UI_QR_Y_FUDGE, bounds.size.w, UI_QR_Y_FUDGE);
+        graphics_context_set_text_color(ctx, UI_COLOR_TEXT_PRIMARY);
         graphics_draw_text(ctx, detail_data->detail_title, font, text_bounds, GTextOverflowModeTrailingEllipsis,
                            GTextAlignmentCenter, NULL);
     }
@@ -87,10 +86,11 @@ static void qr_layer_update_proc(Layer *layer, GContext *ctx)
 
     if (!qr_code_loaded())
     {
-        GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
+        GFont font = ui_get_system_font_title();
         GTextAlignment align = GTextAlignmentCenter;
-        GRect text_bounds = GRect(0, (bounds.size.h / 2) - 12, bounds.size.w, 24);
-        graphics_context_set_text_color(ctx, GColorBlack);
+        GRect text_bounds =
+            GRect(0, (bounds.size.h / 2) - (UI_QR_LOADING_TEXT_HEIGHT / 2), bounds.size.w, UI_QR_LOADING_TEXT_HEIGHT);
+        graphics_context_set_text_color(ctx, UI_COLOR_TEXT_PRIMARY);
         graphics_draw_text(ctx, LOADING_TEXT, font, text_bounds, GTextOverflowModeTrailingEllipsis, align, NULL);
     }
     else

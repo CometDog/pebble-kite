@@ -1,12 +1,5 @@
 #include "menu_handler.h"
-
-#define MENU_X_PADDING 6
-#define MAX_TRACKED_WINDOWS 16
-#define CELL_PADDING_Y 4
-#define DEFAULT_CELL_HEIGHT 40
-#define ONE_LINE_MULTI_LINE_CELL_HEIGHT (DEFAULT_CELL_HEIGHT / 2)
-#define THREE_LINE_CELL_HEIGHT (DEFAULT_CELL_HEIGHT * 3 / 2)
-#define FOUR_LINE_CELL_HEIGHT (DEFAULT_CELL_HEIGHT * 2)
+#include "ui_config.h"
 
 typedef struct
 {
@@ -17,13 +10,13 @@ typedef struct
 } MenuData;
 
 // Track active menu windows to detect stale pointers
-static Window *s_tracked_windows[MAX_TRACKED_WINDOWS];
+static Window *s_tracked_windows[UI_MAX_TRACKED_WINDOWS];
 static int s_tracked_count = 0;
 static GFont s_menu_font = NULL;
 
 static void track_window(Window *window)
 {
-    if (s_tracked_count < MAX_TRACKED_WINDOWS)
+    if (s_tracked_count < UI_MAX_TRACKED_WINDOWS)
     {
         s_tracked_windows[s_tracked_count++] = window;
     }
@@ -89,30 +82,42 @@ static void draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_ind
 
     if (cell_index->row < count)
     {
-        if (!data->use_multiline)
-        {
-            menu_cell_basic_draw(ctx, cell_layer, items[cell_index->row], NULL, NULL);
-        }
-        else
-        {
-            GRect bounds = layer_get_bounds(cell_layer);
-            GRect boundsWithPadding = GRect(bounds.origin.x + MENU_X_PADDING, bounds.origin.y,
-                                            bounds.size.w - (MENU_X_PADDING * 2), bounds.size.h);
-            graphics_draw_text(ctx, items[cell_index->row], s_menu_font, boundsWithPadding,
-                               GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
-        }
+        GRect bounds = layer_get_bounds(cell_layer);
+        int16_t content_width = bounds.size.w - (UI_MENU_X_PADDING * 2);
+
+        // Measure actual text height
+        GSize text_size = graphics_text_layout_get_content_size(items[cell_index->row], s_menu_font,
+                                                                GRect(0, 0, content_width, bounds.size.h),
+                                                                GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
+
+        int16_t y_offset = (bounds.size.h - text_size.h) / 2 - 4;
+        GRect text_bounds =
+            GRect(bounds.origin.x + UI_MENU_X_PADDING, bounds.origin.y + y_offset, content_width, text_size.h);
+
+        graphics_draw_text(ctx, items[cell_index->row], s_menu_font, text_bounds, GTextOverflowModeTrailingEllipsis,
+                           GTextAlignmentLeft, NULL);
     }
 }
 
 static void draw_header(GContext *ctx, const Layer *cell_layer, uint16_t section_index, void *callback_context)
 {
     MenuData *data = callback_context;
-    menu_cell_basic_header_draw(ctx, cell_layer, data->config.title);
+    GRect bounds = layer_get_bounds(cell_layer);
+
+    // Draw header background
+    graphics_context_set_fill_color(ctx, UI_COLOR_MENU_HEADER_BACKGROUND);
+    graphics_fill_rect(ctx, bounds, 0, GCornerNone);
+
+    // Draw header text with ContentSize-aware font
+    graphics_context_set_text_color(ctx, UI_COLOR_MENU_HEADER_TEXT);
+    GRect text_bounds = GRect(bounds.origin.x + (UI_MENU_X_PADDING / 2), bounds.origin.y, bounds.size.w, bounds.size.h);
+    graphics_draw_text(ctx, data->config.title, ui_get_system_font_menu_title(), text_bounds,
+                       GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
 }
 
 static int16_t get_header_height(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context)
 {
-    return MENU_CELL_BASIC_HEADER_HEIGHT;
+    return UI_LINE_HEIGHT_REGULAR;
 }
 
 static int16_t get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context)
@@ -121,7 +126,7 @@ static int16_t get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_ind
 
     if (!data->use_multiline)
     {
-        return DEFAULT_CELL_HEIGHT + CELL_PADDING_Y;
+        return UI_MENU_CELL_HEIGHT_DEFAULT + UI_MENU_CELL_PADDING_Y;
     }
 
     char **items = data->config.get_items();
@@ -129,19 +134,18 @@ static int16_t get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_ind
 
     if (cell_index->row >= count)
     {
-        return DEFAULT_CELL_HEIGHT + CELL_PADDING_Y;
+        return UI_MENU_CELL_HEIGHT_DEFAULT + UI_MENU_CELL_PADDING_Y;
     }
 
     GRect bounds = layer_get_bounds(menu_layer_get_layer(menu_layer));
-    int16_t available_width = bounds.size.w - (MENU_X_PADDING * 2);
+    int16_t available_width = bounds.size.w - (UI_MENU_X_PADDING * 2);
 
     // Calculate amount of space the text would take
     GSize text_size =
         graphics_text_layout_get_content_size(items[cell_index->row], s_menu_font, GRect(0, 0, available_width, 1000),
                                               GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
 
-    // 18 is about the line height of Gothic 18
-    int16_t line_height = 18;
+    int16_t line_height = UI_LINE_HEIGHT_REGULAR;
     int num_lines = (text_size.h + line_height - 1) / line_height;
 
     // 1-2 lines: use default cell height
@@ -149,22 +153,14 @@ static int16_t get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_ind
     // 4+ lines: use 2x default cell height
     if (num_lines >= 4)
     {
-        return FOUR_LINE_CELL_HEIGHT + CELL_PADDING_Y;
+        return UI_MENU_CELL_HEIGHT_FOUR_LINE + UI_MENU_CELL_PADDING_Y;
     }
     else if (num_lines >= 3)
     {
-        return THREE_LINE_CELL_HEIGHT + CELL_PADDING_Y;
-    }
-    else if (num_lines >= 2)
-    {
-        return DEFAULT_CELL_HEIGHT + CELL_PADDING_Y;
-    }
-    else if (num_lines == 1)
-    {
-        return ONE_LINE_MULTI_LINE_CELL_HEIGHT + CELL_PADDING_Y;
+        return UI_MENU_CELL_HEIGHT_THREE_LINE + UI_MENU_CELL_PADDING_Y;
     }
 
-    return DEFAULT_CELL_HEIGHT + CELL_PADDING_Y;
+    return UI_MENU_CELL_HEIGHT_DEFAULT + UI_MENU_CELL_PADDING_Y;
 }
 
 static void select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context)
@@ -184,7 +180,7 @@ Window *s_menu_handler_create_window(MenuConfig config, bool never_multiline)
 
     if (!s_menu_font)
     {
-        s_menu_font = fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD);
+        s_menu_font = ui_get_system_font_menu();
     }
 
     MenuData *menu_data = malloc(sizeof(MenuData));
@@ -218,6 +214,9 @@ Window *s_menu_handler_create_window(MenuConfig config, bool never_multiline)
                                                   .draw_header = draw_header,
                                                   .get_header_height = get_header_height,
                                                   .select_click = select_callback});
+
+    menu_layer_set_normal_colors(menu_data->menu_layer, GColorWhite, UI_COLOR_TEXT_PRIMARY);
+    menu_layer_set_highlight_colors(menu_data->menu_layer, UI_COLOR_HIGHLIGHT, UI_COLOR_TEXT_ON_DARK);
 
     menu_layer_set_click_config_onto_window(menu_data->menu_layer, window);
     layer_add_child(window_layer, menu_layer_get_layer(menu_data->menu_layer));

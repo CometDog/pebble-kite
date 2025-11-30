@@ -1,12 +1,6 @@
 #include "splash_screen.h"
 #include "categories.h"
-
-#ifdef PBL_COLOR
-#define BACKGROUND_COLOR GColorRajah
-#else
-#define BACKGROUND_COLOR GColorWhite
-#endif
-#define LOGO_TOP_MARGIN 15
+#include "ui_config.h"
 
 static Window *s_window;
 static Layer *s_canvas_layer;
@@ -21,14 +15,15 @@ static void canvas_update_proc(Layer *layer, GContext *ctx)
 {
     GRect bounds = layer_get_bounds(layer);
 
-    graphics_context_set_fill_color(ctx, BACKGROUND_COLOR);
+    graphics_context_set_fill_color(ctx, UI_COLOR_BACKGROUND);
     graphics_fill_rect(ctx, bounds, 0, GCornerNone);
 
     // News logo
     if (s_kagi_news_logo_bitmap)
     {
         GRect bitmap_bounds = gbitmap_get_bounds(s_kagi_news_logo_bitmap);
-        GPoint center = GPoint((bounds.size.w - bitmap_bounds.size.w) / 2 - 4, LOGO_TOP_MARGIN);
+        GPoint center =
+            GPoint((bounds.size.w - bitmap_bounds.size.w) / 2 - UI_SPLASH_LOGO_ICON_X_FUDGE, UI_SPLASH_LOGO_TOP_MARGIN);
         graphics_context_set_compositing_mode(ctx, GCompOpSet);
         graphics_draw_bitmap_in_rect(ctx, s_kagi_news_logo_bitmap,
                                      GRect(center.x, center.y, bitmap_bounds.size.w, bitmap_bounds.size.h));
@@ -44,15 +39,18 @@ static void canvas_update_proc(Layer *layer, GContext *ctx)
                                      GRect(center.x, center.y, bitmap_bounds.size.w, bitmap_bounds.size.h));
     }
 
-    graphics_context_set_text_color(ctx, GColorBlack);
+    graphics_context_set_text_color(ctx, UI_COLOR_TEXT_PRIMARY);
 
     // News logo text
-    graphics_draw_text(ctx, "kagi       news", s_kagi_news_logo_font, GRect(0, LOGO_TOP_MARGIN, bounds.size.w, 24),
+    graphics_draw_text(ctx, "kagi       news", s_kagi_news_logo_font,
+                       GRect(0, UI_SPLASH_LOGO_TOP_MARGIN, bounds.size.w, UI_SPLASH_LOGO_HEIGHT),
                        GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
 
     // Loading text
-    graphics_draw_text(ctx, "Loading...", s_loading_font, GRect(0, (bounds.size.h / 2) - 30, bounds.size.w, 22),
-                       GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
+    graphics_draw_text(
+        ctx, "Loading...", s_loading_font,
+        GRect(0, (bounds.size.h / 2) - UI_SPLASH_LOADING_Y_OFFSET, bounds.size.w, UI_SPLASH_LOADING_HEIGHT),
+        GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
 }
 
 static void window_load(Window *window)
@@ -64,10 +62,10 @@ static void window_load(Window *window)
     layer_set_update_proc(s_canvas_layer, canvas_update_proc);
     layer_add_child(window_layer, s_canvas_layer);
 
-    s_kagi_news_logo_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_KAGI_NEWS_25);
-    s_kagi_doggo_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_KAGI_DOGGO_80);
-    s_kagi_news_logo_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LUFGA_BLACK_20));
-    s_loading_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LUFGA_REGULAR_18));
+    s_kagi_news_logo_bitmap = gbitmap_create_with_resource(ui_get_kagi_news_logo_image_handle());
+    s_kagi_doggo_bitmap = gbitmap_create_with_resource(UI_IMAGE_KAGI_DOGGO);
+    s_kagi_news_logo_font = fonts_load_custom_font(ui_get_splash_logo_font_handle());
+    s_loading_font = fonts_load_custom_font(ui_get_splash_loading_font_handle());
 }
 
 static void window_unload(Window *window)
