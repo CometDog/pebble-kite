@@ -12,13 +12,15 @@
 // Colors
 #ifdef PBL_COLOR
 #define UI_COLOR_BACKGROUND GColorRajah
+#define UI_COLOR_HIGHLIGHT GColorVividCerulean
+#define UI_COLOR_TEXT_ON_DARK GColorBlack
 #else
 #define UI_COLOR_BACKGROUND GColorWhite
-#endif
 #define UI_COLOR_HIGHLIGHT GColorBlack
+#define UI_COLOR_TEXT_ON_DARK GColorWhite
+#endif
 
 #define UI_COLOR_TEXT_PRIMARY GColorBlack
-#define UI_COLOR_TEXT_ON_DARK GColorWhite
 
 #define UI_COLOR_MENU_HEADER_BACKGROUND GColorWhite
 #define UI_COLOR_MENU_HEADER_TEXT GColorBlack
@@ -126,10 +128,23 @@
 #endif
 
 // Layout
-#define UI_MENU_X_PADDING_BASE 6
-#define UI_MENU_X_PADDING UI_SCALE_FOR_SIZE(UI_MENU_X_PADDING_BASE)
+#ifdef PBL_ROUND
+#define UI_MENU_TEXT_ALIGNMENT GTextAlignmentCenter
+#else
+#define UI_MENU_TEXT_ALIGNMENT GTextAlignmentLeft
+#endif
 
+#ifdef PBL_ROUND
+#define UI_MENU_X_PADDING_BASE 10
+#define UI_MENU_HEADER_X_PADDING_BASE 0
+#else
+#define UI_MENU_X_PADDING_BASE 6
+#define UI_MENU_HEADER_X_PADDING_BASE 3
+#endif
 #define UI_MENU_CELL_PADDING_Y_BASE 4
+
+#define UI_MENU_HEADER_X_PADDING UI_SCALE_FOR_SIZE(UI_MENU_HEADER_X_PADDING_BASE)
+#define UI_MENU_X_PADDING UI_SCALE_FOR_SIZE(UI_MENU_X_PADDING_BASE)
 #define UI_MENU_CELL_PADDING_Y UI_SCALE_FOR_SIZE(UI_MENU_CELL_PADDING_Y_BASE)
 
 #define UI_MENU_CELL_HEIGHT_BASE 40
@@ -152,6 +167,32 @@
 #define UI_DETAIL_SIDE_PADDING_BASE 4
 #define UI_DETAIL_SIDE_PADDING UI_SCALE_FOR_SIZE(UI_DETAIL_SIDE_PADDING_BASE)
 
+#ifdef PBL_ROUND
+#define UI_DETAIL_SIDE_PADDING_EXTRA UI_SCALE_FOR_SIZE(12)
+#else
+#define UI_DETAIL_SIDE_PADDING_EXTRA 0
+#endif
+
+#ifdef PBL_ROUND
+#define UI_DETAIL_TOP_PADDING_FOR_ROUND(h) ((h) / 2)
+#define UI_DETAIL_BOTTOM_PADDING_FOR_ROUND(h) ((h) / 2)
+#else
+#define UI_DETAIL_TOP_PADDING_FOR_ROUND(h) (0)
+#define UI_DETAIL_BOTTOM_PADDING_FOR_ROUND(h) (0)
+#endif
+
+#define UI_DETAIL_TITLE_Y_INITIAL(title_h, side_padding, scroll_h)                                                     \
+    (UI_DETAIL_TOP_PADDING_FOR_ROUND(scroll_h)                                                                         \
+         ? ((UI_DETAIL_TOP_PADDING_FOR_ROUND(scroll_h) - ((title_h) / 2)) < (side_padding)                             \
+                ? (side_padding)                                                                                       \
+                : (UI_DETAIL_TOP_PADDING_FOR_ROUND(scroll_h) - ((title_h) / 2)))                                       \
+         : (side_padding))
+#ifdef PBL_ROUND
+#define UI_DETAIL_TEXT_ALIGNMENT GTextAlignmentCenter
+#else
+#define UI_DETAIL_TEXT_ALIGNMENT GTextAlignmentLeft
+#endif
+
 #define UI_DETAIL_BETWEEN_PADDING_BASE 6
 #define UI_DETAIL_BETWEEN_PADDING UI_SCALE_FOR_SIZE(UI_DETAIL_BETWEEN_PADDING_BASE)
 
@@ -161,8 +202,17 @@
 #define UI_TEXT_SAFETY_PIXELS 2
 
 #define UI_INDICATOR_RADIUS 10
+#ifdef PBL_ROUND
+#define UI_INDICATOR_X_OFFSET 3
+#else
+#define UI_INDICATOR_X_OFFSET 5
+#endif
 
+#ifdef PBL_ROUND
+#define UI_SPLASH_LOGO_TOP_MARGIN_BASE 25
+#else
 #define UI_SPLASH_LOGO_TOP_MARGIN_BASE 15
+#endif
 #define UI_SPLASH_LOGO_TOP_MARGIN UI_SCALE_FOR_SIZE(UI_SPLASH_LOGO_TOP_MARGIN_BASE)
 
 #define UI_SPLASH_LOGO_HEIGHT_BASE 24

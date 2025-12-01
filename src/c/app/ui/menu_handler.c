@@ -86,16 +86,16 @@ static void draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_ind
         int16_t content_width = bounds.size.w - (UI_MENU_X_PADDING * 2);
 
         // Measure actual text height
-        GSize text_size = graphics_text_layout_get_content_size(items[cell_index->row], s_menu_font,
-                                                                GRect(0, 0, content_width, bounds.size.h),
-                                                                GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
+        GSize text_size = graphics_text_layout_get_content_size(
+            items[cell_index->row], s_menu_font, GRect(0, 0, content_width, bounds.size.h),
+            GTextOverflowModeTrailingEllipsis, UI_MENU_TEXT_ALIGNMENT);
 
         int16_t y_offset = (bounds.size.h - text_size.h) / 2 - 4;
         GRect text_bounds =
             GRect(bounds.origin.x + UI_MENU_X_PADDING, bounds.origin.y + y_offset, content_width, text_size.h);
 
         graphics_draw_text(ctx, items[cell_index->row], s_menu_font, text_bounds, GTextOverflowModeTrailingEllipsis,
-                           GTextAlignmentLeft, NULL);
+                           UI_MENU_TEXT_ALIGNMENT, NULL);
     }
 }
 
@@ -103,6 +103,7 @@ static void draw_header(GContext *ctx, const Layer *cell_layer, uint16_t section
 {
     MenuData *data = callback_context;
     GRect bounds = layer_get_bounds(cell_layer);
+    int16_t content_width = bounds.size.w - (UI_MENU_HEADER_X_PADDING * 2);
 
     // Draw header background
     graphics_context_set_fill_color(ctx, UI_COLOR_MENU_HEADER_BACKGROUND);
@@ -110,9 +111,10 @@ static void draw_header(GContext *ctx, const Layer *cell_layer, uint16_t section
 
     // Draw header text with ContentSize-aware font
     graphics_context_set_text_color(ctx, UI_COLOR_MENU_HEADER_TEXT);
-    GRect text_bounds = GRect(bounds.origin.x + (UI_MENU_X_PADDING / 2), bounds.origin.y, bounds.size.w, bounds.size.h);
+    GRect text_bounds =
+        GRect(bounds.origin.x + UI_MENU_HEADER_X_PADDING, bounds.origin.y, content_width, bounds.size.h);
     graphics_draw_text(ctx, data->config.title, ui_get_system_font_menu_title(), text_bounds,
-                       GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
+                       GTextOverflowModeTrailingEllipsis, UI_MENU_TEXT_ALIGNMENT, NULL);
 }
 
 static int16_t get_header_height(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context)

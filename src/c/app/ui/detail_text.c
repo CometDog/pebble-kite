@@ -79,7 +79,7 @@ static void indicator_layer_update_proc(Layer *layer, GContext *ctx)
     graphics_context_set_fill_color(ctx, UI_COLOR_TEXT_PRIMARY);
     // Draw a circle on the right edge (slightly off-screen) to indicate next page
     const int16_t radius = UI_INDICATOR_RADIUS;
-    GPoint center = GPoint(bounds.size.w + 5, bounds.size.h / 2);
+    GPoint center = GPoint(bounds.size.w + UI_INDICATOR_X_OFFSET, bounds.size.h / 2);
     graphics_fill_circle(ctx, center, radius);
 }
 
@@ -94,9 +94,9 @@ static void update_content_for_window(Window *window)
     Layer *scroll_layer_l = scroll_layer_get_layer(ctx->scroll_layer);
     GRect scroll_bounds = layer_get_bounds(scroll_layer_l);
 
-    const int side_padding = UI_DETAIL_SIDE_PADDING;
+    int side_padding = UI_DETAIL_SIDE_PADDING + UI_DETAIL_SIDE_PADDING_EXTRA;
     const int between_padding = UI_DETAIL_BETWEEN_PADDING;
-    const int bottom_padding = UI_DETAIL_BOTTOM_PADDING;
+    int bottom_padding = UI_DETAIL_BOTTOM_PADDING;
 
     int content_width = scroll_bounds.size.w - side_padding * 2;
     GRect measure_bounds = GRect(0, 0, content_width, 30000);
@@ -104,10 +104,10 @@ static void update_content_for_window(Window *window)
     GFont title_font = ui_get_system_font_title();
     GFont body_font = ui_get_system_font_body();
 
-    GSize title_size = graphics_text_layout_get_content_size(title, title_font, measure_bounds,
-                                                             GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
+    GSize title_size = graphics_text_layout_get_content_size(
+        title, title_font, measure_bounds, GTextOverflowModeTrailingEllipsis, UI_DETAIL_TEXT_ALIGNMENT);
     GSize text_size = graphics_text_layout_get_content_size(text, body_font, measure_bounds, GTextOverflowModeWordWrap,
-                                                            GTextAlignmentLeft);
+                                                            UI_DETAIL_TEXT_ALIGNMENT);
 
     // Small fudge to avoid rounding errors
     const int safety_pixels = UI_TEXT_SAFETY_PIXELS;
@@ -116,7 +116,7 @@ static void update_content_for_window(Window *window)
 
     // Title
     int title_x = side_padding;
-    int title_y = side_padding;
+    int title_y = UI_DETAIL_TITLE_Y_INITIAL(title_h, side_padding, scroll_bounds.size.h);
     layer_set_frame(text_layer_get_layer(ctx->title_layer), GRect(title_x, title_y, content_width, title_h));
     text_layer_set_text(ctx->title_layer, title);
 
@@ -127,14 +127,13 @@ static void update_content_for_window(Window *window)
     text_layer_set_text(ctx->text_layer, text);
 
     // Content size for scroll layer (ensure at least window height)
-    int content_height = text_y + text_h + bottom_padding;
+    int content_height = text_y + text_h + bottom_padding + UI_DETAIL_BOTTOM_PADDING_FOR_ROUND(scroll_bounds.size.h);
     if (content_height < scroll_bounds.size.h)
     {
         content_height = scroll_bounds.size.h;
     }
     scroll_layer_set_content_size(ctx->scroll_layer, GSize(scroll_bounds.size.w, content_height));
 
-    // Reset scroll to top
     scroll_layer_set_content_offset(ctx->scroll_layer, GPoint(0, 0), false);
 }
 
@@ -157,12 +156,14 @@ static void detail_window_load(Window *window)
     text_layer_set_text(ctx->title_layer, "Loading title...");
     text_layer_set_font(ctx->title_layer, ui_get_system_font_title());
     text_layer_set_overflow_mode(ctx->title_layer, GTextOverflowModeTrailingEllipsis);
+    text_layer_set_text_alignment(ctx->title_layer, UI_DETAIL_TEXT_ALIGNMENT);
 
     ctx->text_layer =
         text_layer_create(GRect(UI_DETAIL_SIDE_PADDING, 0, bounds.size.w - UI_DETAIL_SIDE_PADDING * 2, 30));
     text_layer_set_text(ctx->text_layer, "Loading...");
     text_layer_set_font(ctx->text_layer, ui_get_system_font_body());
     text_layer_set_overflow_mode(ctx->text_layer, GTextOverflowModeWordWrap);
+    text_layer_set_text_alignment(ctx->text_layer, UI_DETAIL_TEXT_ALIGNMENT);
 
     scroll_layer_add_child(ctx->scroll_layer, text_layer_get_layer(ctx->title_layer));
     scroll_layer_add_child(ctx->scroll_layer, text_layer_get_layer(ctx->text_layer));
