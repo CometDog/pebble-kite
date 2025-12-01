@@ -62,7 +62,7 @@ static void window_load(Window *window)
     layer_set_update_proc(s_canvas_layer, canvas_update_proc);
     layer_add_child(window_layer, s_canvas_layer);
 
-    s_kagi_news_logo_bitmap = gbitmap_create_with_resource(ui_get_kagi_news_logo_image_handle());
+    s_kagi_news_logo_bitmap = gbitmap_create_with_resource(UI_IMAGE_KAGI_NEWS_LOGO);
     s_kagi_doggo_bitmap = gbitmap_create_with_resource(UI_IMAGE_KAGI_DOGGO);
     s_kagi_news_logo_font = fonts_load_custom_font(ui_get_splash_logo_font_handle());
     s_loading_font = fonts_load_custom_font(ui_get_splash_loading_font_handle());
