@@ -11,11 +11,9 @@
 
 // Colors
 #ifdef PBL_COLOR
-#define UI_COLOR_BACKGROUND GColorRajah
 #define UI_COLOR_HIGHLIGHT GColorVividCerulean
 #define UI_COLOR_TEXT_ON_DARK GColorBlack
 #else
-#define UI_COLOR_BACKGROUND GColorWhite
 #define UI_COLOR_HIGHLIGHT GColorBlack
 #define UI_COLOR_TEXT_ON_DARK GColorWhite
 #endif
@@ -51,16 +49,6 @@
 #define UI_FONT_KEY_MENU_TITLE_LARGE FONT_KEY_GOTHIC_18_BOLD
 #define UI_FONT_KEY_MENU_TITLE_XLARGE FONT_KEY_GOTHIC_24_BOLD
 
-#define UI_FONT_KEY_SPLASH_LOGO_SMALL RESOURCE_ID_FONT_LUFGA_BLACK_20
-#define UI_FONT_KEY_SPLASH_LOGO_MEDIUM RESOURCE_ID_FONT_LUFGA_BLACK_20
-#define UI_FONT_KEY_SPLASH_LOGO_LARGE RESOURCE_ID_FONT_LUFGA_BLACK_30
-#define UI_FONT_KEY_SPLASH_LOGO_XLARGE RESOURCE_ID_FONT_LUFGA_BLACK_30
-
-#define UI_FONT_KEY_SPLASH_LOADING_SMALL RESOURCE_ID_FONT_LUFGA_REGULAR_18
-#define UI_FONT_KEY_SPLASH_LOADING_MEDIUM RESOURCE_ID_FONT_LUFGA_REGULAR_18
-#define UI_FONT_KEY_SPLASH_LOADING_LARGE RESOURCE_ID_FONT_LUFGA_REGULAR_28
-#define UI_FONT_KEY_SPLASH_LOADING_XLARGE RESOURCE_ID_FONT_LUFGA_REGULAR_28
-
 #define UI_FONT_KEY_FOR_SIZE(small, medium, large, xlarge)                                                             \
     ((preferred_content_size() == PreferredContentSizeSmall)        ? (small)                                          \
      : (preferred_content_size() == PreferredContentSizeLarge)      ? (large)                                          \
@@ -87,23 +75,8 @@
     UI_FONT_KEY_FOR_SIZE(UI_FONT_KEY_MENU_TITLE_SMALL, UI_FONT_KEY_MENU_TITLE_MEDIUM, UI_FONT_KEY_MENU_TITLE_LARGE,    \
                          UI_FONT_KEY_MENU_TITLE_XLARGE)
 
-#ifdef PBL_PLATFORM_EMERY
-#define UI_FONT_KEY_SPLASH_LOGO RESOURCE_ID_FONT_LUFGA_BLACK_30
-#define UI_FONT_KEY_SPLASH_LOADING RESOURCE_ID_FONT_LUFGA_REGULAR_28
-#else
-#define UI_FONT_KEY_SPLASH_LOGO RESOURCE_ID_FONT_LUFGA_BLACK_20
-#define UI_FONT_KEY_SPLASH_LOADING RESOURCE_ID_FONT_LUFGA_REGULAR_18
-#endif
-
 // Images
-#ifdef PBL_PLATFORM_EMERY
-#define UI_IMAGE_KAGI_NEWS_LOGO RESOURCE_ID_IMAGE_KAGI_NEWS_40
-#else
-#define UI_IMAGE_KAGI_NEWS_LOGO RESOURCE_ID_IMAGE_KAGI_NEWS_25
-#endif
-
 #define UI_IMAGE_MENU_ICON RESOURCE_ID_IMAGE_MENU_ICON
-#define UI_IMAGE_KAGI_DOGGO RESOURCE_ID_IMAGE_KAGI_DOGGO_80
 
 // Spacing
 #define UI_MARGIN_SMALL_BASE 4
@@ -120,12 +93,6 @@
      : (preferred_content_size() == PreferredContentSizeLarge)      ? ((val) * 5 / 4)                                  \
      : (preferred_content_size() == PreferredContentSizeExtraLarge) ? ((val) * 3 / 2)                                  \
                                                                     : (val))
-
-#ifdef PBL_PLATFORM_EMERY
-#define UI_SPLASH_LOGO_ICON_X_FUDGE 8
-#else
-#define UI_SPLASH_LOGO_ICON_X_FUDGE 4
-#endif
 
 // Layout
 #ifdef PBL_ROUND
@@ -208,21 +175,6 @@
 #define UI_INDICATOR_X_OFFSET 5
 #endif
 
-#ifdef PBL_ROUND
-#define UI_SPLASH_LOGO_TOP_MARGIN_BASE 25
-#else
-#define UI_SPLASH_LOGO_TOP_MARGIN_BASE 15
-#endif
-#define UI_SPLASH_LOGO_TOP_MARGIN UI_SCALE_FOR_SIZE(UI_SPLASH_LOGO_TOP_MARGIN_BASE)
-
-#define UI_SPLASH_LOGO_HEIGHT_BASE 24
-#define UI_SPLASH_LOGO_HEIGHT UI_SCALE_FOR_SIZE(UI_SPLASH_LOGO_HEIGHT_BASE)
-
-#define UI_SPLASH_LOADING_HEIGHT_BASE 22
-#define UI_SPLASH_LOADING_HEIGHT UI_SCALE_FOR_SIZE(UI_SPLASH_LOADING_HEIGHT_BASE)
-
-#define UI_SPLASH_LOADING_Y_OFFSET_BASE 30
-#define UI_SPLASH_LOADING_Y_OFFSET UI_SCALE_FOR_SIZE(UI_SPLASH_LOADING_Y_OFFSET_BASE)
 
 #define UI_QR_Y_FUDGE_BASE 24
 #define UI_QR_Y_FUDGE UI_SCALE_FOR_SIZE(UI_QR_Y_FUDGE_BASE)
@@ -260,16 +212,6 @@ static inline GFont ui_get_system_font_caption(void)
 static inline GFont ui_get_system_font_menu_title(void)
 {
     return fonts_get_system_font(UI_FONT_KEY_MENU_TITLE);
-}
-
-static inline ResHandle ui_get_splash_logo_font_handle(void)
-{
-    return resource_get_handle(UI_FONT_KEY_SPLASH_LOGO);
-}
-
-static inline ResHandle ui_get_splash_loading_font_handle(void)
-{
-    return resource_get_handle(UI_FONT_KEY_SPLASH_LOADING);
 }
 
 // Configuration

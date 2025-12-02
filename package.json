@@ -96,39 +96,9 @@
           "type": "bitmap"
         },
         {
-          "file": "icons/kagi_news_25x25.png",
-          "name": "IMAGE_KAGI_NEWS_25",
+          "file": "icons/splash_screen.png",
+          "name": "IMAGE_SPLASH_SCREEN",
           "type": "bitmap"
-        },
-        {
-          "file": "icons/kagi_news_40x40.png",
-          "name": "IMAGE_KAGI_NEWS_40",
-          "type": "bitmap"
-        },
-        {
-          "file": "icons/kagi_doggo_80x80.png",
-          "name": "IMAGE_KAGI_DOGGO_80",
-          "type": "bitmap"
-        },
-        {
-          "type": "font",
-          "name": "FONT_LUFGA_BLACK_20",
-          "file": "fonts/lufga-black.ttf"
-        },
-        {
-          "type": "font",
-          "name": "FONT_LUFGA_BLACK_30",
-          "file": "fonts/lufga-black.ttf"
-        },
-        {
-          "type": "font",
-          "name": "FONT_LUFGA_REGULAR_18",
-          "file": "fonts/lufga-regular.ttf"
-        },
-        {
-          "type": "font",
-          "name": "FONT_LUFGA_REGULAR_28",
-          "file": "fonts/lufga-regular.ttf"
         }
       ]
     }
