@@ -2,7 +2,6 @@
 #include "communication/message_handlers.h"
 #include "communication/message_router.h"
 #include "utils/debug_logger.h"
-#include <pebble-events/pebble-events.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -408,26 +407,19 @@ void communication_init(void)
         {
             requested_inbox = max_inbox;
         }
-        INFO_LOG("KNCCommunication", "Requesting inbox size: %lu (max: %lu)", (unsigned long)requested_inbox,
-                 (unsigned long)max_inbox);
-        ;
-        events_app_message_request_inbox_size(requested_inbox);
-    }
-    {
         uint32_t requested_outbox = APP_MESSAGE_OUTBOX_SIZE;
         if (APP_MESSAGE_OUTBOX_SIZE_MAXIMUM < requested_outbox)
         {
             requested_outbox = APP_MESSAGE_OUTBOX_SIZE_MAXIMUM;
         }
-        INFO_LOG("KNCCommunication", "Requesting outbox size: %lu (max: %lu)", (unsigned long)requested_outbox,
-                 (unsigned long)APP_MESSAGE_OUTBOX_SIZE_MAXIMUM);
-        ;
-        events_app_message_request_outbox_size(requested_outbox);
+        INFO_LOG("KNCCommunication", "Opening AppMessage inbox: %lu outbox: %lu (max inbox: %lu)",
+                 (unsigned long)requested_inbox, (unsigned long)requested_outbox, (unsigned long)max_inbox);
+
+        app_message_register_inbox_received(inbox_received_callback);
+        app_message_register_outbox_sent(outbox_sent_callback);
+        app_message_register_outbox_failed(outbox_failed_callback);
+        app_message_open(requested_inbox, requested_outbox);
     }
-    events_app_message_register_inbox_received(inbox_received_callback, NULL);
-    events_app_message_register_outbox_sent(outbox_sent_callback, NULL);
-    events_app_message_register_outbox_failed(outbox_failed_callback, NULL);
-    events_app_message_open();
 
     debug_logger_init();
 }

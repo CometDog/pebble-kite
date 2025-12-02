@@ -246,8 +246,8 @@ void handle_get_story_detail_message(DictionaryIterator *iter)
             return;
         }
 
-        void (*set_detail)(char *data, void (*ui_update_callback)(void));
-        void (*ui_update_callback)(void);
+        void (*set_detail)(char *data, void (*ui_update_callback)(void)) = NULL;
+        void (*ui_update_callback)(void) = NULL;
         if (strcmp(story_detail_type_tuple->value->cstring, "Background") == 0)
         {
             set_detail = set_detail_text;

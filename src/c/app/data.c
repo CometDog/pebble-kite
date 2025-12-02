@@ -24,11 +24,13 @@
 #include "utils/debug_logger.h"
 #include "utils/string_utils.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 #define MAX_ITEMS_HIGH 100
 #define MAX_ITEMS_LOW 20
 #define LOADING_TEXT "Loading..."
+#define QR_MAX_CAPACITY 512
 
 /**
  * HIERARCHICAL DATA STRUCTURE
@@ -101,7 +103,8 @@ typedef struct
     bool has_sources;
     char *sources[MAX_ITEMS_LOW];
     uint16_t sources_count;
-    uint8_t qr_code_chunks[512]; // 64x64 QR code max size
+    uint8_t *qr_code_chunks;
+    uint16_t qr_code_chunks_capacity;
     uint16_t qr_code_chunks_count;
     uint8_t qr_size;
 } SelectedDetailLevel;
@@ -109,7 +112,7 @@ typedef struct
 static CategoriesLevel level_1_categories = {{0}, 0};
 static StoryViewLevel level_2_story_view = {NULL, {0}, 0, NULL, NULL, NULL};
 static AvailableDetailsLevel level_3_available_details = {{0}, 0};
-static SelectedDetailLevel level_4_selected_detail = {NULL, {0}, 0, NULL, NULL, false, {0}, 0, {0}, 0, 0};
+static SelectedDetailLevel level_4_selected_detail = {0};
 
 // ============================================================================
 // Level 1: Categories Implementation
@@ -547,13 +550,34 @@ void clear_detail_sources_data(void)
 
 void push_qr_code_chunk(uint8_t *chunk, uint16_t chunk_length)
 {
+    if (chunk == NULL || chunk_length == 0)
+        return;
+
     uint16_t offset = level_4_selected_detail.qr_code_chunks_count;
     DEBUG_LOG("KNCData", "push_qr_code_chunk: offset=%d, chunk_length=%d", offset, chunk_length);
 
-    for (uint16_t i = 0; i < chunk_length && (offset + i) < sizeof(level_4_selected_detail.qr_code_chunks); i++)
+    // Allocate buffer on first use with a fixed maximum capacity
+    if (level_4_selected_detail.qr_code_chunks == NULL)
     {
-        level_4_selected_detail.qr_code_chunks[offset + i] = chunk[i];
+        level_4_selected_detail.qr_code_chunks_capacity = QR_MAX_CAPACITY;
+        level_4_selected_detail.qr_code_chunks = malloc(level_4_selected_detail.qr_code_chunks_capacity);
+        if (!level_4_selected_detail.qr_code_chunks)
+        {
+            ERROR_LOG("KNCData", "Failed to allocate QR buffer");
+            return;
+        }
     }
+
+    // Enforce maximum capacity
+    if ((uint32_t)offset + (uint32_t)chunk_length > (uint32_t)level_4_selected_detail.qr_code_chunks_capacity ||
+        (uint32_t)offset + (uint32_t)chunk_length > (uint32_t)QR_MAX_CAPACITY)
+    {
+        WARN_LOG("KNCData", "QR buffer overflow prevented: capacity=%d, required=%d",
+                 level_4_selected_detail.qr_code_chunks_capacity, offset + chunk_length);
+        return;
+    }
+
+    memcpy(level_4_selected_detail.qr_code_chunks + offset, chunk, chunk_length);
     level_4_selected_detail.qr_code_chunks_count += chunk_length;
     qr_view_refresh();
 }
@@ -567,7 +591,7 @@ void set_qr_size(uint8_t size)
 const QRCodeData *get_qr_code_data(void)
 {
     static QRCodeData data;
-    data.qr_code_chunks = level_4_selected_detail.qr_code_chunks;
+    data.qr_code_chunks = level_4_selected_detail.qr_code_chunks ? level_4_selected_detail.qr_code_chunks : NULL;
     data.qr_code_chunks_count = level_4_selected_detail.qr_code_chunks_count;
     data.qr_size = level_4_selected_detail.qr_size;
     return &data;
@@ -583,7 +607,12 @@ bool qr_code_loaded(void)
 void clear_qr_code_data(void)
 {
     DEBUG_LOG("KNCData", "clear_qr_code_data called, count was: %d", level_4_selected_detail.qr_code_chunks_count);
-    memset(level_4_selected_detail.qr_code_chunks, 0, sizeof(level_4_selected_detail.qr_code_chunks));
+    if (level_4_selected_detail.qr_code_chunks)
+    {
+        free(level_4_selected_detail.qr_code_chunks);
+        level_4_selected_detail.qr_code_chunks = NULL;
+        level_4_selected_detail.qr_code_chunks_capacity = 0;
+    }
     level_4_selected_detail.qr_code_chunks_count = 0;
     level_4_selected_detail.qr_size = 0;
     qr_view_refresh();

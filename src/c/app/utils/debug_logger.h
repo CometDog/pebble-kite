@@ -89,7 +89,7 @@ void debug_logger_notify(const char *title, const char *message);
 #define DEBUG_LOG(tag, fmt, ...)                                                                                       \
     do                                                                                                                 \
     {                                                                                                                  \
-        static char _log_buf[128];                                                                                     \
+        char _log_buf[128];                                                                                            \
         snprintf(_log_buf, sizeof(_log_buf), fmt, ##__VA_ARGS__);                                                      \
         debug_log(tag, _log_buf);                                                                                      \
     } while (0)
@@ -97,7 +97,7 @@ void debug_logger_notify(const char *title, const char *message);
 #define INFO_LOG(tag, fmt, ...)                                                                                        \
     do                                                                                                                 \
     {                                                                                                                  \
-        static char _log_buf[128];                                                                                     \
+        char _log_buf[128];                                                                                            \
         snprintf(_log_buf, sizeof(_log_buf), fmt, ##__VA_ARGS__);                                                      \
         info_log(tag, _log_buf);                                                                                       \
     } while (0)
@@ -105,7 +105,7 @@ void debug_logger_notify(const char *title, const char *message);
 #define WARN_LOG(tag, fmt, ...)                                                                                        \
     do                                                                                                                 \
     {                                                                                                                  \
-        static char _log_buf[128];                                                                                     \
+        char _log_buf[128];                                                                                            \
         snprintf(_log_buf, sizeof(_log_buf), fmt, ##__VA_ARGS__);                                                      \
         warn_log(tag, _log_buf);                                                                                       \
     } while (0)
@@ -113,7 +113,22 @@ void debug_logger_notify(const char *title, const char *message);
 #define ERROR_LOG(tag, fmt, ...)                                                                                       \
     do                                                                                                                 \
     {                                                                                                                  \
-        static char _log_buf[128];                                                                                     \
+        char _log_buf[128];                                                                                            \
         snprintf(_log_buf, sizeof(_log_buf), fmt, ##__VA_ARGS__);                                                      \
         error_log(tag, _log_buf);                                                                                      \
     } while (0)
+
+/* In release builds we don't want debug/info logging code included
+ */
+#ifdef RELEASE
+#undef DEBUG_LOG
+#undef INFO_LOG
+#define DEBUG_LOG(tag, fmt, ...)                                                                                       \
+    do                                                                                                                 \
+    {                                                                                                                  \
+    } while (0)
+#define INFO_LOG(tag, fmt, ...)                                                                                        \
+    do                                                                                                                 \
+    {                                                                                                                  \
+    } while (0)
+#endif

@@ -1,6 +1,5 @@
 #include "message_router.h"
 #include "../utils/debug_logger.h"
-#include <pebble-events/pebble-events.h>
 
 #define MAX_HANDLERS 20
 
