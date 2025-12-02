@@ -96,7 +96,6 @@ typedef struct
     char *detail_type;
     char *detail_options[MAX_ITEMS_LOW];
     uint16_t detail_options_count;
-    // Detail content (text, title, sources)
     char *detail_title;
     char *detail_text;
     bool has_sources;
@@ -384,8 +383,9 @@ void set_detail_options(char *options_string, void (*callback)(void))
     {
         clear_detail_list_data();
     }
-    level_4_selected_detail.detail_options_count = string_split_to_array(
-        level_4_selected_detail.detail_options, level_4_selected_detail.detail_options_count, 10, options_string, "||");
+    level_4_selected_detail.detail_options_count =
+        string_split_to_array(level_4_selected_detail.detail_options, level_4_selected_detail.detail_options_count,
+                              MAX_ITEMS_LOW, options_string, "||");
     if (callback)
     {
         callback();
@@ -502,7 +502,7 @@ void set_detail_sources(char *sources, void (*callback)(void))
         clear_detail_sources_data();
     }
     level_4_selected_detail.sources_count = string_split_to_array(
-        level_4_selected_detail.sources, level_4_selected_detail.sources_count, 10, sources, "||");
+        level_4_selected_detail.sources, level_4_selected_detail.sources_count, MAX_ITEMS_LOW, sources, "||");
     if (callback)
     {
         callback();
