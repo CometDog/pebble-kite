@@ -189,6 +189,49 @@ export default [
           "World",
         ],
       },
+      {
+        type: "heading",
+        defaultValue: "Article Sections",
+      },
+      {
+        type: "checkboxgroup",
+        messageKey: "UserSections",
+        label: "Article Sections",
+        defaultValue: [
+          true, // Highlights
+          true, // Quote
+          true, // Perspectives
+          true, // Historical Background
+          true, // Humanitarian Impact
+          true, // Technical Details
+          true, // Scientific Significance
+          true, // Travel Advisory
+          true, // Performance Statistics
+          true, // Industry Impact
+          true, // Timeline
+          true, // International Reactions
+          true, // Quick Questions
+          true, // Action items,
+          true, // Did You Know?
+        ],
+        options: [
+          "Highlights",
+          "Quote",
+          "Perspectives",
+          "Historical Background",
+          "Humanitarian Impact",
+          "Technical Details",
+          "Scientific Significance",
+          "Travel Advisory",
+          "Performance Statistics",
+          "Industry Impact",
+          "Timeline",
+          "International Reactions",
+          "Quick Questions",
+          "Action items",
+          "Did You Know?",
+        ],
+      },
     ],
   },
   {

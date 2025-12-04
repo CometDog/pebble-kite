@@ -3,19 +3,28 @@ import { getCategoryBatchMap, updateCategories } from "./api";
 import { updateQrCodeBitmap, getQrCodeChunk } from "./qr";
 import {
   availableCategories,
+  availableSections,
   defaultCategories,
+  defaultSections,
   PAGE_SIZE,
   SHORT_TITLE_LENGTH,
   StoryDetailEnum,
 } from "./types";
-import type { SimpleStory, StoryDetailType } from "./types";
+import type {
+  AvailableCategory,
+  AvailableSection,
+  SimpleStory,
+  StoryDetailType,
+} from "./types";
 
 const log = createLogger("KNJSHandler");
 
-let selectedCategoryNames: string[] = defaultCategories;
+let selectedCategoryNames: AvailableCategory[] = [...defaultCategories];
+let selectedSectionNames: AvailableSection[] = [...defaultSections];
+
 let currentStory: SimpleStory | null = null;
 
-export const setSelectedCategories = (selected: string[]) => {
+export const setSelectedCategories = (selected: AvailableCategory[]) => {
   selectedCategoryNames = selected;
 };
 
@@ -24,6 +33,17 @@ export const setSelectedCategoriesFromBoolean = (selected: boolean[]) => {
 };
 
 export const getSelectedCategoryNames = () => selectedCategoryNames;
+
+export const setSelectedSections = (selected: AvailableSection[]) => {
+  selectedSectionNames = selected;
+};
+
+export const setSelectedSectionsFromBoolean = (selected: boolean[]) => {
+  selectedSectionNames = availableSections.filter((_, i) => selected[i]);
+};
+
+export const getSelectedSectionNames = () => selectedSectionNames;
+
 const sendAppMessage = (payload: Record<string, any>) =>
   PebbleTS.sendAppMessage(payload);
 
@@ -337,41 +357,95 @@ export const handleGetAvailableDetails = ({
   const available: string[] = [];
   if (newStory.articles && newStory.articles.length)
     available.push(StoryDetailEnum.Articles);
-  if (newStory.talking_points && newStory.talking_points.length)
+  if (
+    selectedSectionNames.includes("Highlights") &&
+    newStory.talking_points &&
+    newStory.talking_points.length
+  )
     available.push(StoryDetailEnum.TalkingPoints);
-  if (newStory.quote && newStory.quote.text.length)
+  if (
+    selectedSectionNames.includes("Quote") &&
+    newStory.quote &&
+    newStory.quote.text.length
+  )
     available.push(StoryDetailEnum.Quote);
-  if (newStory.perspectives && newStory.perspectives.length)
+  if (
+    selectedSectionNames.includes("Perspectives") &&
+    newStory.perspectives &&
+    newStory.perspectives.length
+  )
     available.push(StoryDetailEnum.Perspectives);
-  if (newStory.historical_background && newStory.historical_background.length)
+  if (
+    selectedSectionNames.includes("Historical Background") &&
+    newStory.historical_background &&
+    newStory.historical_background.length
+  )
     available.push(StoryDetailEnum.Background);
-  if (newStory.humanitarian_impact && newStory.humanitarian_impact.length)
+  if (
+    selectedSectionNames.includes("Humanitarian Impact") &&
+    newStory.humanitarian_impact &&
+    newStory.humanitarian_impact.length
+  )
     available.push(StoryDetailEnum.HumanitarianImpact);
-  if (newStory.travel_advisory && newStory.travel_advisory.length)
+  if (
+    selectedSectionNames.includes("Travel Advisory") &&
+    newStory.travel_advisory &&
+    newStory.travel_advisory.length
+  )
     available.push(StoryDetailEnum.TravelAdvisory);
-  if (newStory.industry_impact && newStory.industry_impact.length)
+  if (
+    selectedSectionNames.includes("Industry Impact") &&
+    newStory.industry_impact &&
+    newStory.industry_impact.length
+  )
     available.push(StoryDetailEnum.IndustryImpact);
-  if (newStory.technical_details && newStory.technical_details.length)
+  if (
+    selectedSectionNames.includes("Technical Details") &&
+    newStory.technical_details &&
+    newStory.technical_details.length
+  )
     available.push(StoryDetailEnum.TechnicalDetails);
-  if (newStory.performance_statistics && newStory.performance_statistics.length)
+  if (
+    selectedSectionNames.includes("Performance Statistics") &&
+    newStory.performance_statistics &&
+    newStory.performance_statistics.length
+  )
     available.push(StoryDetailEnum.PerformanceStatistics);
   if (
+    selectedSectionNames.includes("Scientific Significance") &&
     newStory.scientific_significance &&
     newStory.scientific_significance.length
   )
     available.push(StoryDetailEnum.ScientificSignificance);
-  if (newStory.timeline && newStory.timeline.length)
+  if (
+    selectedSectionNames.includes("Timeline") &&
+    newStory.timeline &&
+    newStory.timeline.length
+  )
     available.push(StoryDetailEnum.Timeline);
   if (
+    selectedSectionNames.includes("International Reactions") &&
     newStory.international_reactions &&
     newStory.international_reactions.length
   )
     available.push(StoryDetailEnum.InternationalReactions);
-  if (newStory.suggested_qna && newStory.suggested_qna.length)
+  if (
+    selectedSectionNames.includes("Quick Questions") &&
+    newStory.suggested_qna &&
+    newStory.suggested_qna.length
+  )
     available.push(StoryDetailEnum.QnA);
-  if (newStory.user_action_items && newStory.user_action_items.length)
+  if (
+    selectedSectionNames.includes("Action items") &&
+    newStory.user_action_items &&
+    newStory.user_action_items.length
+  )
     available.push(StoryDetailEnum.UserActionItems);
-  if (newStory.did_you_know && newStory.did_you_know.length)
+  if (
+    selectedSectionNames.includes("Did You Know?") &&
+    newStory.did_you_know &&
+    newStory.did_you_know.length
+  )
     available.push(StoryDetailEnum.DidYouKnow);
   sendAppMessage({
     type: "get_available_details",

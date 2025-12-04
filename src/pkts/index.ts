@@ -9,7 +9,11 @@ import { healthRequest } from "./server/request/health";
 import * as handlers from "./handlers";
 import {
   availableCategories,
+  AvailableCategory,
+  AvailableSection,
+  availableSections,
   defaultCategories,
+  defaultSections,
   StoryDetailEnum,
 } from "./types";
 import {
@@ -35,13 +39,25 @@ Pebble.addEventListener("ready", async () => {
     if (response.health === true) {
       log.info("Kagi News API is healthy");
 
+      const storedSectionNames = localStorage.getItem("selectedSectionNames");
+      try {
+        if (!storedSectionNames) throw new Error("No stored section names");
+        const names: AvailableSection[] = JSON.parse(storedSectionNames);
+        log.info(`Found saved selected sections: ${names.length} items`);
+
+        handlers.setSelectedSections(names);
+      } catch {
+        handlers.setSelectedSections(defaultSections);
+      }
+
       const storedCategoryNames = localStorage.getItem("selectedCategoryNames");
-      if (storedCategoryNames) {
-        const names: string[] = JSON.parse(storedCategoryNames);
+      try {
+        if (!storedCategoryNames) throw new Error("No stored category names");
+        const names: AvailableCategory[] = JSON.parse(storedCategoryNames);
         log.info(`Found saved selected categories: ${names.length} items`);
 
         handlers.setSelectedCategories(names);
-      } else {
+      } catch {
         handlers.setSelectedCategories(defaultCategories);
       }
 
@@ -62,17 +78,31 @@ Pebble.addEventListener("showConfiguration", () => {
     const storedCategoryNames = localStorage.getItem("selectedCategoryNames");
     let booleanCategories: boolean[];
 
-    if (storedCategoryNames) {
+    try {
+      if (!storedCategoryNames) throw new Error("No stored category names");
       const names: string[] = JSON.parse(storedCategoryNames);
       booleanCategories = availableCategories.map((cat) => names.includes(cat));
-    } else {
+    } catch {
       booleanCategories = availableCategories.map((cat) =>
         defaultCategories.includes(cat as any),
       );
     }
 
+    // Load saved section names and convert to boolean array for Clay
+    const storedSectionNames = localStorage.getItem("selectedSectionNames");
+    let booleanSections: boolean[];
+
+    try {
+      if (!storedSectionNames) throw new Error("No stored section names");
+      const names: string[] = JSON.parse(storedSectionNames);
+      booleanSections = availableSections.map((sec) => names.includes(sec));
+    } catch {
+      booleanSections = Array(availableSections.length).fill(true);
+    }
+
     const claySettings: Record<string, any> = {
       UserCategories: booleanCategories,
+      UserSections: booleanSections,
       DebugMode: isDebugMode(),
     };
     localStorage.setItem("clay-settings", JSON.stringify(claySettings));
@@ -87,8 +117,9 @@ Pebble.addEventListener("webviewclosed", async (event) => {
   try {
     if (!event || !event.response) return;
     const settings = clay.getSettings(event.response);
-    // DebugMode is at key 10100 (after all category checkbox keys)
-    const debugModeKey = "10100";
+    console.log("Clay settings received:", JSON.stringify(settings));
+    // DebugMode is at key 10300 (after all category and section checkbox keys)
+    const debugModeKey = "10300";
     const rawDebugValue = settings[debugModeKey];
     const debugModeValue = rawDebugValue === true || rawDebugValue === 1;
 
@@ -98,13 +129,21 @@ Pebble.addEventListener("webviewclosed", async (event) => {
       data: debugModeValue ? 1 : 0,
     });
 
-    // Categories are at keys 10000-10099
+    // Categories are at keys 10000-10199
     const newSelected: boolean[] = availableCategories.map((_, idx) => {
       const key = (10000 + idx).toString();
       const val = settings[key];
       return val === true || val === 1;
     });
     handlers.setSelectedCategoriesFromBoolean(newSelected);
+
+    // Sections are at keys 10200-10299
+    const newSelectedSections: boolean[] = availableSections.map((_, idx) => {
+      const key = (10200 + idx).toString();
+      const val = settings[key];
+      return val === true || val === 1;
+    });
+    handlers.setSelectedSectionsFromBoolean(newSelectedSections);
 
     // Persist as category names (not booleans) for future-proofing
     const selectedNames = availableCategories.filter((_, i) => newSelected[i]);
@@ -113,6 +152,16 @@ Pebble.addEventListener("webviewclosed", async (event) => {
       JSON.stringify(selectedNames),
     );
     log.info(`Saved ${selectedNames.length} selected categories`);
+
+    // Persist as section names (not booleans) for future-proofing
+    const selectedSectionNames = availableSections.filter(
+      (_, i) => newSelectedSections[i],
+    );
+    localStorage.setItem(
+      "selectedSectionNames",
+      JSON.stringify(selectedSectionNames),
+    );
+    log.info(`Saved ${selectedSectionNames.length} selected sections`);
 
     await handlers.handleUpdateCategories();
     PebbleTS.sendAppMessage({ type: "update_categories", state: "success" });

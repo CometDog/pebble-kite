@@ -3,8 +3,8 @@
 
 static const DetailTypeInfo s_detail_types[] = {
     // Text-only types (no list view)
-    {DETAIL_TYPE_BACKGROUND, "Background", "Background", false, true, NULL},
-    {DETAIL_TYPE_HUMANITARIAN_IMPACT, "HumanitarianImpact", "Human Impact", false, true, NULL},
+    {DETAIL_TYPE_BACKGROUND, "Background", "Historical Background", false, true, NULL},
+    {DETAIL_TYPE_HUMANITARIAN_IMPACT, "HumanitarianImpact", "Humanitarian Impact", false, true, NULL},
     {DETAIL_TYPE_DID_YOU_KNOW, "DidYouKnow", "Did You Know?", false, true, NULL},
     {DETAIL_TYPE_QUOTE, "Quote", "Quote", false, true, NULL},
 
@@ -16,10 +16,10 @@ static const DetailTypeInfo s_detail_types[] = {
     {DETAIL_TYPE_INDUSTRY_IMPACT, "IndustryImpact", "Industry Impact", true, true, "povs"},
     {DETAIL_TYPE_TIMELINE, "Timeline", "Timeline", true, true, "dates"},
     {DETAIL_TYPE_TRAVEL_ADVISORY, "TravelAdvisory", "Travel Advisory", true, true, "advisories"},
-    {DETAIL_TYPE_INTERNATIONAL_REACTIONS, "InternationalReactions", "Int'l Reactions", true, true, "povs"},
+    {DETAIL_TYPE_INTERNATIONAL_REACTIONS, "InternationalReactions", "International Reactions", true, true, "povs"},
     {DETAIL_TYPE_USER_ACTION_ITEMS, "UserActionItems", "Action Items", true, true, "povs"},
-    {DETAIL_TYPE_SCIENTIFIC_SIGNIFICANCE, "ScientificSignificance", "Significance", true, true, "povs"},
-    {DETAIL_TYPE_PERFORMANCE_STATISTICS, "PerformanceStatistics", "Performance", true, true, "povs"},
+    {DETAIL_TYPE_SCIENTIFIC_SIGNIFICANCE, "ScientificSignificance", "Scientific Significance", true, true, "povs"},
+    {DETAIL_TYPE_PERFORMANCE_STATISTICS, "PerformanceStatistics", "Performance Statistics", true, true, "povs"},
 
     // List-only type (sources)
     {DETAIL_TYPE_ARTICLES, "Articles", "Sources", true, false, NULL},

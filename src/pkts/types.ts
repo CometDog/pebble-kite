@@ -156,7 +156,9 @@ export const availableCategories = [
   "World",
 ] as const;
 
-export const defaultCategories = [
+export type AvailableCategory = (typeof availableCategories)[number];
+
+export const defaultCategories: Partial<AvailableCategory>[] = [
   "World",
   "USA",
   "Business",
@@ -164,4 +166,28 @@ export const defaultCategories = [
   "Science",
   "Sports",
   "Gaming",
+] as const;
+
+export const availableSections = [
+  "Highlights",
+  "Quote",
+  "Perspectives",
+  "Historical Background",
+  "Humanitarian Impact",
+  "Technical Details",
+  "Scientific Significance",
+  "Travel Advisory",
+  "Performance Statistics",
+  "Industry Impact",
+  "Timeline",
+  "International Reactions",
+  "Quick Questions",
+  "Action items",
+  "Did You Know?",
+] as const;
+
+export type AvailableSection = (typeof availableSections)[number];
+
+export const defaultSections: Partial<AvailableSection>[] = [
+  ...availableSections,
 ];
