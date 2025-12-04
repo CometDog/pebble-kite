@@ -13,6 +13,7 @@ import {
   AvailableSection,
   availableSections,
   defaultCategories,
+  defaultMaxStories,
   defaultSections,
   StoryDetailEnum,
 } from "./types";
@@ -38,6 +39,17 @@ Pebble.addEventListener("ready", async () => {
     const response = await healthRequest();
     if (response.health === true) {
       log.info("Kagi News API is healthy");
+
+      const maxStoryCount = localStorage.getItem("selectedMaxStoryCount");
+      try {
+        if (!maxStoryCount) throw new Error("No stored max story count");
+        const count: number = JSON.parse(maxStoryCount);
+        log.info(`Found saved max story count: ${count} items`);
+
+        handlers.setMaxStoryCount(count);
+      } catch {
+        handlers.setMaxStoryCount(defaultMaxStories);
+      }
 
       const storedSectionNames = localStorage.getItem("selectedSectionNames");
       try {
@@ -100,9 +112,24 @@ Pebble.addEventListener("showConfiguration", () => {
       booleanSections = Array(availableSections.length).fill(true);
     }
 
+    // Load saved max story count
+    const storedMaxStoryCount = localStorage.getItem("selectedMaxStoryCount");
+    let maxStoryCount: number;
+
+    try {
+      if (!storedMaxStoryCount) throw new Error("No stored max story count");
+      const count: number = JSON.parse(storedMaxStoryCount);
+      log.info(`Found saved max story count: ${count} items`);
+
+      maxStoryCount = count;
+    } catch {
+      maxStoryCount = defaultMaxStories;
+    }
+
     const claySettings: Record<string, any> = {
       UserCategories: booleanCategories,
       UserSections: booleanSections,
+      UserMaxStories: maxStoryCount,
       DebugMode: isDebugMode(),
     };
     localStorage.setItem("clay-settings", JSON.stringify(claySettings));
@@ -118,8 +145,8 @@ Pebble.addEventListener("webviewclosed", async (event) => {
     if (!event || !event.response) return;
     const settings = clay.getSettings(event.response);
     console.log("Clay settings received:", JSON.stringify(settings));
-    // DebugMode is at key 10300 (after all category and section checkbox keys)
-    const debugModeKey = "10300";
+    // DebugMode is at key 10301 (after all category and section checkbox keys)
+    const debugModeKey = "10301";
     const rawDebugValue = settings[debugModeKey];
     const debugModeValue = rawDebugValue === true || rawDebugValue === 1;
 
@@ -137,14 +164,6 @@ Pebble.addEventListener("webviewclosed", async (event) => {
     });
     handlers.setSelectedCategoriesFromBoolean(newSelected);
 
-    // Sections are at keys 10200-10299
-    const newSelectedSections: boolean[] = availableSections.map((_, idx) => {
-      const key = (10200 + idx).toString();
-      const val = settings[key];
-      return val === true || val === 1;
-    });
-    handlers.setSelectedSectionsFromBoolean(newSelectedSections);
-
     // Persist as category names (not booleans) for future-proofing
     const selectedNames = availableCategories.filter((_, i) => newSelected[i]);
     localStorage.setItem(
@@ -152,6 +171,14 @@ Pebble.addEventListener("webviewclosed", async (event) => {
       JSON.stringify(selectedNames),
     );
     log.info(`Saved ${selectedNames.length} selected categories`);
+
+    // Sections are at keys 10200-10299
+    const newSelectedSections: boolean[] = availableSections.map((_, idx) => {
+      const key = (10200 + idx).toString();
+      const val = settings[key];
+      return val === true || val === 1;
+    });
+    handlers.setSelectedSectionsFromBoolean(newSelectedSections);
 
     // Persist as section names (not booleans) for future-proofing
     const selectedSectionNames = availableSections.filter(
@@ -162,6 +189,15 @@ Pebble.addEventListener("webviewclosed", async (event) => {
       JSON.stringify(selectedSectionNames),
     );
     log.info(`Saved ${selectedSectionNames.length} selected sections`);
+
+    // Max story count is key 10300
+    const newMaxStoryCount = settings["10300"] as number;
+    handlers.setMaxStoryCount(newMaxStoryCount);
+    localStorage.setItem(
+      "selectedMaxStoryCount",
+      JSON.stringify(newMaxStoryCount),
+    );
+    log.info(`Saved max story count: ${newMaxStoryCount} items`);
 
     await handlers.handleUpdateCategories();
     PebbleTS.sendAppMessage({ type: "update_categories", state: "success" });

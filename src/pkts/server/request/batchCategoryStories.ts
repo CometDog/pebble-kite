@@ -16,10 +16,12 @@ type BatchCategoryStoriesResponse = {
 export const batchCategoryStoriesRequest = ({
   batchId = "latest",
   categoryId,
+  limit = 50,
 }: {
   batchId?: string;
   categoryId: string;
+  limit?: number;
 }) =>
   fetchJSON<BatchCategoryStoriesResponse>(
-    `https://news.kagi.com/api/batches/${batchId}/categories/${categoryId}/stories`,
+    `https://news.kagi.com/api/batches/${batchId}/categories/${categoryId}/stories?limit=${limit}`,
   );

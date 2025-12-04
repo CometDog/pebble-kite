@@ -58,7 +58,8 @@
     "messageKeys": {
       "UserCategories": 10000,
       "UserSections": 10200,
-      "DebugMode": 10300,
+      "UserMaxStories": 10300,
+      "DebugMode": 10301,
       "type": 10401,
       "state": 10402,
       "data": 10403,

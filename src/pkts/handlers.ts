@@ -5,6 +5,7 @@ import {
   availableCategories,
   availableSections,
   defaultCategories,
+  defaultMaxStories,
   defaultSections,
   PAGE_SIZE,
   SHORT_TITLE_LENGTH,
@@ -21,6 +22,7 @@ const log = createLogger("KNJSHandler");
 
 let selectedCategoryNames: AvailableCategory[] = [...defaultCategories];
 let selectedSectionNames: AvailableSection[] = [...defaultSections];
+let selectedMaxStoryCount: number = defaultMaxStories;
 
 let currentStory: SimpleStory | null = null;
 
@@ -43,6 +45,12 @@ export const setSelectedSectionsFromBoolean = (selected: boolean[]) => {
 };
 
 export const getSelectedSectionNames = () => selectedSectionNames;
+
+export const setMaxStoryCount = (count: number) => {
+  selectedMaxStoryCount = count;
+};
+
+export const getMaxStoryCount = () => selectedMaxStoryCount;
 
 const sendAppMessage = (payload: Record<string, any>) =>
   PebbleTS.sendAppMessage(payload);

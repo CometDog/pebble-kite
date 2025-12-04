@@ -191,3 +191,5 @@ export type AvailableSection = (typeof availableSections)[number];
 export const defaultSections: Partial<AvailableSection>[] = [
   ...availableSections,
 ];
+
+export const defaultMaxStories = 12;

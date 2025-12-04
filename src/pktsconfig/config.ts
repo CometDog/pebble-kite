@@ -7,10 +7,6 @@ export default [
     type: "section",
     items: [
       {
-        type: "heading",
-        defaultValue: "Categories",
-      },
-      {
         type: "checkboxgroup",
         messageKey: "UserCategories",
         label: "Categories",
@@ -190,10 +186,6 @@ export default [
         ],
       },
       {
-        type: "heading",
-        defaultValue: "Article Sections",
-      },
-      {
         type: "checkboxgroup",
         messageKey: "UserSections",
         label: "Article Sections",
@@ -231,6 +223,15 @@ export default [
           "Action items",
           "Did You Know?",
         ],
+      },
+      {
+        type: "slider",
+        messageKey: "UserMaxStories",
+        label: "Number of stories shown",
+        defaultValue: 12,
+        min: 3,
+        max: 12,
+        step: 1,
       },
     ],
   },
