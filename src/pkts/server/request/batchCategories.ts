@@ -1,4 +1,5 @@
 import { fetchJSON } from "../../../pktslib/fetch";
+import { getServerLang } from "../localeManager";
 import { BatchCategory } from "../type/BatchCategory";
 
 type BatchCategoriesResponse = {
@@ -14,5 +15,5 @@ export const batchCategoriesRequest = ({
   batchId?: string;
 }) =>
   fetchJSON<BatchCategoriesResponse>(
-    `https://news.kagi.com/api/batches/${batchId}/categories`,
+    `https://news.kagi.com/api/batches/${batchId}/categories${getServerLang() && `?lang=${getServerLang()}`}`,
   );

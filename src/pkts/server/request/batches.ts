@@ -1,4 +1,5 @@
 import { fetchJSON } from "../../../pktslib/fetch";
+import { getServerLang } from "../localeManager";
 import { Batch } from "../type/Batch";
 
 type BatchesResponse = {
@@ -6,4 +7,6 @@ type BatchesResponse = {
 };
 
 export const batchesRequest = () =>
-  fetchJSON<BatchesResponse>("https://news.kagi.com/api/batches");
+  fetchJSON<BatchesResponse>(
+    `https://news.kagi.com/api/batches${getServerLang() && `?lang=${getServerLang()}`}`,
+  );

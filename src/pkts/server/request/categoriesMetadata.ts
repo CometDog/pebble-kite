@@ -1,4 +1,5 @@
 import { fetchJSON } from "../../../pktslib/fetch";
+import { getServerLang } from "../localeManager";
 import { CategoryMetadata } from "../type/CategoryMetadata";
 
 type CategoriesMetadataResponse = {
@@ -7,5 +8,5 @@ type CategoriesMetadataResponse = {
 
 export const categoriesMetadataRequest = () =>
   fetchJSON<CategoriesMetadataResponse>(
-    "https://news.kagi.com/api/categories/metadata",
+    `https://news.kagi.com/api/categories/metadata${getServerLang() && `?lang=${getServerLang()}`}`,
   );

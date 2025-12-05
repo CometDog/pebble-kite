@@ -23,6 +23,7 @@ import {
   setDebugMode,
   isDebugMode,
 } from "../pktslib/logger";
+import { setServerLang } from "./server/localeManager";
 
 const log = createLogger("KNJS");
 
@@ -39,6 +40,40 @@ Pebble.addEventListener("ready", async () => {
     const response = await healthRequest();
     if (response.health === true) {
       log.info("Kagi News API is healthy");
+
+      const selectedInterfaceLanguage = localStorage.getItem(
+        "selectedInterfaceLanguage",
+      );
+      try {
+        if (!selectedInterfaceLanguage)
+          throw new Error("No stored interface language");
+        const lang: string = JSON.parse(selectedInterfaceLanguage);
+        log.info(`Found saved interface language: ${lang}`);
+
+        PebbleTS.sendAppMessage({
+          type: "set_interface_language",
+          data: lang,
+        });
+      } catch {
+        PebbleTS.sendAppMessage({
+          type: "set_interface_language",
+          data: "",
+        });
+      }
+
+      const selectedContentLanguage = localStorage.getItem(
+        "selectedContentLanguage",
+      );
+      try {
+        if (!selectedContentLanguage)
+          throw new Error("No stored content language");
+        const lang: string = JSON.parse(selectedContentLanguage);
+        log.info(`Found saved content language: ${lang}`);
+
+        setServerLang(lang);
+      } catch {
+        setServerLang("");
+      }
 
       const maxStoryCount = localStorage.getItem("selectedMaxStoryCount");
       try {
@@ -126,9 +161,42 @@ Pebble.addEventListener("showConfiguration", () => {
       maxStoryCount = defaultMaxStories;
     }
 
+    const storedInterfaceLanguage = localStorage.getItem(
+      "selectedInterfaceLanguage",
+    );
+    let interfaceLanguage: string;
+
+    try {
+      if (!storedInterfaceLanguage)
+        throw new Error("No stored interface language");
+      const lang: string = JSON.parse(storedInterfaceLanguage);
+      log.info(`Found saved interface language: ${lang}`);
+
+      interfaceLanguage = lang;
+    } catch {
+      interfaceLanguage = "";
+    }
+
+    const storedContentLanguage = localStorage.getItem(
+      "selectedContentLanguage",
+    );
+    let contentLanguage: string;
+
+    try {
+      if (!storedContentLanguage) throw new Error("No stored content language");
+      const lang: string = JSON.parse(storedContentLanguage);
+      log.info(`Found saved content language: ${lang}`);
+
+      contentLanguage = lang;
+    } catch {
+      contentLanguage = "";
+    }
+
     const claySettings: Record<string, any> = {
       UserCategories: booleanCategories,
       UserSections: booleanSections,
+      UserInterfaceLanguage: interfaceLanguage,
+      UserContentLanguage: contentLanguage,
       UserMaxStories: maxStoryCount,
       DebugMode: isDebugMode(),
     };
@@ -145,8 +213,8 @@ Pebble.addEventListener("webviewclosed", async (event) => {
     if (!event || !event.response) return;
     const settings = clay.getSettings(event.response);
     console.log("Clay settings received:", JSON.stringify(settings));
-    // DebugMode is at key 10301 (after all category and section checkbox keys)
-    const debugModeKey = "10301";
+    // DebugMode is at key 10303 (after all category and section checkbox keys)
+    const debugModeKey = "10303";
     const rawDebugValue = settings[debugModeKey];
     const debugModeValue = rawDebugValue === true || rawDebugValue === 1;
 
@@ -190,8 +258,29 @@ Pebble.addEventListener("webviewclosed", async (event) => {
     );
     log.info(`Saved ${selectedSectionNames.length} selected sections`);
 
-    // Max story count is key 10300
-    const newMaxStoryCount = settings["10300"] as number;
+    // Interface language is key 10300
+    const newInterfaceLanguage = settings["10300"] as string;
+    localStorage.setItem(
+      "selectedInterfaceLanguage",
+      JSON.stringify(newInterfaceLanguage),
+    );
+    log.info(`Saved interface language: ${newInterfaceLanguage}`);
+    PebbleTS.sendAppMessage({
+      type: "set_interface_language",
+      data: newInterfaceLanguage,
+    });
+
+    // Content language is key 10301
+    const newContentLanguage = settings["10301"] as string;
+    setServerLang(newContentLanguage);
+    localStorage.setItem(
+      "selectedContentLanguage",
+      JSON.stringify(newContentLanguage),
+    );
+    log.info(`Saved content language: ${newContentLanguage}`);
+
+    // Max story count is key 10302
+    const newMaxStoryCount = settings["10302"] as number;
     handlers.setMaxStoryCount(newMaxStoryCount);
     localStorage.setItem(
       "selectedMaxStoryCount",
