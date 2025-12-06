@@ -3,6 +3,7 @@
 #include "../data.h"
 #include "../data_manager.h"
 #include "../detail_types.h"
+#include "../localization/localization.h"
 #include "./menu_handler.h"
 #include "./navigation.h"
 #include "detail_list.h"
@@ -150,13 +151,17 @@ void detail_list_window_ui_init(Window **window, DataResource resource_requireme
         title = get_story_list_data()->selected_category;
         if (title == NULL)
         {
-            title = "Stories";
+            title = localization_get_string(STRING_STORIES);
+        }
+        else
+        {
+            title = localization_translate_category(title);
         }
     }
     else if (detail_type == DETAIL_TYPE_DETAIL_SOURCES)
     {
         // Special case: sources for a specific detail
-        title = "Sources";
+        title = localization_get_string(STRING_AVAILABLE_DETAILS);
     }
     else
     {

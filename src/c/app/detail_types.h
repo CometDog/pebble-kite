@@ -1,5 +1,6 @@
 #pragma once
 
+#include "localization/localization.h"
 #include <pebble.h>
 
 typedef enum
@@ -28,7 +29,7 @@ typedef enum
  * Configuration for each detail type
  * - detail_type: The enum value
  * - api_name: Name used in API/messaging
- * - display_name: Human-readable name
+ * - string_id: Localization string ID for display name
  * - has_list: Does this type show a list view first?
  * - has_text: Does this type have text content?
  * - list_key: API data prefix key for list data
@@ -37,7 +38,7 @@ typedef struct
 {
     DetailType detail_type;
     const char *api_name;
-    const char *display_name;
+    StringId string_id;
     bool has_list;
     bool has_text;
     const char *list_key;

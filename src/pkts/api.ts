@@ -4,7 +4,6 @@ import { batchCategoryStoriesRequest } from "./server/request/batchCategoryStori
 import type { CurrentData, CategorizedStories, SimpleStory } from "./types";
 import type { BatchCategory } from "./server/type/BatchCategory";
 import { CONCURRENT_BATCH_SIZE } from "./types";
-import { getMaxStoryCount } from "./handlers";
 
 let categoryBatchMap: CurrentData[] = [];
 
@@ -53,14 +52,16 @@ const normalizeValue = (value: any): any => {
 const updateStories = async ({
   batchId,
   categoryId,
+  maxStoryCount,
 }: {
   batchId: string;
   categoryId: string;
+  maxStoryCount: number;
 }) => {
   const response = await batchCategoryStoriesRequest({
     batchId,
     categoryId,
-    limit: getMaxStoryCount(),
+    limit: maxStoryCount,
   });
   return response.stories.map(
     (story) =>
@@ -143,7 +144,13 @@ const sortData = (data: CurrentData[]) => {
   });
 };
 
-export const updateCategories = async (selectedCategoryNames: string[]) => {
+export const updateCategories = async ({
+  selectedCategoryNames,
+  maxStoryCount,
+}: {
+  selectedCategoryNames: string[];
+  maxStoryCount: number;
+}) => {
   const response = await batchesRequest();
   const batchIds = response.batches.map((b) => b.id);
 
@@ -181,6 +188,7 @@ export const updateCategories = async (selectedCategoryNames: string[]) => {
               const stories = await updateStories({
                 batchId,
                 categoryId: category.id,
+                maxStoryCount,
               });
               categorizedStories.push({
                 category: { id: category.id, name: category.categoryName },

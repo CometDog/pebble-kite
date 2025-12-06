@@ -1,28 +1,29 @@
 #include "detail_types.h"
+#include "localization/localization.h"
 #include <string.h>
 
 static const DetailTypeInfo s_detail_types[] = {
     // Text-only types (no list view)
-    {DETAIL_TYPE_BACKGROUND, "Background", "Historical Background", false, true, NULL},
-    {DETAIL_TYPE_HUMANITARIAN_IMPACT, "HumanitarianImpact", "Humanitarian Impact", false, true, NULL},
-    {DETAIL_TYPE_DID_YOU_KNOW, "DidYouKnow", "Did You Know?", false, true, NULL},
-    {DETAIL_TYPE_QUOTE, "Quote", "Quote", false, true, NULL},
+    {DETAIL_TYPE_BACKGROUND, "Background", STRING_HISTORICAL_BACKGROUND, false, true, NULL},
+    {DETAIL_TYPE_HUMANITARIAN_IMPACT, "HumanitarianImpact", STRING_HUMANITARIAN_IMPACT, false, true, NULL},
+    {DETAIL_TYPE_DID_YOU_KNOW, "DidYouKnow", STRING_DID_YOU_KNOW, false, true, NULL},
+    {DETAIL_TYPE_QUOTE, "Quote", STRING_QUOTE, false, true, NULL},
 
     // List + Text types
-    {DETAIL_TYPE_TALKING_POINTS, "TalkingPoints", "Highlights", true, true, "povs"},
-    {DETAIL_TYPE_PERSPECTIVES, "Perspectives", "Perspectives", true, true, "povs"},
-    {DETAIL_TYPE_QNA, "QnA", "Quick Questions", true, true, "qnas"},
-    {DETAIL_TYPE_TECHNICAL_DETAILS, "TechnicalDetails", "Technical Details", true, true, "povs"},
-    {DETAIL_TYPE_INDUSTRY_IMPACT, "IndustryImpact", "Industry Impact", true, true, "povs"},
-    {DETAIL_TYPE_TIMELINE, "Timeline", "Timeline", true, true, "dates"},
-    {DETAIL_TYPE_TRAVEL_ADVISORY, "TravelAdvisory", "Travel Advisory", true, true, "advisories"},
-    {DETAIL_TYPE_INTERNATIONAL_REACTIONS, "InternationalReactions", "International Reactions", true, true, "povs"},
-    {DETAIL_TYPE_USER_ACTION_ITEMS, "UserActionItems", "Action Items", true, true, "povs"},
-    {DETAIL_TYPE_SCIENTIFIC_SIGNIFICANCE, "ScientificSignificance", "Scientific Significance", true, true, "povs"},
-    {DETAIL_TYPE_PERFORMANCE_STATISTICS, "PerformanceStatistics", "Performance Statistics", true, true, "povs"},
+    {DETAIL_TYPE_TALKING_POINTS, "TalkingPoints", STRING_HIGHLIGHTS, true, true, "povs"},
+    {DETAIL_TYPE_PERSPECTIVES, "Perspectives", STRING_PERSPECTIVES, true, true, "povs"},
+    {DETAIL_TYPE_QNA, "QnA", STRING_QUICK_QUESTIONS, true, true, "qnas"},
+    {DETAIL_TYPE_TECHNICAL_DETAILS, "TechnicalDetails", STRING_TECHNICAL_DETAILS, true, true, "povs"},
+    {DETAIL_TYPE_INDUSTRY_IMPACT, "IndustryImpact", STRING_INDUSTRY_IMPACT, true, true, "povs"},
+    {DETAIL_TYPE_TIMELINE, "Timeline", STRING_TIMELINE, true, true, "dates"},
+    {DETAIL_TYPE_TRAVEL_ADVISORY, "TravelAdvisory", STRING_TRAVEL_ADVISORY, true, true, "advisories"},
+    {DETAIL_TYPE_INTERNATIONAL_REACTIONS, "InternationalReactions", STRING_INTERNATIONAL_REACTIONS, true, true, "povs"},
+    {DETAIL_TYPE_USER_ACTION_ITEMS, "UserActionItems", STRING_ACTION_ITEMS, true, true, "povs"},
+    {DETAIL_TYPE_SCIENTIFIC_SIGNIFICANCE, "ScientificSignificance", STRING_SCIENTIFIC_SIGNIFICANCE, true, true, "povs"},
+    {DETAIL_TYPE_PERFORMANCE_STATISTICS, "PerformanceStatistics", STRING_PERFORMANCE_STATISTICS, true, true, "povs"},
 
     // List-only type (sources)
-    {DETAIL_TYPE_ARTICLES, "Articles", "Sources", true, false, NULL},
+    {DETAIL_TYPE_ARTICLES, "Articles", STRING_SOURCES, true, false, NULL},
 };
 
 static const int s_detail_types_count = sizeof(s_detail_types) / sizeof(s_detail_types[0]);
@@ -59,13 +60,13 @@ const DetailTypeInfo *detail_type_from_type(DetailType type)
 const char *detail_type_get_display_name(const char *api_name)
 {
     const DetailTypeInfo *info = detail_type_from_api_name(api_name);
-    return info ? info->display_name : api_name;
+    return info ? localization_get_string(info->string_id) : api_name;
 }
 
 const char *detail_type_get_display_name_from_type(DetailType type)
 {
     const DetailTypeInfo *info = detail_type_from_type(type);
-    return info ? info->display_name : "Details";
+    return info ? localization_get_string(info->string_id) : "Details";
 }
 
 DetailType detail_type_get_type(const char *api_name)

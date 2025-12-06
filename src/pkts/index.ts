@@ -23,6 +23,7 @@ import {
   setDebugMode,
   isDebugMode,
 } from "../pktslib/logger";
+import { getFlattenedInterfaceStrings } from "./localization";
 import { setServerLang } from "./server/localeManager";
 
 const log = createLogger("KNJS");
@@ -51,13 +52,13 @@ Pebble.addEventListener("ready", async () => {
         log.info(`Found saved interface language: ${lang}`);
 
         PebbleTS.sendAppMessage({
-          type: "set_interface_language",
-          data: lang,
+          type: "send_interface_strings",
+          data: JSON.stringify(getFlattenedInterfaceStrings(lang)),
         });
       } catch {
         PebbleTS.sendAppMessage({
-          type: "set_interface_language",
-          data: "",
+          type: "send_interface_strings",
+          data: JSON.stringify(getFlattenedInterfaceStrings()),
         });
       }
 
@@ -69,7 +70,6 @@ Pebble.addEventListener("ready", async () => {
           throw new Error("No stored content language");
         const lang: string = JSON.parse(selectedContentLanguage);
         log.info(`Found saved content language: ${lang}`);
-
         setServerLang(lang);
       } catch {
         setServerLang("");
@@ -211,6 +211,8 @@ Pebble.addEventListener("showConfiguration", () => {
 Pebble.addEventListener("webviewclosed", async (event) => {
   try {
     if (!event || !event.response) return;
+    PebbleTS.sendAppMessage({ type: "restart_app" });
+
     const settings = clay.getSettings(event.response);
     console.log("Clay settings received:", JSON.stringify(settings));
     // DebugMode is at key 10303 (after all category and section checkbox keys)
@@ -266,8 +268,8 @@ Pebble.addEventListener("webviewclosed", async (event) => {
     );
     log.info(`Saved interface language: ${newInterfaceLanguage}`);
     PebbleTS.sendAppMessage({
-      type: "set_interface_language",
-      data: newInterfaceLanguage,
+      type: "send_interface_strings",
+      data: JSON.stringify(getFlattenedInterfaceStrings(newInterfaceLanguage)),
     });
 
     // Content language is key 10301
@@ -287,14 +289,15 @@ Pebble.addEventListener("webviewclosed", async (event) => {
       JSON.stringify(newMaxStoryCount),
     );
     log.info(`Saved max story count: ${newMaxStoryCount} items`);
-
-    await handlers.handleUpdateCategories();
-    PebbleTS.sendAppMessage({ type: "update_categories", state: "success" });
   } catch (err) {
+    PebbleTS.sendAppMessage({ type: "update_categories", state: "success" });
     log.error(
       "Error in webviewclosed handler",
       err instanceof Error ? err.message : String(err),
     );
+  } finally {
+    await handlers.handleUpdateCategories();
+    PebbleTS.sendAppMessage({ type: "update_categories", state: "success" });
   }
 });
 

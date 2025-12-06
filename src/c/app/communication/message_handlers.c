@@ -1,6 +1,8 @@
 #include "message_handlers.h"
+#include "../app.h"
 #include "../communication.h"
 #include "../data.h"
+#include "../localization/localization.h"
 #include "../ui/action_items/action_items_detail_list_window.h"
 #include "../ui/action_items/action_items_detail_text_window.h"
 #include "../ui/background/background_detail_text_window.h"
@@ -614,4 +616,24 @@ void handle_set_debug_mode_message(DictionaryIterator *iter)
 
     bool enabled = enabled_tuple->value->int32 != 0;
     debug_logger_set_enabled(enabled);
+}
+
+void handle_restart_app_message(DictionaryIterator *iter)
+{
+    INFO_LOG("KNCMessageHandling", "Received restart_app message from phone, restarting app");
+    app_restart();
+}
+
+void handle_send_interface_strings_message(DictionaryIterator *iter)
+{
+    Tuple *strings_tuple = dict_find(iter, MESSAGE_KEY_data);
+    if (!strings_tuple)
+    {
+        ERROR_LOG("KNCMessageHandling", "Send interface strings message missing data");
+        return;
+    }
+
+    const char *strings = strings_tuple->value->cstring;
+    localization_set_strings(strings);
+    INFO_LOG("KNCMessageHandling", "Interface strings changed, restarting app");
 }

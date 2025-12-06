@@ -47,3 +47,14 @@ void handle_get_story_detail_sources_message(DictionaryIterator *iter);
  * @param iter Dictionary iterator containing the message
  */
 void handle_set_debug_mode_message(DictionaryIterator *iter);
+/**
+ * Handler for "send_interface_strings" message from phone
+ * @param iter Dictionary iterator containing the message
+ */
+void handle_send_interface_strings_message(DictionaryIterator *iter);
+
+/**
+ * Handler for "restart_app" message from phone
+ * @param iter Dictionary iterator containing the message
+ */
+void handle_restart_app_message(DictionaryIterator *iter);

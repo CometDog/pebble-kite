@@ -2,11 +2,13 @@
 #include "communication.h"
 #include "data.h"
 #include "data_manager.h"
+#include "localization/localization.h"
 #include "ui/categories.h"
 #include "ui/splash_screen.h"
 
 static void init(void)
 {
+    localization_init();
     communication_init();
     splash_screen_init();
     data_init();
@@ -26,6 +28,13 @@ static void deinit(void)
     communication_deinit();
     data_deinit();
     data_manager_deinit();
+    localization_deinit();
+}
+
+void app_restart(void)
+{
+    window_stack_pop_all(false);
+    splash_screen_init();
 }
 
 int main(void)

@@ -659,7 +659,10 @@ export const handleGetStoryDetail = ({
 };
 
 export const handleUpdateCategories = async () => {
-  await updateCategories(selectedCategoryNames);
+  await updateCategories({
+    selectedCategoryNames,
+    maxStoryCount: selectedMaxStoryCount,
+  });
 };
 
 export const handleGetArticleDomainsFromContent = ({

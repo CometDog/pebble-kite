@@ -2,11 +2,36 @@
 #include "../communication.h"
 #include "../data.h"
 #include "../data_manager.h"
+#include "../localization/localization.h"
 #include "./navigation.h"
 #include "menu_handler.h"
+#include <string.h>
 
 static Window *s_main_window;
 static DataRegistrationHandle s_registration = NULL;
+
+static char *s_translated_categories[100];
+static uint16_t s_translated_count = 0;
+
+static void translate_categories_for_display(void)
+{
+    const CategoriesData *cat_data = get_categories_data();
+
+    // Clear previous translations
+    for (int i = 0; i < s_translated_count; ++i)
+    {
+        s_translated_categories[i] = NULL;
+    }
+    s_translated_count = 0;
+
+    // Translate each category name
+    for (uint16_t i = 0; i < cat_data->categories_count; ++i)
+    {
+        const char *translated = localization_translate_category(cat_data->categories[i]);
+        s_translated_categories[i] = (char *)translated;
+        s_translated_count++;
+    }
+}
 
 static uint16_t get_categories_count(void)
 {
@@ -15,7 +40,14 @@ static uint16_t get_categories_count(void)
 
 static char **get_categories_list(void)
 {
-    return get_categories_data()->categories;
+    translate_categories_for_display();
+
+    if (get_categories_data()->categories_count == 0)
+    {
+        return get_categories_data()->categories;
+    }
+
+    return s_translated_categories;
 }
 
 static void category_select_handler(int index)
@@ -35,7 +67,7 @@ static void category_select_handler(int index)
 
 void categories_ui_init(void)
 {
-    MenuConfig config = {.title = "Categories",
+    MenuConfig config = {.title = localization_get_string(STRING_CATEGORIES),
                          .get_num_items = get_categories_count,
                          .get_items = get_categories_list,
                          .select_callback = category_select_handler};

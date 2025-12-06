@@ -3,6 +3,7 @@
 #include "../data.h"
 #include "../data_manager.h"
 #include "../detail_types.h"
+#include "../localization/localization.h"
 #include "menu_handler.h"
 #include "navigation.h"
 #include <stdlib.h>
@@ -53,7 +54,7 @@ static void story_details_window_unload(Window *window)
 
 void story_details_ui_init(void)
 {
-    MenuConfig config = {.title = "Available Details",
+    MenuConfig config = {.title = localization_get_string(STRING_AVAILABLE_DETAILS),
                          .get_num_items = get_details_count,
                          .get_items = get_modified_item_names,
                          .select_callback = detail_select_handler};

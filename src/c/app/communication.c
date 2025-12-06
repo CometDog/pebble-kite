@@ -8,7 +8,7 @@
 // APP_MESSAGE_OUTBOX_SIZE_MINIMUM is erroneously named; it is the maximum allowed size.
 #define APP_MESSAGE_OUTBOX_SIZE_MAXIMUM APP_MESSAGE_OUTBOX_SIZE_MINIMUM
 #define APP_MESSAGE_OUTBOX_SIZE 512
-#define APP_MESSAGE_INBOX_SIZE 2048
+#define APP_MESSAGE_INBOX_SIZE 4096
 #define COMMUNICATION_QUEUE_MAX 16
 
 static void inbox_received_callback(DictionaryIterator *iter, void *context)
@@ -397,6 +397,8 @@ void communication_init(void)
     message_router_register("get_story_detail", handle_get_story_detail_message);
     message_router_register("get_story_detail_sources", handle_get_story_detail_sources_message);
     message_router_register("set_debug_mode", handle_set_debug_mode_message);
+    message_router_register("send_interface_strings", handle_send_interface_strings_message);
+    message_router_register("restart_app", handle_restart_app_message);
 
     // Use the lesser of requested size and maximum allowed size.
     // However sizes smaller than requested will probably break things
