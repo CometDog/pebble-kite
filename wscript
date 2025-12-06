@@ -5,6 +5,10 @@
 #
 import os.path
 
+# When PEBBLE_DEBUG=1 is set in the environment, remove the `RELEASE` define
+# so that debug-only code (guarded by `#ifndef RELEASE`) is compiled in.
+DEBUG_BUILD = os.environ.get('PEBBLE_DEBUG') == '1'
+
 top = '.'
 out = 'build'
 
@@ -35,6 +39,13 @@ def build(ctx):
     for platform in ctx.env.TARGET_PLATFORMS:
         ctx.env = ctx.all_envs[platform]
         ctx.set_group(ctx.env.PLATFORM_NAME)
+        if DEBUG_BUILD:
+            try:
+                defs = ctx.env.DEFINES
+                ctx.env.DEFINES = [d for d in defs if d != 'RELEASE']
+            except Exception:
+                pass
+
         app_elf = '{}/pebble-app.elf'.format(ctx.env.BUILD_DIR)
         ctx.pbl_build(source=ctx.path.ant_glob('src/c/**/*.c'), target=app_elf, bin_type='app')
 
