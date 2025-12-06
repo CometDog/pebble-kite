@@ -5,9 +5,11 @@
 #include "localization/localization.h"
 #include "ui/categories.h"
 #include "ui/splash_screen.h"
+#include "ui/ui_config.h"
 
 static void init(void)
 {
+    ui_load_fonts();
     localization_init();
     communication_init();
     splash_screen_init();
@@ -29,6 +31,7 @@ static void deinit(void)
     data_deinit();
     data_manager_deinit();
     localization_deinit();
+    ui_unload_fonts();
 }
 
 void app_restart(void)

@@ -1,5 +1,67 @@
 #include "ui_config.h"
 
+// Define the font handles (single definition)
+GFont ui_font_title = NULL;
+GFont ui_font_body = NULL;
+GFont ui_font_menu = NULL;
+GFont ui_font_caption = NULL;
+GFont ui_font_menu_title = NULL;
+
+// This was built to handle custom fonts but is just using system fonts for now
+void ui_load_fonts(void)
+{
+    if (!ui_font_title)
+    {
+        ui_font_title = fonts_get_system_font(UI_FONT_KEY_TITLE);
+    }
+    if (!ui_font_body)
+    {
+        ui_font_body = fonts_get_system_font(UI_FONT_KEY_BODY);
+    }
+    if (!ui_font_menu)
+    {
+        ui_font_menu = fonts_get_system_font(UI_FONT_KEY_MENU);
+    }
+    if (!ui_font_caption)
+    {
+        ui_font_caption = fonts_get_system_font(UI_FONT_KEY_CAPTION);
+    }
+    if (!ui_font_menu_title)
+    {
+        ui_font_menu_title = fonts_get_system_font(UI_FONT_KEY_MENU_TITLE);
+    }
+}
+
+void ui_unload_fonts(void)
+{
+    if (ui_font_title)
+    {
+        ui_font_title = NULL;
+    }
+    if (ui_font_body)
+    {
+        ui_font_body = NULL;
+    }
+    if (ui_font_menu)
+    {
+        ui_font_menu = NULL;
+    }
+    if (ui_font_caption)
+    {
+        ui_font_caption = NULL;
+    }
+    if (ui_font_menu_title)
+    {
+        ui_font_menu_title = NULL;
+    }
+}
+
+void ui_reload_fonts(void)
+{
+    ui_unload_fonts();
+    ui_load_fonts();
+}
+
 // 0 = follow system preferred_content_size(), 1..3 = override
 static int8_t s_text_size_override = 0;
 

@@ -18,6 +18,8 @@ const normalizeString = (value: string) =>
   value
     // Convert non-standard dashes to ASCII hyphen
     .replace(/[\u2014\u2013\u2012\u2011\u2010\u2212]/g, "-")
+    // Convert various apostrophe-like characters to ASCII apostrophe
+    .replace(/[\u2018\u2019\u201A\u201B\u2032\u02BC\uFF07]/g, "'")
     // Remove Private Use Area characters (icon fonts like Font Awesome)
     .replace(/[\uE000-\uF8FF]/g, "")
     // Remove orphaned/broken UTF-16 surrogate pairs

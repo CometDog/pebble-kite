@@ -651,4 +651,6 @@ void handle_set_text_size_message(DictionaryIterator *iter)
     const char *text_size = text_size_tuple->value->cstring;
     INFO_LOG("KNCMessageHandling", "Received set_text_size message from phone, text size: %s", text_size);
     ui_set_text_size_override(atoi(text_size));
+
+    ui_reload_fonts();
 }

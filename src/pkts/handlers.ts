@@ -267,10 +267,10 @@ export const handleGetStoryTitles = ({
   const { pageItems, nextPage } = paginate(titles, page);
   const processed = shortData
     ? pageItems.map((title) =>
-      title.length > SHORT_TITLE_LENGTH
-        ? title.slice(0, SHORT_TITLE_LENGTH - 3) + "..."
-        : title,
-    )
+        title.length > SHORT_TITLE_LENGTH
+          ? title.slice(0, SHORT_TITLE_LENGTH - 3) + "..."
+          : title,
+      )
     : pageItems;
   sendAppMessage({
     type: "get_story_titles",

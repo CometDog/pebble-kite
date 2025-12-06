@@ -25,6 +25,19 @@ int8_t ui_get_text_size_override(void);
  */
 PreferredContentSize ui_effective_preferred_content_size(void);
 
+/**
+ * Load all UI fonts once
+ */
+void ui_load_fonts(void);
+/**
+ * Unload UI fonts
+ */
+void ui_unload_fonts(void);
+/**
+ * Reload UI fonts
+ */
+void ui_reload_fonts(void);
+
 // Colors
 #ifdef PBL_COLOR
 #define UI_COLOR_HIGHLIGHT GColorVividCerulean
@@ -199,29 +212,56 @@ PreferredContentSize ui_effective_preferred_content_size(void);
 
 // Helper functions
 
+// Extern font handles (defined in ui_config.c)
+extern GFont ui_font_title;
+extern GFont ui_font_body;
+extern GFont ui_font_menu;
+extern GFont ui_font_caption;
+extern GFont ui_font_menu_title;
+
 static inline GFont ui_get_system_font_title(void)
 {
-    return fonts_get_system_font(UI_FONT_KEY_TITLE);
+    if (!ui_font_title)
+    {
+        ui_load_fonts();
+    }
+    return ui_font_title;
 }
 
 static inline GFont ui_get_system_font_body(void)
 {
-    return fonts_get_system_font(UI_FONT_KEY_BODY);
+    if (!ui_font_body)
+    {
+        ui_load_fonts();
+    }
+    return ui_font_body;
 }
 
 static inline GFont ui_get_system_font_menu(void)
 {
-    return fonts_get_system_font(UI_FONT_KEY_MENU);
+    if (!ui_font_menu)
+    {
+        ui_load_fonts();
+    }
+    return ui_font_menu;
 }
 
 static inline GFont ui_get_system_font_caption(void)
 {
-    return fonts_get_system_font(UI_FONT_KEY_CAPTION);
+    if (!ui_font_caption)
+    {
+        ui_load_fonts();
+    }
+    return ui_font_caption;
 }
 
 static inline GFont ui_get_system_font_menu_title(void)
 {
-    return fonts_get_system_font(UI_FONT_KEY_MENU_TITLE);
+    if (!ui_font_menu_title)
+    {
+        ui_load_fonts();
+    }
+    return ui_font_menu_title;
 }
 
 // Configuration
