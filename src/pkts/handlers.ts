@@ -62,6 +62,8 @@ const paginate = <T>(items: T[], page = 1, pageSize = PAGE_SIZE) => {
   return { pageItems, nextPage: hasNext ? page + 1 : undefined };
 };
 
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 const findBatchOrDefault = (batchId?: string) => {
   const map = getCategoryBatchMap();
   if (!map.length) return undefined;
@@ -118,11 +120,11 @@ const handleDetailList = <T>(
   items?.forEach((item) => {
     const raw = getKey(item);
     if (!raw) return;
-    // If keys are based on content prefix, extract the actual key
-    if (getContent(item)?.startsWith(raw)) {
-      const parts = raw.split(": ");
-      if (parts.length >= 2) keys.push(parts[0]);
-      else keys.push(keyFallback);
+    // If the raw key contains a colon, extract the text before the colon (trim spaces).
+    const colonIndex = raw.indexOf(":");
+    if (colonIndex !== -1) {
+      const before = raw.slice(0, colonIndex).trim();
+      keys.push(before.length ? before : keyFallback);
     } else {
       // Otherwise, use the raw key as is
       keys.push(raw);
@@ -145,19 +147,22 @@ const getDetailContent = (
   detailKey?: string,
 ): string => {
   if (!currentStory) return "";
+  const prefixRegex = detailKey
+    ? new RegExp(`^${escapeRegExp(detailKey)}\\s*:\\s*`)
+    : null;
 
   const findAndStrip = (items: string[] | undefined) => {
-    if (!detailKey) return "";
-    const found = items?.find((item) => item.startsWith(`${detailKey}: `));
-    return found ? found.replace(`${detailKey}: `, "") : "";
+    if (!prefixRegex) return "";
+    const found = items?.find((item) => prefixRegex.test(item));
+    return found ? found.replace(prefixRegex, "") : "";
   };
 
   const findAndStripPerspective = (
     items: Array<{ text: string }> | undefined,
   ) => {
-    if (!detailKey) return "";
-    const found = items?.find((item) => item.text.startsWith(`${detailKey}: `));
-    return found ? found.text.replace(`${detailKey}: `, "") : "";
+    if (!prefixRegex) return "";
+    const found = items?.find((item) => prefixRegex.test(item.text));
+    return found ? found.text.replace(prefixRegex, "") : "";
   };
 
   const findQnAAnswer = (
@@ -262,10 +267,10 @@ export const handleGetStoryTitles = ({
   const { pageItems, nextPage } = paginate(titles, page);
   const processed = shortData
     ? pageItems.map((title) =>
-        title.length > SHORT_TITLE_LENGTH
-          ? title.slice(0, SHORT_TITLE_LENGTH - 3) + "..."
-          : title,
-      )
+      title.length > SHORT_TITLE_LENGTH
+        ? title.slice(0, SHORT_TITLE_LENGTH - 3) + "..."
+        : title,
+    )
     : pageItems;
   sendAppMessage({
     type: "get_story_titles",
