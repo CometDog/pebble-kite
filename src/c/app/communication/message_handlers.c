@@ -33,6 +33,7 @@
 #include "../ui/timeline/timeline_detail_text_window.h"
 #include "../ui/travel_advisory/travel_advisory_detail_list_window.h"
 #include "../ui/travel_advisory/travel_advisory_detail_text_window.h"
+#include "../ui/ui_config.h"
 #include "../utils/debug_logger.h"
 
 void handle_update_categories_message(DictionaryIterator *iter)
@@ -636,4 +637,18 @@ void handle_send_interface_strings_message(DictionaryIterator *iter)
     const char *strings = strings_tuple->value->cstring;
     localization_set_strings(strings);
     INFO_LOG("KNCMessageHandling", "Interface strings changed, restarting app");
+}
+
+void handle_set_text_size_message(DictionaryIterator *iter)
+{
+    Tuple *text_size_tuple = dict_find(iter, MESSAGE_KEY_data);
+    if (!text_size_tuple)
+    {
+        ERROR_LOG("KNCMessageHandling", "Set text size message missing data");
+        return;
+    }
+
+    const char *text_size = text_size_tuple->value->cstring;
+    INFO_LOG("KNCMessageHandling", "Received set_text_size message from phone, text size: %s", text_size);
+    ui_set_text_size_override(atoi(text_size));
 }

@@ -399,6 +399,7 @@ void communication_init(void)
     message_router_register("set_debug_mode", handle_set_debug_mode_message);
     message_router_register("send_interface_strings", handle_send_interface_strings_message);
     message_router_register("restart_app", handle_restart_app_message);
+    message_router_register("set_text_size", handle_set_text_size_message);
 
     // Use the lesser of requested size and maximum allowed size.
     // However sizes smaller than requested will probably break things

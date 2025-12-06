@@ -118,12 +118,14 @@ static void update_content_for_window(Window *window)
     int title_x = side_padding;
     int title_y = UI_DETAIL_TITLE_Y_INITIAL(title_h, side_padding, scroll_bounds.size.h);
     layer_set_frame(text_layer_get_layer(ctx->title_layer), GRect(title_x, title_y, content_width, title_h));
+    text_layer_set_font(ctx->title_layer, title_font);
     text_layer_set_text(ctx->title_layer, title);
 
     // Text
     int text_x = side_padding;
     int text_y = title_y + title_h + between_padding;
     layer_set_frame(text_layer_get_layer(ctx->text_layer), GRect(text_x, text_y, content_width, text_h));
+    text_layer_set_font(ctx->text_layer, body_font);
     text_layer_set_text(ctx->text_layer, text);
 
     // Content size for scroll layer (ensure at least window height)

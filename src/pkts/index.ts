@@ -42,6 +42,23 @@ Pebble.addEventListener("ready", async () => {
     if (response.health === true) {
       log.info("Kagi News API is healthy");
 
+      const selectedTextSize = localStorage.getItem("selectedTextSize");
+      try {
+        if (!selectedTextSize) throw new Error("No stored text size");
+        const size: number = JSON.parse(selectedTextSize);
+        log.info(`Found saved text size: ${size}`);
+
+        PebbleTS.sendAppMessage({
+          type: "set_text_size",
+          data: size,
+        });
+      } catch {
+        PebbleTS.sendAppMessage({
+          type: "set_text_size",
+          data: "0",
+        });
+      }
+
       const selectedInterfaceLanguage = localStorage.getItem(
         "selectedInterfaceLanguage",
       );
@@ -192,12 +209,26 @@ Pebble.addEventListener("showConfiguration", () => {
       contentLanguage = "";
     }
 
+    const storedTextSize = localStorage.getItem("selectedTextSize");
+    let textSize: number;
+
+    try {
+      if (!storedTextSize) throw new Error("No stored text size");
+      const size: number = JSON.parse(storedTextSize);
+      log.info(`Found saved text size: ${size}`);
+
+      textSize = size;
+    } catch {
+      textSize = 0;
+    }
+
     const claySettings: Record<string, any> = {
       UserCategories: booleanCategories,
       UserSections: booleanSections,
       UserInterfaceLanguage: interfaceLanguage,
       UserContentLanguage: contentLanguage,
       UserMaxStories: maxStoryCount,
+      UserTextSize: textSize,
       DebugMode: isDebugMode(),
     };
     localStorage.setItem("clay-settings", JSON.stringify(claySettings));
@@ -215,8 +246,8 @@ Pebble.addEventListener("webviewclosed", async (event) => {
 
     const settings = clay.getSettings(event.response);
     console.log("Clay settings received:", JSON.stringify(settings));
-    // DebugMode is at key 10303 (after all category and section checkbox keys)
-    const debugModeKey = "10303";
+    // DebugMode is at key 10304 (after all category and section checkbox keys)
+    const debugModeKey = "10304";
     const rawDebugValue = settings[debugModeKey];
     const debugModeValue = rawDebugValue === true || rawDebugValue === 1;
 
@@ -289,6 +320,15 @@ Pebble.addEventListener("webviewclosed", async (event) => {
       JSON.stringify(newMaxStoryCount),
     );
     log.info(`Saved max story count: ${newMaxStoryCount} items`);
+
+    // Text size is key 10303
+    const newTextSize = settings["10303"] as string;
+    localStorage.setItem("selectedTextSize", JSON.stringify(newTextSize));
+    log.info(`Saved text size: ${newTextSize}`);
+    PebbleTS.sendAppMessage({
+      type: "set_text_size",
+      data: newTextSize,
+    });
   } catch (err) {
     PebbleTS.sendAppMessage({ type: "update_categories", state: "success" });
     log.error(

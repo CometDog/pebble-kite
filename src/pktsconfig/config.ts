@@ -267,6 +267,18 @@ export default [
         max: 12,
         step: 1,
       },
+      {
+        type: "select",
+        messageKey: "UserTextSize",
+        label: "Text Size",
+        defaultValue: "",
+        options: [
+          { label: "Default (Follow Notification Size)", value: "0" },
+          { label: "Small", value: "1" },
+          { label: "Medium", value: "2" },
+          { label: "Large", value: "3" },
+        ],
+      },
     ],
   },
   {

@@ -58,3 +58,9 @@ void handle_send_interface_strings_message(DictionaryIterator *iter);
  * @param iter Dictionary iterator containing the message
  */
 void handle_restart_app_message(DictionaryIterator *iter);
+
+/**
+ * Handler for "set_text_size" message from phone
+ * @param iter Dictionary iterator containing the message
+ */
+void handle_set_text_size_message(DictionaryIterator *iter);

@@ -34,7 +34,8 @@ static void deinit(void)
 void app_restart(void)
 {
     window_stack_pop_all(false);
-    splash_screen_init();
+    deinit();
+    init();
 }
 
 int main(void)

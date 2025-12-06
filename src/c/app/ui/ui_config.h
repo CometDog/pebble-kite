@@ -9,6 +9,22 @@
  *   - PreferredContentSizeExtraLarge (only available on Emery)
  */
 
+/**
+ * Set text size override
+ * @param override: 0 = follow system preferred_content_size(), 1 = Small, 2 = Medium, 3 = Large
+ */
+void ui_set_text_size_override(int8_t override);
+/**
+ * Get text size override
+ * @return override value: 0 = follow system preferred_content_size(), 1 = Small, 2 = Medium, 3 = Large
+ */
+int8_t ui_get_text_size_override(void);
+/**
+ * Get effective preferred content size considering override
+ * @return PreferredContentSize value
+ */
+PreferredContentSize ui_effective_preferred_content_size(void);
+
 // Colors
 #ifdef PBL_COLOR
 #define UI_COLOR_HIGHLIGHT GColorVividCerulean
@@ -50,10 +66,10 @@
 #define UI_FONT_KEY_MENU_TITLE_XLARGE FONT_KEY_GOTHIC_24_BOLD
 
 #define UI_FONT_KEY_FOR_SIZE(small, medium, large, xlarge)                                                             \
-    ((preferred_content_size() == PreferredContentSizeSmall)        ? (small)                                          \
-     : (preferred_content_size() == PreferredContentSizeLarge)      ? (large)                                          \
-     : (preferred_content_size() == PreferredContentSizeExtraLarge) ? (xlarge)                                         \
-                                                                    : (medium))
+    ((ui_effective_preferred_content_size() == PreferredContentSizeSmall)        ? (small)                             \
+     : (ui_effective_preferred_content_size() == PreferredContentSizeLarge)      ? (large)                             \
+     : (ui_effective_preferred_content_size() == PreferredContentSizeExtraLarge) ? (xlarge)                            \
+                                                                                 : (medium))
 
 #define UI_FONT_KEY_TITLE                                                                                              \
     UI_FONT_KEY_FOR_SIZE(UI_FONT_KEY_TITLE_SMALL, UI_FONT_KEY_TITLE_MEDIUM, UI_FONT_KEY_TITLE_LARGE,                   \
@@ -89,10 +105,10 @@
  * Small: 0.75x, Medium: 1.0x, Large: 1.25x, XLarge: 1.5x
  */
 #define UI_SCALE_FOR_SIZE(val)                                                                                         \
-    ((preferred_content_size() == PreferredContentSizeSmall)        ? ((val) * 3 / 4)                                  \
-     : (preferred_content_size() == PreferredContentSizeLarge)      ? ((val) * 5 / 4)                                  \
-     : (preferred_content_size() == PreferredContentSizeExtraLarge) ? ((val) * 3 / 2)                                  \
-                                                                    : (val))
+    ((ui_effective_preferred_content_size() == PreferredContentSizeSmall)        ? ((val) * 3 / 4)                     \
+     : (ui_effective_preferred_content_size() == PreferredContentSizeLarge)      ? ((val) * 5 / 4)                     \
+     : (ui_effective_preferred_content_size() == PreferredContentSizeExtraLarge) ? ((val) * 3 / 2)                     \
+                                                                                 : (val))
 
 // Layout
 #ifdef PBL_ROUND
@@ -126,10 +142,10 @@
 #define UI_LINE_HEIGHT_REGULAR_XLARGE 28
 
 #define UI_LINE_HEIGHT_REGULAR                                                                                         \
-    ((preferred_content_size() == PreferredContentSizeSmall)        ? UI_LINE_HEIGHT_REGULAR_SMALL                     \
-     : (preferred_content_size() == PreferredContentSizeLarge)      ? UI_LINE_HEIGHT_REGULAR_LARGE                     \
-     : (preferred_content_size() == PreferredContentSizeExtraLarge) ? UI_LINE_HEIGHT_REGULAR_XLARGE                    \
-                                                                    : UI_LINE_HEIGHT_REGULAR_MEDIUM)
+    ((ui_effective_preferred_content_size() == PreferredContentSizeSmall)        ? UI_LINE_HEIGHT_REGULAR_SMALL        \
+     : (ui_effective_preferred_content_size() == PreferredContentSizeLarge)      ? UI_LINE_HEIGHT_REGULAR_LARGE        \
+     : (ui_effective_preferred_content_size() == PreferredContentSizeExtraLarge) ? UI_LINE_HEIGHT_REGULAR_XLARGE       \
+                                                                                 : UI_LINE_HEIGHT_REGULAR_MEDIUM)
 
 #define UI_DETAIL_SIDE_PADDING_BASE 4
 #define UI_DETAIL_SIDE_PADDING UI_SCALE_FOR_SIZE(UI_DETAIL_SIDE_PADDING_BASE)
@@ -175,7 +191,6 @@
 #define UI_INDICATOR_X_OFFSET 5
 #endif
 
-
 #define UI_QR_Y_FUDGE_BASE 24
 #define UI_QR_Y_FUDGE UI_SCALE_FOR_SIZE(UI_QR_Y_FUDGE_BASE)
 
@@ -183,12 +198,7 @@
 #define UI_QR_LOADING_TEXT_HEIGHT UI_SCALE_FOR_SIZE(UI_QR_LOADING_TEXT_HEIGHT_BASE)
 
 // Helper functions
-/**
- * Get system font for the current content size preference.
- *
- * @param font_type One of: UI_FONT_TYPE_TITLE, UI_FONT_TYPE_BODY, etc.
- * @return GFont from system fonts
- */
+
 static inline GFont ui_get_system_font_title(void)
 {
     return fonts_get_system_font(UI_FONT_KEY_TITLE);

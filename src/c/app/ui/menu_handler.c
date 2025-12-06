@@ -12,7 +12,6 @@ typedef struct
 // Track active menu windows to detect stale pointers
 static Window *s_tracked_windows[UI_MAX_TRACKED_WINDOWS];
 static int s_tracked_count = 0;
-static GFont s_menu_font = NULL;
 
 static void track_window(Window *window)
 {
@@ -87,14 +86,14 @@ static void draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_ind
 
         // Measure actual text height
         GSize text_size = graphics_text_layout_get_content_size(
-            items[cell_index->row], s_menu_font, GRect(0, 0, content_width, bounds.size.h),
+            items[cell_index->row], ui_get_system_font_menu(), GRect(0, 0, content_width, bounds.size.h),
             GTextOverflowModeTrailingEllipsis, UI_MENU_TEXT_ALIGNMENT);
 
         int16_t y_offset = (bounds.size.h - text_size.h) / 2 - 4;
         GRect text_bounds =
             GRect(bounds.origin.x + UI_MENU_X_PADDING, bounds.origin.y + y_offset, content_width, text_size.h);
 
-        graphics_draw_text(ctx, items[cell_index->row], s_menu_font, text_bounds, GTextOverflowModeTrailingEllipsis,
+        graphics_draw_text(ctx, items[cell_index->row], ui_get_system_font_menu(), text_bounds, GTextOverflowModeTrailingEllipsis,
                            UI_MENU_TEXT_ALIGNMENT, NULL);
     }
 }
@@ -144,7 +143,7 @@ static int16_t get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_ind
 
     // Calculate amount of space the text would take
     GSize text_size =
-        graphics_text_layout_get_content_size(items[cell_index->row], s_menu_font, GRect(0, 0, available_width, 1000),
+        graphics_text_layout_get_content_size(items[cell_index->row], ui_get_system_font_menu(), GRect(0, 0, available_width, 1000),
                                               GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
 
     int16_t line_height = UI_LINE_HEIGHT_REGULAR;
@@ -179,11 +178,6 @@ Window *s_menu_handler_create_window(MenuConfig config, bool never_multiline)
     Window *window = window_create();
     if (!window)
         return NULL;
-
-    if (!s_menu_font)
-    {
-        s_menu_font = ui_get_system_font_menu();
-    }
 
     MenuData *menu_data = malloc(sizeof(MenuData));
     if (!menu_data)
@@ -258,6 +252,7 @@ void menu_handler_destroy_window(Window *window)
         free(menu_data);
         window_set_user_data(window, NULL);
     }
+
     window_destroy(window);
 }
 
