@@ -93,8 +93,8 @@ static void draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_ind
         GRect text_bounds =
             GRect(bounds.origin.x + UI_MENU_X_PADDING, bounds.origin.y + y_offset, content_width, text_size.h);
 
-        graphics_draw_text(ctx, items[cell_index->row], ui_get_system_font_menu(), text_bounds, GTextOverflowModeTrailingEllipsis,
-                           UI_MENU_TEXT_ALIGNMENT, NULL);
+        graphics_draw_text(ctx, items[cell_index->row], ui_get_system_font_menu(), text_bounds,
+                           GTextOverflowModeTrailingEllipsis, UI_MENU_TEXT_ALIGNMENT, NULL);
     }
 }
 
@@ -110,15 +110,22 @@ static void draw_header(GContext *ctx, const Layer *cell_layer, uint16_t section
 
     // Draw header text with ContentSize-aware font
     graphics_context_set_text_color(ctx, UI_COLOR_MENU_HEADER_TEXT);
-    GRect text_bounds =
-        GRect(bounds.origin.x + UI_MENU_HEADER_X_PADDING, bounds.origin.y, content_width, bounds.size.h);
+    GRect text_bounds = GRect(bounds.origin.x + UI_MENU_HEADER_X_PADDING, bounds.size.h - UI_LINE_HEIGHT_REGULAR,
+                              content_width, bounds.size.h);
     graphics_draw_text(ctx, data->config.title, ui_get_system_font_menu_title(), text_bounds,
                        GTextOverflowModeTrailingEllipsis, UI_MENU_TEXT_ALIGNMENT, NULL);
 }
 
 static int16_t get_header_height(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context)
 {
+#ifdef PBL_ROUND
+    // This is built to handle drawing a header with a special full height background for Time Round but I have not
+    // picked a color yet so it does nothing special
+    GRect bounds = layer_get_bounds(menu_layer_get_layer(menu_layer));
+    return (bounds.size.h / 2) - (UI_MENU_CELL_HEIGHT_BASE / 2);
+#else
     return UI_LINE_HEIGHT_REGULAR;
+#endif
 }
 
 static int16_t get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context)
@@ -142,9 +149,9 @@ static int16_t get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_ind
     int16_t available_width = bounds.size.w - (UI_MENU_X_PADDING * 2);
 
     // Calculate amount of space the text would take
-    GSize text_size =
-        graphics_text_layout_get_content_size(items[cell_index->row], ui_get_system_font_menu(), GRect(0, 0, available_width, 1000),
-                                              GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
+    GSize text_size = graphics_text_layout_get_content_size(items[cell_index->row], ui_get_system_font_menu(),
+                                                            GRect(0, 0, available_width, 1000),
+                                                            GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
 
     int16_t line_height = UI_LINE_HEIGHT_REGULAR;
     int num_lines = (text_size.h + line_height - 1) / line_height;

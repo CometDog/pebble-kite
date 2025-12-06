@@ -40,16 +40,20 @@ void ui_reload_fonts(void);
 
 // Colors
 #ifdef PBL_COLOR
-#define UI_COLOR_HIGHLIGHT GColorVividCerulean
+#define UI_COLOR_HIGHLIGHT GColorRajah
 #define UI_COLOR_TEXT_ON_DARK GColorBlack
+#ifdef PBL_ROUND
+#define UI_COLOR_MENU_HEADER_BACKGROUND GColorWhite
+#else
+#define UI_COLOR_MENU_HEADER_BACKGROUND GColorWhite
+#endif
 #else
 #define UI_COLOR_HIGHLIGHT GColorBlack
 #define UI_COLOR_TEXT_ON_DARK GColorWhite
+#define UI_COLOR_MENU_HEADER_BACKGROUND GColorWhite
 #endif
 
 #define UI_COLOR_TEXT_PRIMARY GColorBlack
-
-#define UI_COLOR_MENU_HEADER_BACKGROUND GColorWhite
 #define UI_COLOR_MENU_HEADER_TEXT GColorBlack
 
 // Fonts
