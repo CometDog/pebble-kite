@@ -15,6 +15,7 @@
     "@babel/runtime-corejs3": "^7.28.2",
     "core-js": "^3.44.0",
     "pebble-clay": "^1.0.4",
+    "pebble-timeline-js": "^2.1.1",
     "qrcode-generator": "^2.0.4",
     "regenerator-runtime": "^0.14.1"
   },
@@ -62,7 +63,8 @@
       "UserContentLanguage": 10301,
       "UserMaxStories": 10302,
       "UserTextSize": 10303,
-      "DebugMode": 10304,
+      "UserTimelinePins": 10304,
+      "DebugMode": 10305,
       "type": 10401,
       "state": 10402,
       "data": 10403,

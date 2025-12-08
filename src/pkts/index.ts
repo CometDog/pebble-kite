@@ -42,6 +42,26 @@ Pebble.addEventListener("ready", async () => {
     if (response.health === true) {
       log.info("Kagi News API is healthy");
 
+      const newsRefreshPinSetting = localStorage.getItem(
+        "newsRefreshPinSetting",
+      );
+      try {
+        if (!newsRefreshPinSetting)
+          throw new Error("No stored news refresh pin setting");
+        const newsRefreshPinEnabled: boolean = JSON.parse(
+          newsRefreshPinSetting,
+        );
+        log.info(`Found news refresh pin setting: ${newsRefreshPinEnabled}`);
+
+        if (newsRefreshPinEnabled) {
+          handlers.pushNewsRefreshPinToTimeline();
+        }
+      } catch {
+        log.info(
+          "No news refresh pin setting found, defaulting to disabled behavior",
+        );
+      }
+
       const selectedTextSize = localStorage.getItem("selectedTextSize");
       try {
         if (!selectedTextSize) throw new Error("No stored text size");
@@ -222,6 +242,20 @@ Pebble.addEventListener("showConfiguration", () => {
       textSize = 0;
     }
 
+    const newsRefreshPinSetting = localStorage.getItem("newsRefreshPinSetting");
+    let newsRefreshPinEnabled: boolean;
+
+    try {
+      if (!newsRefreshPinSetting)
+        throw new Error("No stored news refresh pin setting");
+      const enabled: boolean = JSON.parse(newsRefreshPinSetting);
+      log.info(`Found news refresh pin setting: ${enabled}`);
+
+      newsRefreshPinEnabled = enabled;
+    } catch {
+      newsRefreshPinEnabled = false;
+    }
+
     const claySettings: Record<string, any> = {
       UserCategories: booleanCategories,
       UserSections: booleanSections,
@@ -229,6 +263,7 @@ Pebble.addEventListener("showConfiguration", () => {
       UserContentLanguage: contentLanguage,
       UserMaxStories: maxStoryCount,
       UserTextSize: textSize,
+      UserTimelinePins: [newsRefreshPinEnabled],
       DebugMode: isDebugMode(),
     };
     localStorage.setItem("clay-settings", JSON.stringify(claySettings));
@@ -246,8 +281,8 @@ Pebble.addEventListener("webviewclosed", async (event) => {
 
     const settings = clay.getSettings(event.response);
     console.log("Clay settings received:", JSON.stringify(settings));
-    // DebugMode is at key 10304 (after all category and section checkbox keys)
-    const debugModeKey = "10304";
+    // DebugMode is at key 10305 (after all category and section checkbox keys)
+    const debugModeKey = "10305";
     const rawDebugValue = settings[debugModeKey];
     const debugModeValue = rawDebugValue === true || rawDebugValue === 1;
 
@@ -329,6 +364,17 @@ Pebble.addEventListener("webviewclosed", async (event) => {
       type: "set_text_size",
       data: newTextSize,
     });
+
+    // News refresh timeline pin setting is key 10304
+    const newsRefreshPinSetting = settings["10304"] as boolean;
+    localStorage.setItem(
+      "newsRefreshPinSetting",
+      JSON.stringify(newsRefreshPinSetting),
+    );
+    log.info(`Saved news refresh pin setting: ${newsRefreshPinSetting}`);
+    if (newsRefreshPinSetting) {
+      handlers.pushNewsRefreshPinToTimeline();
+    }
   } catch (err) {
     PebbleTS.sendAppMessage({ type: "update_categories", state: "success" });
     log.error(

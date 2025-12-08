@@ -279,6 +279,13 @@ export default [
           { label: "Large", value: "3" },
         ],
       },
+      {
+        type: "checkboxgroup",
+        messageKey: "UserTimelinePins",
+        label: "Timeline Pins",
+        defaultValue: [false],
+        options: ["Show news refresh time pins"],
+      },
     ],
   },
   {
