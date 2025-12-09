@@ -828,11 +828,12 @@ export const pushNewsRefreshPinToTimeline = () => {
     ];
 
     // If a user removed a pin already I don't want to re-add it so I rely on checking if I've already pushed this time
-    const needNewPush = times.map((timeMs, index) => {
-      const lastPushTime = localStorage.getItem(
-        `newsRefreshPin${index}PushTime`,
-      );
-      return !(lastPushTime && Number(lastPushTime) === timeMs);
+    const lastPushTimes = times.map((_, index) =>
+      localStorage.getItem(`newsRefreshPin${index}PushTime`),
+    );
+    const needNewPush = times.map((timeMs) => {
+      if (lastPushTimes.includes(timeMs.toString())) return false;
+      return true;
     });
 
     const insertPinForIndex = (index: number) => {
