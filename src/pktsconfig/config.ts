@@ -302,6 +302,13 @@ export default [
         description: "Show notifications for warnings and errors",
         defaultValue: false,
       },
+      {
+        type: "checkboxgroup",
+        messageKey: "ClearCacheOnSave",
+        label: "Clear Cache On Save",
+        defaultValue: [false, false],
+        options: ["Clear full cache", "Clear timeline pin memory"],
+      },
     ],
   },
   {

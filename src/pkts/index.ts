@@ -164,6 +164,20 @@ Pebble.addEventListener("webviewclosed", async (event) => {
     if (newsRefreshPinSetting) {
       handlers.pushNewsRefreshPinToTimeline();
     }
+
+    // Clear full cache on save is key 10306
+    const clearFullCacheOnSave = settings["10306"] as boolean;
+    if (clearFullCacheOnSave) {
+      log.info("Clearing full cache as per user request");
+      handlers.clearFullCache();
+    } else {
+      // Clear timeline pin memory on save is key 10307
+      const clearPinCacheOnSave = settings["10307"] as boolean;
+      if (clearPinCacheOnSave) {
+        log.info("Clearing timeline pin cache as per user request");
+        handlers.clearPinCache();
+      }
+    }
   } catch (err) {
     PebbleTS.sendAppMessage({ type: "update_categories", state: "success" });
     log.error(

@@ -65,6 +65,7 @@
       "UserTextSize": 10303,
       "UserTimelinePins": 10304,
       "DebugMode": 10305,
+      "ClearCacheOnSave": 10306,
       "type": 10401,
       "state": 10402,
       "data": 10403,

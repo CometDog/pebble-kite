@@ -859,3 +859,13 @@ export const pushNewsRefreshPinToTimeline = () => {
     }
   });
 };
+
+export const clearPinCache = () => {
+  localStorage.removeItem("newsRefreshPin0PushTime");
+  localStorage.removeItem("newsRefreshPin1PushTime");
+  localStorage.removeItem("newsRefreshPin2PushTime");
+};
+
+export const clearFullCache = () => {
+  clearPinCache();
+};

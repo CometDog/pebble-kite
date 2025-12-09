@@ -172,6 +172,7 @@ export const generateClaySettings = (
     UserMaxStories: config.selectedMaxStoryCount,
     UserTextSize: config.selectedTextSize,
     UserTimelinePins: [config.newsRefreshPinSetting],
+    ClearCacheOnSave: [false, false], // Always default to false on load
     DebugMode: debugMode,
   };
 };
