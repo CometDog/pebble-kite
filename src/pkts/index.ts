@@ -5,16 +5,18 @@ const Clay: ClayConstructor = require("pebble-clay");
 const clayConfig = require("../pkjs/config");
 const clay = new Clay(clayConfig, null, { autoHandleEvents: false });
 
+import {
+  getConfig,
+  setConfig,
+  booleanToCategories,
+  booleanToSections,
+  generateClaySettings,
+} from "./config";
 import { healthRequest } from "./server/request/health";
 import * as handlers from "./handlers";
 import {
   availableCategories,
-  AvailableCategory,
-  AvailableSection,
   availableSections,
-  defaultCategories,
-  defaultMaxStories,
-  defaultSections,
   StoryDetailEnum,
 } from "./types";
 import {
@@ -42,108 +44,34 @@ Pebble.addEventListener("ready", async () => {
     if (response.health === true) {
       log.info("Kagi News API is healthy");
 
-      const newsRefreshPinSetting = localStorage.getItem(
-        "newsRefreshPinSetting",
-      );
-      try {
-        if (!newsRefreshPinSetting)
-          throw new Error("No stored news refresh pin setting");
-        const newsRefreshPinEnabled: boolean = JSON.parse(
-          newsRefreshPinSetting,
-        );
-        log.info(`Found news refresh pin setting: ${newsRefreshPinEnabled}`);
-
-        if (newsRefreshPinEnabled) {
-          handlers.pushNewsRefreshPinToTimeline();
-        }
-      } catch {
-        log.info(
-          "No news refresh pin setting found, defaulting to disabled behavior",
-        );
+      const newsRefreshPinEnabled = getConfig("newsRefreshPinSetting");
+      if (newsRefreshPinEnabled) {
+        handlers.pushNewsRefreshPinToTimeline();
       }
 
-      const selectedTextSize = localStorage.getItem("selectedTextSize");
-      try {
-        if (!selectedTextSize) throw new Error("No stored text size");
-        const size: number = JSON.parse(selectedTextSize);
-        log.info(`Found saved text size: ${size}`);
+      const textSize = getConfig("selectedTextSize");
+      PebbleTS.sendAppMessage({
+        type: "set_text_size",
+        data: textSize,
+      });
 
-        PebbleTS.sendAppMessage({
-          type: "set_text_size",
-          data: size,
-        });
-      } catch {
-        PebbleTS.sendAppMessage({
-          type: "set_text_size",
-          data: "0",
-        });
-      }
+      const interfaceLanguage = getConfig("selectedInterfaceLanguage");
+      PebbleTS.sendAppMessage({
+        type: "send_interface_strings",
+        data: JSON.stringify(getFlattenedInterfaceStrings(interfaceLanguage)),
+      });
 
-      const selectedInterfaceLanguage = localStorage.getItem(
-        "selectedInterfaceLanguage",
-      );
-      try {
-        if (!selectedInterfaceLanguage)
-          throw new Error("No stored interface language");
-        const lang: string = JSON.parse(selectedInterfaceLanguage);
-        log.info(`Found saved interface language: ${lang}`);
+      const contentLanguage = getConfig("selectedContentLanguage");
+      setServerLang(contentLanguage);
 
-        PebbleTS.sendAppMessage({
-          type: "send_interface_strings",
-          data: JSON.stringify(getFlattenedInterfaceStrings(lang)),
-        });
-      } catch {
-        PebbleTS.sendAppMessage({
-          type: "send_interface_strings",
-          data: JSON.stringify(getFlattenedInterfaceStrings()),
-        });
-      }
+      const maxStoryCount = getConfig("selectedMaxStoryCount");
+      handlers.setMaxStoryCount(maxStoryCount);
 
-      const selectedContentLanguage = localStorage.getItem(
-        "selectedContentLanguage",
-      );
-      try {
-        if (!selectedContentLanguage)
-          throw new Error("No stored content language");
-        const lang: string = JSON.parse(selectedContentLanguage);
-        log.info(`Found saved content language: ${lang}`);
-        setServerLang(lang);
-      } catch {
-        setServerLang("");
-      }
+      const selectedSectionNames = getConfig("selectedSectionNames");
+      handlers.setSelectedSections(selectedSectionNames);
 
-      const maxStoryCount = localStorage.getItem("selectedMaxStoryCount");
-      try {
-        if (!maxStoryCount) throw new Error("No stored max story count");
-        const count: number = JSON.parse(maxStoryCount);
-        log.info(`Found saved max story count: ${count} items`);
-
-        handlers.setMaxStoryCount(count);
-      } catch {
-        handlers.setMaxStoryCount(defaultMaxStories);
-      }
-
-      const storedSectionNames = localStorage.getItem("selectedSectionNames");
-      try {
-        if (!storedSectionNames) throw new Error("No stored section names");
-        const names: AvailableSection[] = JSON.parse(storedSectionNames);
-        log.info(`Found saved selected sections: ${names.length} items`);
-
-        handlers.setSelectedSections(names);
-      } catch {
-        handlers.setSelectedSections(defaultSections);
-      }
-
-      const storedCategoryNames = localStorage.getItem("selectedCategoryNames");
-      try {
-        if (!storedCategoryNames) throw new Error("No stored category names");
-        const names: AvailableCategory[] = JSON.parse(storedCategoryNames);
-        log.info(`Found saved selected categories: ${names.length} items`);
-
-        handlers.setSelectedCategories(names);
-      } catch {
-        handlers.setSelectedCategories(defaultCategories);
-      }
+      const selectedCategoryNames = getConfig("selectedCategoryNames");
+      handlers.setSelectedCategories(selectedCategoryNames);
 
       await handlers.handleUpdateCategories();
       log.info("Notifying watch that data is ready");
@@ -158,116 +86,8 @@ Pebble.addEventListener("ready", async () => {
 
 Pebble.addEventListener("showConfiguration", () => {
   try {
-    // Load saved category names and convert to boolean array for Clay
-    const storedCategoryNames = localStorage.getItem("selectedCategoryNames");
-    let booleanCategories: boolean[];
-
-    try {
-      if (!storedCategoryNames) throw new Error("No stored category names");
-      const names: string[] = JSON.parse(storedCategoryNames);
-      booleanCategories = availableCategories.map((cat) => names.includes(cat));
-    } catch {
-      booleanCategories = availableCategories.map((cat) =>
-        defaultCategories.includes(cat as any),
-      );
-    }
-
-    // Load saved section names and convert to boolean array for Clay
-    const storedSectionNames = localStorage.getItem("selectedSectionNames");
-    let booleanSections: boolean[];
-
-    try {
-      if (!storedSectionNames) throw new Error("No stored section names");
-      const names: string[] = JSON.parse(storedSectionNames);
-      booleanSections = availableSections.map((sec) => names.includes(sec));
-    } catch {
-      booleanSections = Array(availableSections.length).fill(true);
-    }
-
-    // Load saved max story count
-    const storedMaxStoryCount = localStorage.getItem("selectedMaxStoryCount");
-    let maxStoryCount: number;
-
-    try {
-      if (!storedMaxStoryCount) throw new Error("No stored max story count");
-      const count: number = JSON.parse(storedMaxStoryCount);
-      log.info(`Found saved max story count: ${count} items`);
-
-      maxStoryCount = count;
-    } catch {
-      maxStoryCount = defaultMaxStories;
-    }
-
-    const storedInterfaceLanguage = localStorage.getItem(
-      "selectedInterfaceLanguage",
-    );
-    let interfaceLanguage: string;
-
-    try {
-      if (!storedInterfaceLanguage)
-        throw new Error("No stored interface language");
-      const lang: string = JSON.parse(storedInterfaceLanguage);
-      log.info(`Found saved interface language: ${lang}`);
-
-      interfaceLanguage = lang;
-    } catch {
-      interfaceLanguage = "";
-    }
-
-    const storedContentLanguage = localStorage.getItem(
-      "selectedContentLanguage",
-    );
-    let contentLanguage: string;
-
-    try {
-      if (!storedContentLanguage) throw new Error("No stored content language");
-      const lang: string = JSON.parse(storedContentLanguage);
-      log.info(`Found saved content language: ${lang}`);
-
-      contentLanguage = lang;
-    } catch {
-      contentLanguage = "";
-    }
-
-    const storedTextSize = localStorage.getItem("selectedTextSize");
-    let textSize: number;
-
-    try {
-      if (!storedTextSize) throw new Error("No stored text size");
-      const size: number = JSON.parse(storedTextSize);
-      log.info(`Found saved text size: ${size}`);
-
-      textSize = size;
-    } catch {
-      textSize = 0;
-    }
-
-    const newsRefreshPinSetting = localStorage.getItem("newsRefreshPinSetting");
-    let newsRefreshPinEnabled: boolean;
-
-    try {
-      if (!newsRefreshPinSetting)
-        throw new Error("No stored news refresh pin setting");
-      const enabled: boolean = JSON.parse(newsRefreshPinSetting);
-      log.info(`Found news refresh pin setting: ${enabled}`);
-
-      newsRefreshPinEnabled = enabled;
-    } catch {
-      newsRefreshPinEnabled = false;
-    }
-
-    const claySettings: Record<string, any> = {
-      UserCategories: booleanCategories,
-      UserSections: booleanSections,
-      UserInterfaceLanguage: interfaceLanguage,
-      UserContentLanguage: contentLanguage,
-      UserMaxStories: maxStoryCount,
-      UserTextSize: textSize,
-      UserTimelinePins: [newsRefreshPinEnabled],
-      DebugMode: isDebugMode(),
-    };
+    const claySettings = generateClaySettings(isDebugMode());
     localStorage.setItem("clay-settings", JSON.stringify(claySettings));
-
     Pebble.openURL(clay.generateUrl());
   } catch (e) {
     log.error("Failed to open Clay configuration", e);
@@ -299,14 +119,8 @@ Pebble.addEventListener("webviewclosed", async (event) => {
       return val === true || val === 1;
     });
     handlers.setSelectedCategoriesFromBoolean(newSelected);
-
-    // Persist as category names (not booleans) for future-proofing
-    const selectedNames = availableCategories.filter((_, i) => newSelected[i]);
-    localStorage.setItem(
-      "selectedCategoryNames",
-      JSON.stringify(selectedNames),
-    );
-    log.info(`Saved ${selectedNames.length} selected categories`);
+    const selectedNames = booleanToCategories(newSelected);
+    setConfig("selectedCategoryNames", selectedNames);
 
     // Sections are at keys 10200-10299
     const newSelectedSections: boolean[] = availableSections.map((_, idx) => {
@@ -315,24 +129,12 @@ Pebble.addEventListener("webviewclosed", async (event) => {
       return val === true || val === 1;
     });
     handlers.setSelectedSectionsFromBoolean(newSelectedSections);
-
-    // Persist as section names (not booleans) for future-proofing
-    const selectedSectionNames = availableSections.filter(
-      (_, i) => newSelectedSections[i],
-    );
-    localStorage.setItem(
-      "selectedSectionNames",
-      JSON.stringify(selectedSectionNames),
-    );
-    log.info(`Saved ${selectedSectionNames.length} selected sections`);
+    const selectedSectionNames = booleanToSections(newSelectedSections);
+    setConfig("selectedSectionNames", selectedSectionNames);
 
     // Interface language is key 10300
     const newInterfaceLanguage = settings["10300"] as string;
-    localStorage.setItem(
-      "selectedInterfaceLanguage",
-      JSON.stringify(newInterfaceLanguage),
-    );
-    log.info(`Saved interface language: ${newInterfaceLanguage}`);
+    setConfig("selectedInterfaceLanguage", newInterfaceLanguage);
     PebbleTS.sendAppMessage({
       type: "send_interface_strings",
       data: JSON.stringify(getFlattenedInterfaceStrings(newInterfaceLanguage)),
@@ -341,25 +143,16 @@ Pebble.addEventListener("webviewclosed", async (event) => {
     // Content language is key 10301
     const newContentLanguage = settings["10301"] as string;
     setServerLang(newContentLanguage);
-    localStorage.setItem(
-      "selectedContentLanguage",
-      JSON.stringify(newContentLanguage),
-    );
-    log.info(`Saved content language: ${newContentLanguage}`);
+    setConfig("selectedContentLanguage", newContentLanguage);
 
     // Max story count is key 10302
     const newMaxStoryCount = settings["10302"] as number;
     handlers.setMaxStoryCount(newMaxStoryCount);
-    localStorage.setItem(
-      "selectedMaxStoryCount",
-      JSON.stringify(newMaxStoryCount),
-    );
-    log.info(`Saved max story count: ${newMaxStoryCount} items`);
+    setConfig("selectedMaxStoryCount", newMaxStoryCount);
 
     // Text size is key 10303
-    const newTextSize = settings["10303"] as string;
-    localStorage.setItem("selectedTextSize", JSON.stringify(newTextSize));
-    log.info(`Saved text size: ${newTextSize}`);
+    const newTextSize = settings["10303"] as number;
+    setConfig("selectedTextSize", newTextSize);
     PebbleTS.sendAppMessage({
       type: "set_text_size",
       data: newTextSize,
@@ -367,11 +160,7 @@ Pebble.addEventListener("webviewclosed", async (event) => {
 
     // News refresh timeline pin setting is key 10304
     const newsRefreshPinSetting = settings["10304"] as boolean;
-    localStorage.setItem(
-      "newsRefreshPinSetting",
-      JSON.stringify(newsRefreshPinSetting),
-    );
-    log.info(`Saved news refresh pin setting: ${newsRefreshPinSetting}`);
+    setConfig("newsRefreshPinSetting", newsRefreshPinSetting);
     if (newsRefreshPinSetting) {
       handlers.pushNewsRefreshPinToTimeline();
     }
