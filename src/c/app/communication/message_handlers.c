@@ -99,7 +99,6 @@ void handle_get_story_titles_message(DictionaryIterator *iter)
 
     if (strcmp(state_tuple->value->cstring, "success") == 0)
     {
-        Tuple *batch_id_tuple = dict_find(iter, MESSAGE_KEY_batchId);
         Tuple *category_name_tuple = dict_find(iter, MESSAGE_KEY_categoryName);
         Tuple *short_data_tuple = dict_find(iter, MESSAGE_KEY_shortData);
         Tuple *story_titles = dict_find(iter, MESSAGE_KEY_data1);

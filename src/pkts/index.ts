@@ -204,14 +204,12 @@ Pebble.addEventListener("appmessage", async (event) => {
     case "get_category_names":
       handlers.handleGetCategoryNames({
         page: payload.page,
-        batchId: payload.batchId,
       });
       break;
     case "get_story_titles":
       if ("categoryName" in payload) {
         handlers.handleGetStoryTitles({
           page: payload.page,
-          batchId: payload.batchId,
           categoryName: payload.categoryName,
           shortData: payload.shortData === 1,
         });
@@ -226,7 +224,6 @@ Pebble.addEventListener("appmessage", async (event) => {
     case "get_short_summary":
       if ("storyTitle" in payload) {
         handlers.handleGetShortSummary({
-          batchId: payload.batchId,
           categoryName: payload.categoryName,
           storyTitle: payload.storyTitle,
         });
@@ -241,7 +238,6 @@ Pebble.addEventListener("appmessage", async (event) => {
     case "get_available_details":
       if ("storyId" in payload) {
         handlers.handleGetAvailableDetails({
-          batchId: payload.batchId,
           categoryName: payload.categoryName,
           storyId: payload.storyId,
         });

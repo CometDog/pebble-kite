@@ -20,6 +20,7 @@ import type {
   AvailableSection,
   SimpleStory,
   StoryDetailType,
+  CategorizedStories,
 } from "./types";
 
 const log = createLogger("KNJSHandler");
@@ -88,31 +89,16 @@ const paginate = <T>(items: T[], page = 1, pageSize = PAGE_SIZE) => {
 
 const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-const findBatchOrDefault = (batchId?: string) => {
-  const map = getCategoryBatchMap();
-  if (!map.length) return undefined;
-  if (!batchId) return map[0];
-  return map.find((batch) => batch.batchId === batchId) ?? map[0];
+const getCategorizedList = (categoryName?: string): CategorizedStories[] => {
+  const categorizedStories = getCategoryBatchMap().categorizedStories;
+  if (categoryName) {
+    const filtered = categorizedStories.filter(
+      (story) => story.category.name === categoryName,
+    );
+    return filtered;
+  }
+  return categorizedStories;
 };
-
-const getBatchesToSearch = (batchId?: string) => {
-  const map = getCategoryBatchMap();
-  if (!map.length) return [] as typeof map;
-  if (!batchId) return map;
-  const filtered = map.filter((batch) => batch.batchId === batchId);
-  return filtered.length ? filtered : map;
-};
-
-const getCategorizedLists = (batchesToSearch: any[], categoryName?: string) =>
-  batchesToSearch.map((batch) => {
-    if (categoryName) {
-      const filtered = batch.categorizedStories.filter(
-        (categorized: any) => categorized.category.name === categoryName,
-      );
-      return filtered.length ? filtered : batch.categorizedStories;
-    }
-    return batch.categorizedStories;
-  });
 
 // Generic handler for list-like details (perspectives, talking points, technical details, industry impact)
 const handleDetailList = <T>(
@@ -241,14 +227,8 @@ const getDetailContent = (
   }
 };
 
-export const handleGetCategoryNames = ({
-  page = 1,
-  batchId,
-}: {
-  page?: number;
-  batchId?: string;
-}) => {
-  const batch = findBatchOrDefault(batchId);
+export const handleGetCategoryNames = ({ page = 1 }: { page?: number }) => {
+  const batch = getCategoryBatchMap();
   if (!batch)
     return sendAppMessage({
       type: "get_category_names",
@@ -260,7 +240,6 @@ export const handleGetCategoryNames = ({
   sendAppMessage({
     type: "get_category_names",
     state: "success",
-    batchId: batch.batchId,
     data: pageItems.join("||"),
     ...(nextPage && { nextPage }),
   });
@@ -268,16 +247,14 @@ export const handleGetCategoryNames = ({
 
 export const handleGetStoryTitles = ({
   page = 1,
-  batchId,
   categoryName,
   shortData = false,
 }: {
   page?: number;
-  batchId?: string;
   categoryName: string;
   shortData?: boolean;
 }) => {
-  const batch = findBatchOrDefault(batchId);
+  const batch = getCategoryBatchMap();
   if (!batch)
     return sendAppMessage({
       type: "get_story_titles",
@@ -291,10 +268,10 @@ export const handleGetStoryTitles = ({
   const { pageItems, nextPage } = paginate(titles, page);
   const processed = shortData
     ? pageItems.map((title) =>
-      title.length > SHORT_TITLE_LENGTH
-        ? title.slice(0, SHORT_TITLE_LENGTH - 3) + "..."
-        : title,
-    )
+        title.length > SHORT_TITLE_LENGTH
+          ? title.slice(0, SHORT_TITLE_LENGTH - 3) + "..."
+          : title,
+      )
     : pageItems;
 
   // This is redundant to the code above and should be DRY'd up
@@ -306,7 +283,6 @@ export const handleGetStoryTitles = ({
   sendAppMessage({
     type: "get_story_titles",
     state: "success",
-    batchId: batch.batchId,
     categoryName,
     shortData: shortData ? 1 : 0,
     data1: processed.join("||"),
@@ -316,35 +292,30 @@ export const handleGetStoryTitles = ({
 };
 
 export const handleGetShortSummary = ({
-  batchId,
   categoryName,
   storyTitle,
 }: {
-  batchId?: string;
   categoryName?: string;
   storyTitle: string;
 }) => {
-  const batchesToSearch = getBatchesToSearch(batchId);
-  const categorizedLists = getCategorizedLists(batchesToSearch, categoryName);
+  const categories = getCategorizedList(categoryName);
 
   let storyId = "";
   let fullTitle = "";
   let shortSummary = "";
 
-  outer: for (const categories of categorizedLists) {
-    for (const category of categories) {
-      for (const story of category.stories) {
-        if (
-          story.title.startsWith(
-            storyTitle.slice(0, Math.max(0, storyTitle.length - 3)),
-          ) ||
-          story.title === storyTitle
-        ) {
-          storyId = story.id;
-          fullTitle = story.title;
-          shortSummary = story.shortSummary;
-          break outer;
-        }
+  for (const category of categories) {
+    for (const story of category.stories) {
+      if (
+        story.title.startsWith(
+          storyTitle.slice(0, Math.max(0, storyTitle.length - 3)),
+        ) ||
+        story.title === storyTitle
+      ) {
+        storyId = story.id;
+        fullTitle = story.title;
+        shortSummary = story.shortSummary;
+        break;
       }
     }
   }
@@ -359,37 +330,30 @@ export const handleGetShortSummary = ({
 };
 
 export const handleGetAvailableDetails = ({
-  batchId,
   categoryName,
   storyId,
 }: {
-  batchId?: string;
   categoryName?: string;
   storyId: string;
 }) => {
   currentStory = null;
-  const batchesToSearch = getBatchesToSearch(batchId);
-  const categorizedLists = getCategorizedLists(batchesToSearch, categoryName);
+  const categories = getCategorizedList(categoryName);
 
-  for (const categories of categorizedLists) {
-    for (const category of categories) {
-      for (const story of category.stories) {
-        if (story.id === storyId) {
-          currentStory = story;
-          currentStory!.articles = currentStory!.articles?.map(
-            (article, index) => ({
-              link: article.link,
-              domain: article.domain.startsWith("[")
-                ? article.domain
-                : `[${index + 1}] ${article.domain}`,
-            }),
-          );
-          break;
-        }
+  for (const category of categories) {
+    for (const story of category.stories) {
+      if (story.id === storyId) {
+        currentStory = story;
+        currentStory!.articles = currentStory!.articles?.map(
+          (article, index) => ({
+            link: article.link,
+            domain: article.domain.startsWith("[")
+              ? article.domain
+              : `[${index + 1}] ${article.domain}`,
+          }),
+        );
+        break;
       }
-      if (currentStory) break;
     }
-    if (currentStory) break;
   }
 
   if (!currentStory)

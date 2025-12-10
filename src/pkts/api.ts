@@ -1,4 +1,3 @@
-import { batchesRequest } from "./server/request/batches";
 import { batchCategoriesRequest } from "./server/request/batchCategories";
 import { batchCategoryStoriesRequest } from "./server/request/batchCategoryStories";
 import type {
@@ -10,17 +9,12 @@ import type {
 import type { BatchCategory } from "./server/type/BatchCategory";
 import { CONCURRENT_BATCH_SIZE } from "./types";
 
-let categoryBatchMap: CurrentData[] = [];
+let categoryBatchMap: CurrentData = { batchId: "", categorizedStories: [] };
 
 export const getCategoryBatchMap = () => categoryBatchMap;
 
-export const setCategoryBatchMap = (data: CurrentData[]) => {
+export const setCategoryBatchMap = (data: CurrentData) => {
   cleanUpStaleReadStories(data);
-  console.log(
-    JSON.stringify(
-      updateDataWithReadStories(data)[0].categorizedStories[0].stories[0],
-    ),
-  );
   categoryBatchMap = updateDataWithReadStories(data);
 };
 
@@ -44,32 +38,30 @@ export const addReadStory = (storyId: string) => {
   setReadStories(existingReadStories);
 };
 
-export const updateDataWithReadStories = (
-  data: CurrentData[],
-): CurrentData[] => {
+export const updateDataWithReadStories = (data: CurrentData): CurrentData => {
   const existingReadStories = getReadStories();
 
-  return data.map((batch) => ({
-    batchId: batch.batchId,
-    categorizedStories: batch.categorizedStories.map((category) => ({
+  return {
+    batchId: data.batchId,
+    categorizedStories: data.categorizedStories.map((category) => ({
       category: category.category,
       stories: category.stories.map((story) => ({
         ...story,
         read: existingReadStories.readStoryIds.includes(story.id) ?? false,
       })),
     })),
-  }));
+  };
 };
 
-export const cleanUpStaleReadStories = (data: CurrentData[]) => {
+export const cleanUpStaleReadStories = (data: CurrentData) => {
   const existingReadStories = getReadStories();
   const updatedReadStories: ReadStoriesStorageObject = {
     batchId: "",
     readStoryIds: [],
   };
 
-  if (data[0].batchId !== existingReadStories.batchId) {
-    updatedReadStories.batchId = data[0].batchId;
+  if (data.batchId !== existingReadStories.batchId) {
+    updatedReadStories.batchId = data.batchId;
     updatedReadStories.readStoryIds = [];
     setReadStories(updatedReadStories);
   }
@@ -114,16 +106,14 @@ const normalizeValue = (value: any): any => {
 };
 
 const updateStories = async ({
-  batchId,
   categoryId,
   maxStoryCount,
 }: {
-  batchId: string;
   categoryId: string;
   maxStoryCount: number;
 }) => {
   const response = await batchCategoryStoriesRequest({
-    batchId,
+    batchId: "latest",
     categoryId,
     limit: maxStoryCount,
   });
@@ -186,27 +176,25 @@ const updateStories = async ({
   );
 };
 
-const sortData = (data: CurrentData[]) => {
-  return data.map((batch) => {
-    const sortedCategories = [...batch.categorizedStories].sort(
-      (categorizedA, categorizedB) => {
-        const aName = categorizedA.category.name;
-        const bName = categorizedB.category.name;
-        if (aName > bName) return 1;
-        if (aName < bName) return -1;
-        return 0;
-      },
-    );
-    const processedCategories = sortedCategories.map((categorized) => ({
-      ...categorized,
-      stories: [...categorized.stories].sort((a, b) => {
-        if (a.id > b.id) return 1;
-        if (a.id < b.id) return -1;
-        return 0;
-      }),
-    }));
-    return { ...batch, categorizedStories: processedCategories };
-  });
+const sortData = (data: CurrentData) => {
+  const sortedCategories = [...data.categorizedStories].sort(
+    (categorizedA, categorizedB) => {
+      const aName = categorizedA.category.name;
+      const bName = categorizedB.category.name;
+      if (aName > bName) return 1;
+      if (aName < bName) return -1;
+      return 0;
+    },
+  );
+  const processedCategories = sortedCategories.map((categorized) => ({
+    ...categorized,
+    stories: [...categorized.stories].sort((a, b) => {
+      if (a.id > b.id) return 1;
+      if (a.id < b.id) return -1;
+      return 0;
+    }),
+  }));
+  return { ...data, categorizedStories: processedCategories };
 };
 
 export const updateCategories = async ({
@@ -216,57 +204,38 @@ export const updateCategories = async ({
   selectedCategoryNames: string[];
   maxStoryCount: number;
 }) => {
-  const response = await batchesRequest();
-  const batchIds = response.batches.map((b) => b.id);
+  const categoriesResponse = await batchCategoriesRequest({
+    batchId: "latest",
+  });
+  let filtered = categoriesResponse;
+  if (selectedCategoryNames.length > 0) {
+    filtered = {
+      ...categoriesResponse,
+      categories: categoriesResponse.categories.filter(
+        (category: BatchCategory) =>
+          selectedCategoryNames.includes(category.categoryName),
+      ),
+    };
+  }
 
-  const newMap: CurrentData[] = [];
+  const categorizedStories: CategorizedStories[] = [];
 
-  for (let i = 0; i < batchIds.length; i += CONCURRENT_BATCH_SIZE) {
-    const group = batchIds.slice(i, i + CONCURRENT_BATCH_SIZE);
+  for (let j = 0; j < filtered.categories.length; j += CONCURRENT_BATCH_SIZE) {
+    const catGroup = filtered.categories.slice(j, j + CONCURRENT_BATCH_SIZE);
     await Promise.all(
-      group.map(async (batchId) => {
-        const categoriesResponse = await batchCategoriesRequest({ batchId });
-        let filtered = categoriesResponse;
-        if (selectedCategoryNames.length > 0) {
-          filtered = {
-            ...categoriesResponse,
-            categories: categoriesResponse.categories.filter(
-              (category: BatchCategory) =>
-                selectedCategoryNames.includes(category.categoryName),
-            ),
-          };
-        }
-
-        const categorizedStories: CategorizedStories[] = [];
-
-        for (
-          let j = 0;
-          j < filtered.categories.length;
-          j += CONCURRENT_BATCH_SIZE
-        ) {
-          const catGroup = filtered.categories.slice(
-            j,
-            j + CONCURRENT_BATCH_SIZE,
-          );
-          await Promise.all(
-            catGroup.map(async (category: BatchCategory) => {
-              const stories = await updateStories({
-                batchId,
-                categoryId: category.id,
-                maxStoryCount,
-              });
-              categorizedStories.push({
-                category: { id: category.id, name: category.categoryName },
-                stories,
-              });
-            }),
-          );
-        }
-
-        newMap.push({ batchId, categorizedStories });
+      catGroup.map(async (category: BatchCategory) => {
+        const stories = await updateStories({
+          categoryId: category.id,
+          maxStoryCount,
+        });
+        categorizedStories.push({
+          category: { id: category.id, name: category.categoryName },
+          stories,
+        });
       }),
     );
   }
 
+  const newMap = { batchId: categoriesResponse.batchId, categorizedStories };
   setCategoryBatchMap(sortData(newMap));
 };
