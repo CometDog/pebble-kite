@@ -13,6 +13,7 @@ typedef struct
 {
     char *selected_category;
     char **story_titles;
+    bool *stories_read;
     uint16_t story_titles_count;
 } StoryListData;
 
@@ -154,6 +155,19 @@ void set_story_full_title(char *story_full_title);
  * @param story_short_summary The short summary string
  */
 void set_story_short_summary(char *story_short_summary);
+
+/**
+ * Set the current story's read status
+ * @param index Index of the story in the list
+ * @param story_read Boolean indicating if the story has been read
+ */
+void set_story_read(uint16_t index, bool story_read);
+
+/**
+ * Push story read status in batches
+ * @param stories_read_string String of double-pipe-separated "0" (unread) and "1" (read) values
+ */
+void push_story_read_statuses(char *stories_read_string);
 
 /**
  * Get story data (read-only)

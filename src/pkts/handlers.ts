@@ -2,7 +2,7 @@
 const timelinejs = require("pebble-timeline-js");
 
 import { createLogger } from "../pktslib";
-import { getCategoryBatchMap, updateCategories } from "./api";
+import { addReadStory, getCategoryBatchMap, updateCategories } from "./api";
 import { updateQrCodeBitmap, getQrCodeChunk } from "./qr";
 import { onThisDayRequest } from "./server/request/onThisDay";
 import {
@@ -291,18 +291,26 @@ export const handleGetStoryTitles = ({
   const { pageItems, nextPage } = paginate(titles, page);
   const processed = shortData
     ? pageItems.map((title) =>
-        title.length > SHORT_TITLE_LENGTH
-          ? title.slice(0, SHORT_TITLE_LENGTH - 3) + "..."
-          : title,
-      )
+      title.length > SHORT_TITLE_LENGTH
+        ? title.slice(0, SHORT_TITLE_LENGTH - 3) + "..."
+        : title,
+    )
     : pageItems;
+
+  // This is redundant to the code above and should be DRY'd up
+  const readStories =
+    batch.categorizedStories
+      .find((categorized) => categorized.category.name === categoryName)
+      ?.stories.map((story) => story.read) ?? [];
+
   sendAppMessage({
     type: "get_story_titles",
     state: "success",
     batchId: batch.batchId,
     categoryName,
-    data: processed.join("||"),
     shortData: shortData ? 1 : 0,
+    data1: processed.join("||"),
+    data2: readStories.map((read) => (read ? "1" : "0")).join("||"),
     ...(nextPage && { nextPage }),
   });
 };
@@ -790,6 +798,14 @@ export const handleGetQrCodeChunk = ({ chunk }: { chunk: number }) => {
   });
 };
 
+export const handleAddReadStory = (storyId: string) => {
+  addReadStory(storyId);
+  // For performance reasons, this doesn't send back to the watch the index of the
+  // story that was marked as read. The watch app is expected to keep track of
+  // which stories have been read already locally until the next full update.
+};
+
+// I don't think any of these belong in handlers but I haven't moved them somewhere better yet
 export const pushNewsRefreshPinToTimeline = () => {
   // Retrieve the On This Day for the latest batch always to avoid waiting around for the batch to update here
   onThisDayRequest({ batchId: "latest" }).then((onThisDay) => {
@@ -866,6 +882,11 @@ export const clearPinCache = () => {
   localStorage.removeItem("newsRefreshPin2PushTime");
 };
 
+export const clearReadStoriesCache = () => {
+  localStorage.removeItem("readStories");
+};
+
 export const clearFullCache = () => {
   clearPinCache();
+  clearReadStoriesCache();
 };

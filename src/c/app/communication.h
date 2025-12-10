@@ -79,6 +79,12 @@ bool send_debug_log(int32_t level, const char *tag, const char *message);
 bool send_debug_notify(const char *title, const char *message);
 
 /**
+ * Send a request to mark a story as read
+ * @param story_id The ID of the story to mark as read
+ * @return true if the request was successfully queued/sent, false otherwise
+ */
+bool send_mark_story_read(const char *story_id);
+/**
  * Initialize the communication module, setting up message routing and handlers
  */
 void communication_init(void);

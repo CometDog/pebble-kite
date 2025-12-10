@@ -84,17 +84,23 @@ static void draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_ind
         GRect bounds = layer_get_bounds(cell_layer);
         int16_t content_width = bounds.size.w - (UI_MENU_X_PADDING * 2);
 
+        GFont font = ui_get_system_font_menu();
+        if (data->config.is_item_read && data->config.is_item_read(cell_index->row))
+        {
+            font = ui_get_system_font_menu_read();
+        }
+
         // Measure actual text height
         GSize text_size = graphics_text_layout_get_content_size(
-            items[cell_index->row], ui_get_system_font_menu(), GRect(0, 0, content_width, bounds.size.h),
-            GTextOverflowModeTrailingEllipsis, UI_MENU_TEXT_ALIGNMENT);
+            items[cell_index->row], font, GRect(0, 0, content_width, bounds.size.h), GTextOverflowModeTrailingEllipsis,
+            UI_MENU_TEXT_ALIGNMENT);
 
         int16_t y_offset = (bounds.size.h - text_size.h) / 2 - 4;
         GRect text_bounds =
             GRect(bounds.origin.x + UI_MENU_X_PADDING, bounds.origin.y + y_offset, content_width, text_size.h);
 
-        graphics_draw_text(ctx, items[cell_index->row], ui_get_system_font_menu(), text_bounds,
-                           GTextOverflowModeTrailingEllipsis, UI_MENU_TEXT_ALIGNMENT, NULL);
+        graphics_draw_text(ctx, items[cell_index->row], font, text_bounds, GTextOverflowModeTrailingEllipsis,
+                           UI_MENU_TEXT_ALIGNMENT, NULL);
     }
 }
 
@@ -149,9 +155,14 @@ static int16_t get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_ind
     int16_t available_width = bounds.size.w - (UI_MENU_X_PADDING * 2);
 
     // Calculate amount of space the text would take
-    GSize text_size = graphics_text_layout_get_content_size(items[cell_index->row], ui_get_system_font_menu(),
-                                                            GRect(0, 0, available_width, 1000),
-                                                            GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
+    GFont font = ui_get_system_font_menu();
+    if (data->config.is_item_read && data->config.is_item_read(cell_index->row))
+    {
+        font = ui_get_system_font_menu_read();
+    }
+    GSize text_size =
+        graphics_text_layout_get_content_size(items[cell_index->row], font, GRect(0, 0, available_width, 1000),
+                                              GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
 
     int16_t line_height = UI_LINE_HEIGHT_REGULAR;
     int num_lines = (text_size.h + line_height - 1) / line_height;
@@ -279,5 +290,17 @@ void menu_handler_request_update(Window *window)
                 ? false
                 : any_item_exceeds_length(menu_data->config.get_items(), menu_data->config.get_num_items(), 20);
         menu_layer_reload_data(menu_data->menu_layer);
+    }
+}
+
+void menu_handler_set_is_read_callback(Window *window, bool (*callback)(int index))
+{
+    if (!window)
+        return;
+
+    MenuData *menu_data = window_get_user_data(window);
+    if (menu_data)
+    {
+        menu_data->config.is_item_read = callback;
     }
 }

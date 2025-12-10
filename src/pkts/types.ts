@@ -26,6 +26,7 @@ export type StoryDetailType = keyof typeof StoryDetailEnum;
 
 export type SimpleStory = {
   id: string;
+  read: boolean;
   category: string;
   title: string;
   shortSummary: string;
@@ -66,6 +67,11 @@ export type CategorizedStories = {
 export type CurrentData = {
   batchId: string;
   categorizedStories: CategorizedStories[];
+};
+
+export type ReadStoriesStorageObject = {
+  batchId: string;
+  readStoryIds: string[];
 };
 
 export const availableCategories = [

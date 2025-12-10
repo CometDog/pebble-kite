@@ -177,6 +177,12 @@ Pebble.addEventListener("webviewclosed", async (event) => {
         log.info("Clearing timeline pin cache as per user request");
         handlers.clearPinCache();
       }
+      // Clear read stories memory on save is key 10308
+      const clearReadStoriesOnSave = settings["10308"] as boolean;
+      if (clearReadStoriesOnSave) {
+        log.info("Clearing read stories cache as per user request");
+        handlers.clearReadStoriesCache();
+      }
     }
   } catch (err) {
     PebbleTS.sendAppMessage({ type: "update_categories", state: "success" });
@@ -305,6 +311,17 @@ Pebble.addEventListener("appmessage", async (event) => {
           type: "get_next_qr_code_bitmap",
           state: "error",
           error: "chunk required for get_next_qr_code_bitmap but none provided",
+        });
+      }
+      break;
+    case "mark_story_read":
+      if ("storyId" in payload) {
+        handlers.handleAddReadStory(payload.storyId);
+      } else {
+        PebbleTS.sendAppMessage({
+          type: "mark_story_read",
+          state: "error",
+          error: "storyId required for mark_story_read but not provided",
         });
       }
       break;

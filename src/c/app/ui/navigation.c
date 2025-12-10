@@ -107,7 +107,7 @@ void navigation_open_story_titles(const char *category)
     main_story_list_window_ui_init();
 }
 
-void navigation_open_story_summary(const char *category, const char *story_title)
+void navigation_open_story_summary(const char *category, const char *story_title, int index)
 {
     s_current_tier = NAV_TIER_2_STORY_SUMMARY;
 
@@ -115,7 +115,7 @@ void navigation_open_story_summary(const char *category, const char *story_title
 
     send_get_short_summary((char *)category, (char *)story_title);
     set_story_full_title((char *)story_title);
-    main_story_text_window_ui_init();
+    main_story_text_window_ui_init(index);
 }
 
 void navigation_open_available_details(const char *category, const char *story_id)

@@ -80,7 +80,8 @@ typedef struct
 typedef struct
 {
     char *selected_category;
-    char *story_titles[MAX_ITEMS_HIGH];
+    char *story_titles[MAX_ITEMS_LOW];
+    bool stories_read[MAX_ITEMS_LOW];
     uint16_t story_titles_count;
     char *story_id;
     char *story_full_title;
@@ -110,7 +111,7 @@ typedef struct
 } SelectedDetailLevel;
 
 static CategoriesLevel level_1_categories = {{0}, 0};
-static StoryViewLevel level_2_story_view = {NULL, {0}, 0, NULL, NULL, NULL};
+static StoryViewLevel level_2_story_view = {NULL, {0}, {0}, 0, NULL, NULL, NULL};
 static AvailableDetailsLevel level_3_available_details = {{0}, 0};
 static SelectedDetailLevel level_4_selected_detail = {0};
 
@@ -190,7 +191,7 @@ void set_selected_category(char *category_name)
 void push_story_titles(char *story_titles_string)
 {
     level_2_story_view.story_titles_count +=
-        string_split_to_array(level_2_story_view.story_titles, level_2_story_view.story_titles_count, MAX_ITEMS_HIGH,
+        string_split_to_array(level_2_story_view.story_titles, level_2_story_view.story_titles_count, MAX_ITEMS_LOW,
                               story_titles_string, "||");
     main_story_list_window_ui_update();
 }
@@ -202,12 +203,15 @@ const StoryListData *get_story_list_data(void)
     if (level_2_story_view.story_titles_count == 0)
     {
         static char *loading_arr[1] = {LOADING_TEXT};
+        static bool loading_read_arr[1] = {false};
         data.story_titles = loading_arr;
+        data.stories_read = loading_read_arr;
         data.story_titles_count = 1;
     }
     else
     {
         data.story_titles = level_2_story_view.story_titles;
+        data.stories_read = level_2_story_view.stories_read;
         data.story_titles_count = level_2_story_view.story_titles_count;
     }
     return &data;
@@ -271,6 +275,28 @@ void set_story_short_summary(char *story_short_summary)
         level_2_story_view.story_short_summary = string_duplicate(story_short_summary);
     }
     main_story_text_window_ui_update();
+}
+
+void set_story_read(uint16_t index, bool story_read)
+{
+    if (index < level_2_story_view.story_titles_count)
+    {
+        level_2_story_view.stories_read[index] = story_read;
+    }
+    main_story_list_window_ui_update();
+}
+
+void push_story_read_statuses(char *stories_read_string)
+{
+    char *temp_array[get_story_list_data()->story_titles_count];
+    string_split_to_array(temp_array, 0, get_story_list_data()->story_titles_count, stories_read_string, "||");
+    uint16_t index = 0;
+    while (index < get_story_list_data()->story_titles_count && temp_array[index] != NULL)
+    {
+        level_2_story_view.stories_read[index] = (strcmp(temp_array[index], "1") == 0);
+        index++;
+    }
+    main_story_list_window_ui_update();
 }
 
 const StoryData *get_story_data(void)

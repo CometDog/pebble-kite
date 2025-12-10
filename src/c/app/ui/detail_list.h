@@ -34,3 +34,10 @@ Window *detail_list_create_with_resources(Window **window, const char *title, ui
                                           char **(*get_items)(void), void (*select_callback)(int),
                                           DataResource *resources, size_t resource_count,
                                           DataRegistrationHandle *handle);
+
+/**
+ * Set the callback to check if an item is read
+ * @param window The detail list window
+ * @param callback The callback function
+ */
+void detail_list_set_is_read_callback(Window *window, bool (*callback)(int index));

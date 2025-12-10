@@ -31,3 +31,8 @@ Window *detail_list_create_with_resources(Window **window, const char *title, ui
     }
     return list;
 }
+
+void detail_list_set_is_read_callback(Window *window, bool (*callback)(int index))
+{
+    menu_handler_set_is_read_callback(window, callback);
+}

@@ -4,6 +4,7 @@
 GFont ui_font_title = NULL;
 GFont ui_font_body = NULL;
 GFont ui_font_menu = NULL;
+GFont ui_font_menu_read = NULL;
 GFont ui_font_caption = NULL;
 GFont ui_font_menu_title = NULL;
 
@@ -21,6 +22,10 @@ void ui_load_fonts(void)
     if (!ui_font_menu)
     {
         ui_font_menu = fonts_get_system_font(UI_FONT_KEY_MENU);
+    }
+    if (!ui_font_menu_read)
+    {
+        ui_font_menu_read = fonts_get_system_font(UI_FONT_KEY_MENU_READ);
     }
     if (!ui_font_caption)
     {
@@ -45,6 +50,10 @@ void ui_unload_fonts(void)
     if (ui_font_menu)
     {
         ui_font_menu = NULL;
+    }
+    if (ui_font_menu_read)
+    {
+        ui_font_menu_read = NULL;
     }
     if (ui_font_caption)
     {

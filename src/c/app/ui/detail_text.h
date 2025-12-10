@@ -53,10 +53,16 @@ void detail_text_destroy(Window *window);
 void detail_text_update(Window *window);
 
 /**
- * Set the callback to be invoked when the select button is pressed.
- * Only called when has_next_page is true.
+ * Set a custom select handler for the detail text window.
  *
  * @param window: the detail text Window*
- * @param on_select: callback function to invoke on select button press
+ * @param on_select: the callback to invoke on select button press
  */
 void detail_text_set_select_handler(Window *window, void (*on_select)(void));
+
+/**
+ * Set a custom scroll handler for the detail text window.
+ * @param window: the detail text Window*
+ * @param callback: the ScrollLayerCallback to invoke on scroll
+ */
+void detail_text_set_scroll_handler(Window *window, ScrollLayerCallback callback);

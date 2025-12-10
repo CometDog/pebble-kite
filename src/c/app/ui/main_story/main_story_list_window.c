@@ -10,14 +10,25 @@ static void on_story_select(int index)
     const StoryListData *story_list = get_story_list_data();
     if (story_list->story_titles && story_list->selected_category && index < story_list->story_titles_count)
     {
-        navigation_open_story_summary(story_list->selected_category, story_list->story_titles[index]);
+        navigation_open_story_summary(story_list->selected_category, story_list->story_titles[index], index);
     }
+}
+
+static bool is_story_read(int index)
+{
+    const StoryListData *story_list = get_story_list_data();
+    if (story_list && story_list->stories_read && index < story_list->story_titles_count)
+    {
+        return story_list->stories_read[index];
+    }
+    return false;
 }
 
 void main_story_list_window_ui_init()
 {
     DataResource resources[] = {DATA_RESOURCE_PRIMARY_STORY_OPTIONS};
     detail_list_window_ui_init(&s_main_window, resources, DETAIL_TYPE_PRIMARY_STORY, on_story_select);
+    detail_list_window_set_is_read_callback(&s_main_window, is_story_read);
 }
 
 void main_story_list_window_ui_deinit(void)

@@ -61,7 +61,7 @@ void navigation_open_story_titles(const char *category);
  * @param category: The category name
  * @param story_title: The story title
  */
-void navigation_open_story_summary(const char *category, const char *story_title);
+void navigation_open_story_summary(const char *category, const char *story_title, int index);
 
 /**
  * Navigate to available details from story summary

@@ -185,7 +185,7 @@ static void detail_window_appear(Window *window)
 
 static void detail_window_disappear(Window *window)
 {
-    (void)window;
+    // No-op
 }
 
 static void detail_window_unload(Window *window)
@@ -318,4 +318,15 @@ void detail_text_set_select_handler(Window *window, void (*on_select)(void))
     {
         layer_set_hidden(ctx->indicator_layer, !on_select);
     }
+}
+
+void detail_text_set_scroll_handler(Window *window, ScrollLayerCallback callback)
+{
+    DetailTextContext *ctx = get_context_for_window(window);
+    if (!ctx || !ctx->scroll_layer)
+        return;
+
+    // Preserve existing click config provider
+    scroll_layer_set_callbacks(ctx->scroll_layer, (ScrollLayerCallbacks){.click_config_provider = click_config_provider,
+                                                                         .content_offset_changed_handler = callback});
 }

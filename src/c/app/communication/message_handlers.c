@@ -102,7 +102,8 @@ void handle_get_story_titles_message(DictionaryIterator *iter)
         Tuple *batch_id_tuple = dict_find(iter, MESSAGE_KEY_batchId);
         Tuple *category_name_tuple = dict_find(iter, MESSAGE_KEY_categoryName);
         Tuple *short_data_tuple = dict_find(iter, MESSAGE_KEY_shortData);
-        Tuple *story_titles = dict_find(iter, MESSAGE_KEY_data);
+        Tuple *story_titles = dict_find(iter, MESSAGE_KEY_data1);
+        Tuple *story_read_statuses = dict_find(iter, MESSAGE_KEY_data2);
 
         if (!story_titles || !category_name_tuple)
         {
@@ -111,6 +112,11 @@ void handle_get_story_titles_message(DictionaryIterator *iter)
         }
 
         push_story_titles(story_titles->value->cstring);
+
+        if (story_read_statuses)
+        {
+            push_story_read_statuses(story_read_statuses->value->cstring);
+        }
 
         Tuple *next_page_tuple = dict_find(iter, MESSAGE_KEY_nextPage);
         if (next_page_tuple && short_data_tuple)

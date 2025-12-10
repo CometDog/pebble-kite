@@ -1,7 +1,12 @@
 import { batchesRequest } from "./server/request/batches";
 import { batchCategoriesRequest } from "./server/request/batchCategories";
 import { batchCategoryStoriesRequest } from "./server/request/batchCategoryStories";
-import type { CurrentData, CategorizedStories, SimpleStory } from "./types";
+import type {
+  CurrentData,
+  CategorizedStories,
+  SimpleStory,
+  ReadStoriesStorageObject,
+} from "./types";
 import type { BatchCategory } from "./server/type/BatchCategory";
 import { CONCURRENT_BATCH_SIZE } from "./types";
 
@@ -10,7 +15,64 @@ let categoryBatchMap: CurrentData[] = [];
 export const getCategoryBatchMap = () => categoryBatchMap;
 
 export const setCategoryBatchMap = (data: CurrentData[]) => {
-  categoryBatchMap = data;
+  cleanUpStaleReadStories(data);
+  console.log(
+    JSON.stringify(
+      updateDataWithReadStories(data)[0].categorizedStories[0].stories[0],
+    ),
+  );
+  categoryBatchMap = updateDataWithReadStories(data);
+};
+
+const getReadStories = (): ReadStoriesStorageObject => {
+  const existingReadStoriesString = localStorage.getItem("readStories");
+  return existingReadStoriesString
+    ? JSON.parse(existingReadStoriesString)
+    : { batchId: "", readStoryIds: [] };
+};
+
+const setReadStories = (readStories: ReadStoriesStorageObject) => {
+  localStorage.setItem("readStories", JSON.stringify(readStories));
+  categoryBatchMap = updateDataWithReadStories(categoryBatchMap);
+};
+
+export const addReadStory = (storyId: string) => {
+  const existingReadStories = getReadStories();
+  if (existingReadStories.readStoryIds.includes(storyId)) return;
+
+  existingReadStories.readStoryIds.push(storyId);
+  setReadStories(existingReadStories);
+};
+
+export const updateDataWithReadStories = (
+  data: CurrentData[],
+): CurrentData[] => {
+  const existingReadStories = getReadStories();
+
+  return data.map((batch) => ({
+    batchId: batch.batchId,
+    categorizedStories: batch.categorizedStories.map((category) => ({
+      category: category.category,
+      stories: category.stories.map((story) => ({
+        ...story,
+        read: existingReadStories.readStoryIds.includes(story.id) ?? false,
+      })),
+    })),
+  }));
+};
+
+export const cleanUpStaleReadStories = (data: CurrentData[]) => {
+  const existingReadStories = getReadStories();
+  const updatedReadStories: ReadStoriesStorageObject = {
+    batchId: "",
+    readStoryIds: [],
+  };
+
+  if (data[0].batchId !== existingReadStories.batchId) {
+    updatedReadStories.batchId = data[0].batchId;
+    updatedReadStories.readStoryIds = [];
+    setReadStories(updatedReadStories);
+  }
 };
 
 // Normalize strings: convert dashes, remove emojis and broken surrogate pairs
@@ -69,6 +131,7 @@ const updateStories = async ({
     (story) =>
       normalizeValue({
         id: story.id,
+        read: false,
         category: story.category,
         title: story.title,
         shortSummary: story.short_summary,

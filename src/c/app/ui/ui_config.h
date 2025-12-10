@@ -108,6 +108,15 @@ void ui_reload_fonts(void);
     UI_FONT_KEY_FOR_SIZE(UI_FONT_KEY_MENU_TITLE_SMALL, UI_FONT_KEY_MENU_TITLE_MEDIUM, UI_FONT_KEY_MENU_TITLE_LARGE,    \
                          UI_FONT_KEY_MENU_TITLE_XLARGE)
 
+#define UI_FONT_KEY_MENU_READ_SMALL FONT_KEY_GOTHIC_14
+#define UI_FONT_KEY_MENU_READ_MEDIUM FONT_KEY_GOTHIC_18
+#define UI_FONT_KEY_MENU_READ_LARGE FONT_KEY_GOTHIC_24
+#define UI_FONT_KEY_MENU_READ_XLARGE FONT_KEY_GOTHIC_28
+
+#define UI_FONT_KEY_MENU_READ                                                                                          \
+    UI_FONT_KEY_FOR_SIZE(UI_FONT_KEY_MENU_READ_SMALL, UI_FONT_KEY_MENU_READ_MEDIUM, UI_FONT_KEY_MENU_READ_LARGE,       \
+                         UI_FONT_KEY_MENU_READ_XLARGE)
+
 // Images
 #define UI_IMAGE_MENU_ICON RESOURCE_ID_IMAGE_MENU_ICON
 
@@ -220,6 +229,7 @@ void ui_reload_fonts(void);
 extern GFont ui_font_title;
 extern GFont ui_font_body;
 extern GFont ui_font_menu;
+extern GFont ui_font_menu_read;
 extern GFont ui_font_caption;
 extern GFont ui_font_menu_title;
 
@@ -248,6 +258,15 @@ static inline GFont ui_get_system_font_menu(void)
         ui_load_fonts();
     }
     return ui_font_menu;
+}
+
+static inline GFont ui_get_system_font_menu_read(void)
+{
+    if (!ui_font_menu_read)
+    {
+        ui_load_fonts();
+    }
+    return ui_font_menu_read;
 }
 
 static inline GFont ui_get_system_font_caption(void)

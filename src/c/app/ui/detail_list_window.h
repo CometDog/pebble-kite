@@ -36,3 +36,10 @@ void detail_list_window_ui_deinit(Window **window);
  * Request an update to the available detail list menu, causing a redraw
  */
 void detail_list_window_ui_update(Window **window);
+
+/**
+ * Set the callback to check if an item is read
+ * @param window The detail list window
+ * @param callback The callback function
+ */
+void detail_list_window_set_is_read_callback(Window **window, bool (*callback)(int index));

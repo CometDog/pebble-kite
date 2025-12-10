@@ -383,6 +383,13 @@ bool send_debug_notify(const char *title, const char *message)
     return send_request_with_extra("debug_notify", extras, 2);
 }
 
+bool send_mark_story_read(const char *story_id)
+{
+    ExtraRequestKeyValuePair extras[] = {
+        {.key = MESSAGE_KEY_storyId, .type = VALUE_TYPE_STRING, .value.str = story_id}};
+    return send_request_with_extra("mark_story_read", extras, 1);
+}
+
 void communication_init(void)
 {
     message_router_init();

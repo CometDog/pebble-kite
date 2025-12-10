@@ -267,3 +267,10 @@ void detail_list_window_ui_update(Window **window)
 {
     menu_handler_request_update(*window);
 }
+
+void detail_list_window_set_is_read_callback(Window **window, bool (*callback)(int index))
+{
+    if (!window || !*window)
+        return;
+    detail_list_set_is_read_callback(*window, callback);
+}
