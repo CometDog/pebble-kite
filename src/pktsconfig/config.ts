@@ -10,97 +10,115 @@ export default [
         type: "checkboxgroup",
         messageKey: "UserCategories",
         label: "Categories",
+        description:
+          "NOTE: Some categories may have limited content available. If there are no summaries for the day they will not show up in the app. Categories are manually kept up to date based on Kagi feeds. Selecting a large number of categories  (30+) may cause unexpected behavior.",
         defaultValue: [
-          false, // AI
-          false, // Africa
-          false, // Apple
-          false, // Australia
-          false, // Austria
-          false, // Bay
-          false, // Belgium
-          false, // Bitcoin
-          false, // Brazil
-          false, // Business
-          false, // Canada
-          false, // Catholic
-          false, // China
-          false, // Coffee
-          false, // Colombia
-          false, // Costa Rica
-          false, // Croatia
-          false, // Cryptocurrency
-          false, // Cybersecurity
-          false, // Czech Republic
-          false, // Denmark
-          false, // Economy
-          false, // Estonia
-          false, // Europe
-          false, // Finland
-          false, // Formula 1
-          false, // France
-          false, // Gaming
-          false, // Germany | Hesse
-          false, // Germany
-          false, // Greece
-          false, // Hungary
-          false, // India
-          false, // Iran
-          false, // Ireland
-          false, // Israel
-          false, // Italy
-          false, // Japan
-          false, // Linux & OSS
-          false, // Lithuania
-          false, // Mexico
-          false, // Middle East
-          false, // NFL
-          false, // NHL
-          false, // New Zealand
-          false, // Nintendo
-          false, // Norway
-          false, // Pakistan
-          false, // Palestine
-          false, // Philippines
-          false, // Podcasting
-          false, // Poland
-          false, // Portugal
-          false, // Romania
-          false, // Russia
-          false, // Science
-          false, // Serbia
-          false, // Singapore
-          false, // Slovakia
-          false, // Slovenia
-          false, // South Korea
-          false, // Spain
-          false, // Sports
-          false, // Sweden
-          false, // Switzerland (DE)
-          false, // Switzerland (FR)
-          false, // Taiwan
-          false, // Technology
-          false, // Thailand
-          false, // The Netherlands
-          false, // Turkey
-          false, // UK
-          false, // Ukraine
-          false, // USA | Austin, TX
-          false, // USA | Chicago
-          false, // USA | Colorado
-          false, // USA | Michigan
-          false, // USA | Minnesota
-          false, // USA | New York City
-          false, // USA | Ohio
-          false, // USA | Utah
-          false, // USA | Virginia
-          false, // USA
-          false, // iRacing & Sim Racing
-          false, // World
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
         ],
         options: [
-          "AI",
+          "3D Printing",
           "Africa",
+          "AI",
           "Apple",
+          "Argentina",
           "Australia",
           "Austria",
           "Bay",
@@ -125,12 +143,18 @@ export default [
           "Finland",
           "Formula 1",
           "France",
+          "French Music",
           "Gaming",
           "Germany | Hesse",
           "Germany",
+          "Google",
           "Greece",
+          "Healthcare | USA",
+          "Hong Kong",
           "Hungary",
+          "India | Tamil Nadu",
           "India",
+          "iRacing & Sim Racing",
           "Iran",
           "Ireland",
           "Israel",
@@ -139,10 +163,10 @@ export default [
           "Linux & OSS",
           "Lithuania",
           "Mexico",
-          "Middle East",
+          "Microsoft",
+          "New Zealand",
           "NFL",
           "NHL",
-          "New Zealand",
           "Nintendo",
           "Norway",
           "Pakistan",
@@ -151,10 +175,12 @@ export default [
           "Podcasting",
           "Poland",
           "Portugal",
+          "Privacy",
           "Romania",
           "Russia",
           "Science",
           "Serbia",
+          "Simulation Games",
           "Singapore",
           "Slovakia",
           "Slovenia",
@@ -174,14 +200,18 @@ export default [
           "USA | Austin, TX",
           "USA | Chicago",
           "USA | Colorado",
+          "USA | Hawaii",
           "USA | Michigan",
           "USA | Minnesota",
+          "USA | Nevada",
           "USA | New York City",
           "USA | Ohio",
           "USA | Utah",
+          "USA | Vermont",
           "USA | Virginia",
+          "USA | Washington",
           "USA",
-          "iRacing & Sim Racing",
+          "Watches & Horology",
           "World",
         ],
       },

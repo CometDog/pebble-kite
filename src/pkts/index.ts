@@ -17,6 +17,8 @@ import * as handlers from "./handlers";
 import {
   availableCategories,
   availableSections,
+  defaultCategories,
+  defaultSections,
   StoryDetailEnum,
 } from "./types";
 import {
@@ -25,7 +27,11 @@ import {
   setDebugMode,
   isDebugMode,
 } from "../pktslib/logger";
-import { getFlattenedInterfaceStrings } from "./localization";
+import {
+  filterInterfaceStringSectionsAndCategories,
+  flattenInterfaceStrings,
+  getInterfaceStrings,
+} from "./localization";
 import { setServerLang } from "./server/localeManager";
 
 const log = createLogger("KNJS");
@@ -55,12 +61,6 @@ Pebble.addEventListener("ready", async () => {
         data: textSize,
       });
 
-      const interfaceLanguage = getConfig("selectedInterfaceLanguage");
-      PebbleTS.sendAppMessage({
-        type: "send_interface_strings",
-        data: JSON.stringify(getFlattenedInterfaceStrings(interfaceLanguage)),
-      });
-
       const contentLanguage = getConfig("selectedContentLanguage");
       setServerLang(contentLanguage);
 
@@ -72,6 +72,23 @@ Pebble.addEventListener("ready", async () => {
 
       const selectedCategoryNames = getConfig("selectedCategoryNames");
       handlers.setSelectedCategories(selectedCategoryNames);
+
+      const interfaceLanguage = getConfig("selectedInterfaceLanguage");
+      const interfaceStrings = flattenInterfaceStrings(
+        filterInterfaceStringSectionsAndCategories({
+          strings: getInterfaceStrings(interfaceLanguage),
+          sectionKeys: selectedSectionNames ?? defaultSections,
+          categoryKeys: selectedCategoryNames ?? defaultCategories,
+        }),
+      );
+      console.log(
+        "Sending interface strings:",
+        JSON.stringify(interfaceStrings),
+      );
+      PebbleTS.sendAppMessage({
+        type: "send_interface_strings",
+        data: JSON.stringify(interfaceStrings),
+      });
 
       await handlers.handleUpdateCategories();
       log.info("Notifying watch that data is ready");
@@ -135,9 +152,17 @@ Pebble.addEventListener("webviewclosed", async (event) => {
     // Interface language is key 10300
     const newInterfaceLanguage = settings["10300"] as string;
     setConfig("selectedInterfaceLanguage", newInterfaceLanguage);
+    const interfaceLanguage = getConfig("selectedInterfaceLanguage");
+    const interfaceStrings = flattenInterfaceStrings(
+      filterInterfaceStringSectionsAndCategories({
+        strings: getInterfaceStrings(interfaceLanguage),
+        sectionKeys: selectedSectionNames ?? defaultSections,
+        categoryKeys: selectedNames ?? defaultCategories,
+      }),
+    );
     PebbleTS.sendAppMessage({
       type: "send_interface_strings",
-      data: JSON.stringify(getFlattenedInterfaceStrings(newInterfaceLanguage)),
+      data: JSON.stringify(interfaceStrings),
     });
 
     // Content language is key 10301

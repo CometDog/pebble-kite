@@ -6,6 +6,10 @@ import { strings as itStrings } from "./definitions/it";
 import { strings as ptStrings } from "./definitions/pt";
 import { InterfaceStrings } from "./type";
 
+type DeepPartial<B> = {
+  [X in keyof B]?: B[X] extends object ? DeepPartial<B[X]> : B[X];
+};
+
 export const getInterfaceStrings = (lang?: string): InterfaceStrings => {
   const langToUse = lang || navigator.language || "en";
   const langCode = langToUse.split("_")[0].split("-")[0];
@@ -27,6 +31,48 @@ export const getInterfaceStrings = (lang?: string): InterfaceStrings => {
   }
 };
 
+export const filterInterfaceStringSectionsAndCategories = ({
+  strings,
+  sectionKeys,
+  categoryKeys,
+}: {
+  strings: InterfaceStrings;
+  sectionKeys: string[];
+  categoryKeys: string[];
+}): DeepPartial<InterfaceStrings> => {
+  const filteredStrings: DeepPartial<InterfaceStrings> = {
+    title: { ...strings.title },
+    section: { sources: strings.section.sources },
+    category: {},
+  };
+
+  console.log(
+    "Filtering interface strings with sections:",
+    sectionKeys,
+    "and categories:",
+    categoryKeys,
+  );
+  // Filter sections to only include those in sectionKeys
+  for (const [key, value] of Object.entries(enStrings.section)) {
+    if (sectionKeys.includes(value)) {
+      // Force unwrap, we know it exists from initialization above
+      filteredStrings!.section![key as keyof typeof strings.section] =
+        strings.section[key as keyof typeof strings.section];
+    }
+  }
+
+  // Filter categories to only include those in categoryKeys
+  for (const [key, value] of Object.entries(enStrings.category)) {
+    if (categoryKeys.includes(value)) {
+      // Force unwrap, we know it exists from initialization above
+      filteredStrings!.category![key as keyof typeof strings.category] =
+        strings.category[key as keyof typeof strings.category];
+    }
+  }
+
+  return filteredStrings;
+};
+
 export const getFlattenedInterfaceStrings = (
   lang?: string,
 ): Record<string, string> => {
@@ -36,7 +82,7 @@ export const getFlattenedInterfaceStrings = (
 };
 
 export function flattenInterfaceStrings(
-  strings: InterfaceStrings,
+  strings: InterfaceStrings | DeepPartial<InterfaceStrings>,
 ): Record<string, string> {
   const flatStrings: Record<string, string> = {};
 
