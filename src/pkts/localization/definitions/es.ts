@@ -30,6 +30,7 @@ export const strings: InterfaceStrings = {
     apple: "Apple",
     argentina: "Argentina",
     australia: "Australia",
+    austria: "Austria",
     bay: "Bahía",
     belgium: "Bélgica",
     bitcoin: "Bitcoin",

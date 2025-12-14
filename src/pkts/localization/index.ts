@@ -4,6 +4,8 @@ import { strings as deStrings } from "./definitions/de";
 import { strings as esStrings } from "./definitions/es";
 import { strings as itStrings } from "./definitions/it";
 import { strings as ptStrings } from "./definitions/pt";
+import { strings as ruStrings } from "./definitions/ru";
+import { strings as jaStrings } from "./definitions/ja";
 import { InterfaceStrings } from "./type";
 
 type DeepPartial<B> = {
@@ -26,6 +28,10 @@ export const getInterfaceStrings = (lang?: string): InterfaceStrings => {
       return itStrings;
     case "pt":
       return ptStrings;
+    case "ru":
+      return ruStrings;
+    case "ja":
+      return jaStrings;
     default:
       return enStrings;
   }

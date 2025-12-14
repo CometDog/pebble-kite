@@ -259,6 +259,8 @@ export default [
         messageKey: "UserInterfaceLanguage",
         label: "Interface Language",
         defaultValue: "",
+        description:
+          "Changes the language of the app interface. Some languages may require additional language packs to display correctly.",
         options: [
           { label: "Default (System Language)", value: "" },
           { label: "English (English)", value: "en_US" },
@@ -267,6 +269,8 @@ export default [
           { label: "Deutsch (German)", value: "de_DE" },
           { label: "Italiano (Italian)", value: "it_IT" },
           { label: "Português (Portuguese)", value: "pt_PT" },
+          { label: "Русский (Russian)", value: "ru_RU" },
+          { label: "日本語 (Japanese)", value: "ja_JP" },
         ],
       },
       {
@@ -274,6 +278,8 @@ export default [
         messageKey: "UserContentLanguage",
         label: "Content Language",
         defaultValue: "",
+        description:
+          "Changes the language of the news content. Not all languages may have full content available. Some languages may require additional language packs to display correctly.",
         options: [
           { label: "Default (Original Language)", value: "" },
           { label: "English (English)", value: "en" },
@@ -286,6 +292,8 @@ export default [
             label: "Português Brasileiro (Brazilian Portuguese)",
             value: "pt-BR",
           },
+          { label: "Русский (Russian)", value: "ru" },
+          { label: "日本語 (Japanese)", value: "ja" },
         ],
       },
       {
