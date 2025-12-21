@@ -1,4 +1,3 @@
-import { fetchJSON } from "../../../pktslib/fetch";
 import { getServerLang } from "../localeManager";
 import { Story } from "../type/Story";
 import { StoryDomain } from "../type/StoryDomain";
@@ -23,6 +22,8 @@ export const batchCategoryStoriesRequest = ({
   categoryId: string;
   limit?: number;
 }) =>
-  fetchJSON<BatchCategoryStoriesResponse>(
+  fetch(
     `https://news.kagi.com/api/batches/${batchId}/categories/${categoryId}/stories?limit=${limit}${getServerLang() && `&lang=${getServerLang()}`}`,
-  );
+  ).then(async (res) => {
+    return res.ok ? await res.json() as BatchCategoryStoriesResponse : Promise.reject(res);
+  });

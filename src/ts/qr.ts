@@ -1,7 +1,6 @@
+import { createLogger } from "../lib";
 import { generateQrCode, qrMatrixToBytes } from "./qrEncoder";
-import { fetchString } from "../pktslib/fetch";
 import { QR_CODE_CHUNK_SIZE } from "./types";
-import { createLogger } from "../pktslib";
 
 // Max Size a QR code can be for watch app to handle it properly
 const MAX_QR_SIZE = 64;
@@ -24,7 +23,7 @@ export const generateQrBytes = (data: string) => {
 
 const shortenUrl = async (url: string): Promise<string> => {
   const shortenerUrl = `https://is.gd/create.php?format=simple&url=${encodeURIComponent(url)}`;
-  return await fetchString(shortenerUrl);
+  return (await fetch(shortenerUrl)).text();
 };
 
 export const updateQrCodeBitmap = async ({ url }: { url: string }) => {

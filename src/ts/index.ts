@@ -1,8 +1,8 @@
-import { ClayConstructor } from "../pktslib/Clay";
+import { ClayConstructor } from "../lib/Clay";
 // @ts-ignore
-const Clay: ClayConstructor = require("pebble-clay");
+const Clay: ClayConstructor = require("@rebble/clay");
 // @ts-ignore
-const clayConfig = require("../pkjs/config");
+const clayConfig = require("../ts-build/config");
 const clay = new Clay(clayConfig, null, { autoHandleEvents: false });
 
 import {
@@ -26,7 +26,7 @@ import {
   initDebugMode,
   setDebugMode,
   isDebugMode,
-} from "../pktslib/logger";
+} from "../lib/logger";
 import {
   filterInterfaceStringSectionsAndCategories,
   flattenInterfaceStrings,
@@ -111,7 +111,8 @@ Pebble.addEventListener("showConfiguration", () => {
   }
 });
 
-Pebble.addEventListener("webviewclosed", async (event) => {
+// @ts-ignore
+Pebble.addEventListener("webviewclosed", async (event: any) => {
   try {
     if (!event || !event.response) return;
     PebbleTS.sendAppMessage({ type: "restart_app" });

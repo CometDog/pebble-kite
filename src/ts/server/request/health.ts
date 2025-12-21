@@ -1,5 +1,3 @@
-import { fetchJSON } from "../../../pktslib/fetch";
-
 type HealthResponse = {
   health: boolean;
   hasBatch: boolean;
@@ -11,4 +9,6 @@ type HealthResponse = {
 };
 
 export const healthRequest = () =>
-  fetchJSON<HealthResponse>("https://news.kagi.com/api/health");
+  fetch("https://news.kagi.com/api/health").then(async (res) => {
+    return res.ok ? await res.json() as HealthResponse : Promise.reject(res);
+  });

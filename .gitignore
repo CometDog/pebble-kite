@@ -1,6 +1,6 @@
 build
 node_modules
-src/pkjs
+src/ts-build
 .lock-*
 .DS_Store
 /.vscode

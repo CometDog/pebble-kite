@@ -1,14 +1,4 @@
 {
-  "compilerOptions": {
-    "target": "esnext",
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true
-  },
-  "include": ["src/pkts/**/*", "src/pktslib/**/*"],
-  "files": ["src/pktslib/index.ts"]
+  "extends": "pkts/config/tsconfig.json",
+  "include": ["src/ts/**/*", "node_modules/pkts/lib/**/*"]
 }

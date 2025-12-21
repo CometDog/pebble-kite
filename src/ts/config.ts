@@ -7,7 +7,7 @@ import {
   defaultMaxStories,
   defaultSections,
 } from "./types";
-import { createLogger } from "../pktslib/logger";
+import { createLogger } from "../lib/logger";
 
 const log = createLogger("KNJSConfig");
 
