@@ -1,4 +1,7 @@
 export type InterfaceStrings = {
+  general: {
+    loading: string;
+  };
   title: {
     category: string;
     stories: string;

@@ -4,6 +4,8 @@
 
 typedef enum
 {
+    // General
+    STRING_LOADING,
     // Main menu
     STRING_CATEGORIES,
     STRING_STORIES,

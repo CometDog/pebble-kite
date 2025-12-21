@@ -1,6 +1,9 @@
 import { InterfaceStrings } from "../type";
 
 export const strings: InterfaceStrings = {
+  general: {
+    loading: "読み込み中...",
+  },
   title: {
     category: "カテゴリー",
     stories: "ニュース",

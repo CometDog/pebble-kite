@@ -1,10 +1,9 @@
 #include "qr_view.h"
 #include "../data.h"
 #include "../data_manager.h"
+#include "../localization/localization.h"
 #include "../utils/debug_logger.h"
 #include "ui_config.h"
-
-#define LOADING_TEXT "Loading..."
 
 static Window *s_qr_window;
 static DataRegistrationHandle s_registration = NULL;
@@ -113,7 +112,8 @@ static void qr_layer_update_proc(Layer *layer, GContext *ctx)
         GRect text_bounds =
             GRect(0, (bounds.size.h / 2) - (UI_QR_LOADING_TEXT_HEIGHT / 2), bounds.size.w, UI_QR_LOADING_TEXT_HEIGHT);
         graphics_context_set_text_color(ctx, UI_COLOR_TEXT_PRIMARY);
-        graphics_draw_text(ctx, LOADING_TEXT, font, text_bounds, GTextOverflowModeTrailingEllipsis, align, NULL);
+        graphics_draw_text(ctx, localization_get_string(STRING_LOADING), font, text_bounds,
+                           GTextOverflowModeTrailingEllipsis, align, NULL);
     }
     else
     {

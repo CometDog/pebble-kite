@@ -1,6 +1,9 @@
 import { InterfaceStrings } from "../type";
 
 export const strings: InterfaceStrings = {
+  general: {
+    loading: "Caricamento...",
+  },
   title: {
     category: "Categorie",
     stories: "Storie",

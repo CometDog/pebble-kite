@@ -25,5 +25,7 @@ export const batchCategoryStoriesRequest = ({
   fetch(
     `https://news.kagi.com/api/batches/${batchId}/categories/${categoryId}/stories?limit=${limit}${getServerLang() && `&lang=${getServerLang()}`}`,
   ).then(async (res) => {
-    return res.ok ? await res.json() as BatchCategoryStoriesResponse : Promise.reject(res);
+    return res.ok
+      ? ((await res.json()) as BatchCategoryStoriesResponse)
+      : Promise.reject(res);
   });

@@ -47,6 +47,7 @@ export const filterInterfaceStringSectionsAndCategories = ({
   categoryKeys: string[];
 }): DeepPartial<InterfaceStrings> => {
   const filteredStrings: DeepPartial<InterfaceStrings> = {
+    general: { ...strings.general },
     title: { ...strings.title },
     section: { sources: strings.section.sources },
     category: {},
@@ -93,6 +94,12 @@ export function flattenInterfaceStrings(
   const flatStrings: Record<string, string> = {};
 
   if (!strings) return flatStrings;
+
+  if (strings.general) {
+    if (strings.general.loading !== undefined) {
+      flatStrings["general.loading"] = strings.general.loading;
+    }
+  }
 
   if (strings.title) {
     if (strings.title.category !== undefined) {

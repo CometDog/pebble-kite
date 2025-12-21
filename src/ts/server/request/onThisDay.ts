@@ -9,5 +9,7 @@ export const onThisDayRequest = ({
   fetch(
     `https://news.kagi.com/api/batches/${batchId}/onthisday${getServerLang() && `?lang=${getServerLang()}`}`,
   ).then(async (res) => {
-    return res.ok ? await res.json() as OnThisDayEvents : Promise.reject(res);
+    return res.ok
+      ? ((await res.json()) as OnThisDayEvents)
+      : Promise.reject(res);
   });

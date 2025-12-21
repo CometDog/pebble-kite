@@ -11,6 +11,5 @@ export default [
       compact: true,
     },
     plugins: [typescript(), commonjs(), terser()],
-  }
+  },
 ];
- 

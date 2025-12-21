@@ -1,5 +1,6 @@
 #include "detail_text.h"
 #include "../data.h"
+#include "../localization/localization.h"
 #include "ui_config.h"
 #include <stdlib.h>
 #include <string.h>
@@ -162,7 +163,7 @@ static void detail_window_load(Window *window)
 
     ctx->text_layer =
         text_layer_create(GRect(UI_DETAIL_SIDE_PADDING, 0, bounds.size.w - UI_DETAIL_SIDE_PADDING * 2, 30));
-    text_layer_set_text(ctx->text_layer, "Loading...");
+    text_layer_set_text(ctx->text_layer, localization_get_string(STRING_LOADING));
     text_layer_set_font(ctx->text_layer, ui_get_system_font_body());
     text_layer_set_overflow_mode(ctx->text_layer, GTextOverflowModeWordWrap);
     text_layer_set_text_alignment(ctx->text_layer, UI_DETAIL_TEXT_ALIGNMENT);

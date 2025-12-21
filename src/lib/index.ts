@@ -5,12 +5,7 @@ import {
   isDebugMode,
 } from "./logger";
 
-export {
-  createLogger,
-  initDebugMode,
-  setDebugMode,
-  isDebugMode,
-};
+export { createLogger, initDebugMode, setDebugMode, isDebugMode };
 
 export default {
   createLogger,

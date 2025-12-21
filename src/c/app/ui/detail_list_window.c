@@ -218,7 +218,7 @@ static void generic_detail_list_select_handler(int index)
     }
 
     const char *option = list_data->detail_options[index];
-    if (!option || strcmp(option, "Loading...") == 0)
+    if (!option || strcmp(option, localization_get_string(STRING_LOADING)) == 0)
     {
         return;
     }

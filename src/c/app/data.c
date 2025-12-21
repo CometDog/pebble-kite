@@ -1,4 +1,5 @@
 #include "data.h"
+#include "localization/localization.h"
 #include "ui/background/background_detail_text_window.h"
 #include "ui/categories.h"
 #include "ui/humanitarian_impact/humanitarian_impact_detail_text_window.h"
@@ -29,7 +30,6 @@
 
 #define MAX_ITEMS_HIGH 100
 #define MAX_ITEMS_LOW 20
-#define LOADING_TEXT "Loading..."
 #define QR_MAX_CAPACITY 512
 
 /**
@@ -141,8 +141,9 @@ const CategoriesData *get_categories_data(void)
     static CategoriesData data;
     if (level_1_categories.categories_count == 0)
     {
-        static char *loading_arr[1] = {LOADING_TEXT};
-        data.categories = loading_arr;
+        static const char *loading_arr[1];
+        loading_arr[0] = localization_get_string(STRING_LOADING);
+        data.categories = (char **)loading_arr;
         data.categories_count = 1;
     }
     else
@@ -202,9 +203,10 @@ const StoryListData *get_story_list_data(void)
     data.selected_category = level_2_story_view.selected_category;
     if (level_2_story_view.story_titles_count == 0)
     {
-        static char *loading_arr[1] = {LOADING_TEXT};
+        static const char *loading_arr[1];
+        loading_arr[0] = localization_get_string(STRING_LOADING);
         static bool loading_read_arr[1] = {false};
-        data.story_titles = loading_arr;
+        data.story_titles = (char **)loading_arr;
         data.stories_read = loading_read_arr;
         data.story_titles_count = 1;
     }
@@ -303,9 +305,10 @@ const StoryData *get_story_data(void)
 {
     static StoryData data;
     data.story_id = level_2_story_view.story_id ? level_2_story_view.story_id : "";
-    data.story_full_title = level_2_story_view.story_full_title ? level_2_story_view.story_full_title : LOADING_TEXT;
-    data.story_short_summary =
-        level_2_story_view.story_short_summary ? level_2_story_view.story_short_summary : LOADING_TEXT;
+    data.story_full_title = level_2_story_view.story_full_title ? level_2_story_view.story_full_title
+                                                                : (char *)localization_get_string(STRING_LOADING);
+    data.story_short_summary = level_2_story_view.story_short_summary ? level_2_story_view.story_short_summary
+                                                                      : (char *)localization_get_string(STRING_LOADING);
     return &data;
 }
 
@@ -350,8 +353,9 @@ const AvailableDetailsData *get_available_details_data(void)
     static AvailableDetailsData data;
     if (level_3_available_details.available_details_count == 0)
     {
-        static char *loading_arr[1] = {LOADING_TEXT};
-        data.available_details = loading_arr;
+        static const char *loading_arr[1];
+        loading_arr[0] = localization_get_string(STRING_LOADING);
+        data.available_details = (char **)loading_arr;
         data.available_details_count = 1;
     }
     else
@@ -429,8 +433,9 @@ const DetailListData *get_detail_list_data(void)
               level_4_selected_detail.detail_type ? level_4_selected_detail.detail_type : "NULL");
     if (level_4_selected_detail.detail_options_count == 0)
     {
-        static char *loading_arr[1] = {LOADING_TEXT};
-        data.detail_options = loading_arr;
+        static const char *loading_arr[1];
+        loading_arr[0] = localization_get_string(STRING_LOADING);
+        data.detail_options = (char **)loading_arr;
         data.detail_options_count = 1;
     }
     else
@@ -496,8 +501,10 @@ void set_detail_text(char *text, void (*callback)(void))
 const DetailTextData *get_detail_text_data(void)
 {
     static DetailTextData data;
-    data.detail_title = level_4_selected_detail.detail_title ? level_4_selected_detail.detail_title : LOADING_TEXT;
-    data.detail_text = level_4_selected_detail.detail_text ? level_4_selected_detail.detail_text : LOADING_TEXT;
+    data.detail_title = level_4_selected_detail.detail_title ? level_4_selected_detail.detail_title
+                                                             : (char *)localization_get_string(STRING_LOADING);
+    data.detail_text = level_4_selected_detail.detail_text ? level_4_selected_detail.detail_text
+                                                           : (char *)localization_get_string(STRING_LOADING);
     return &data;
 }
 
@@ -547,8 +554,9 @@ const DetailSourcesData *get_detail_sources_data(void)
     ;
     if (level_4_selected_detail.sources_count == 0)
     {
-        static char *loading_arr[1] = {LOADING_TEXT};
-        data.sources = loading_arr;
+        static const char *loading_arr[1];
+        loading_arr[0] = localization_get_string(STRING_LOADING);
+        data.sources = (char **)loading_arr;
         data.sources_count = 1;
     }
     else

@@ -1,5 +1,6 @@
 #include "active_detail_source_list_window.h"
 #include "../../data.h"
+#include "../../localization/localization.h"
 #include "../detail_list_window.h"
 #include "../navigation.h"
 #include <string.h>
@@ -12,7 +13,7 @@ static void on_active_source_select(int index)
     if (sources_data->sources && index < sources_data->sources_count)
     {
         const char *source = sources_data->sources[index];
-        if (source && strcmp(source, "Loading...") != 0)
+        if (source && strcmp(source, localization_get_string(STRING_LOADING)) != 0)
         {
             set_detail_title((char *)source, NULL);
 

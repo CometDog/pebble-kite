@@ -9,6 +9,9 @@ static char *s_dynamic_strings[STRING_COUNT] = {0};
 
 // Keys corresponding to each StringId in the same order as the enum
 static const char *s_string_keys[STRING_COUNT] = {
+    // general
+    "STRING_LOADING",
+    // menus
     "STRING_CATEGORIES",
     "STRING_STORIES",
     "STRING_AVAILABLE_DETAILS",
@@ -257,6 +260,9 @@ typedef struct
 } KeyMap;
 
 static const KeyMap s_dotted_map[] = {
+    /* general */
+    {"general.loading", STRING_LOADING},
+
     /* title */
     {"title.category", STRING_CATEGORIES},
     {"title.stories", STRING_STORIES},
