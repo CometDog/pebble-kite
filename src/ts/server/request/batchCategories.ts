@@ -1,3 +1,4 @@
+import { fetchJSON } from "../fetchUtils";
 import { getServerLang } from "../localeManager";
 import { BatchCategory } from "../type/BatchCategory";
 
@@ -13,10 +14,6 @@ export const batchCategoriesRequest = ({
 }: {
   batchId?: string;
 }) =>
-  fetch(
+  fetchJSON<BatchCategoriesResponse>(
     `https://news.kagi.com/api/batches/${batchId}/categories${getServerLang() && `?lang=${getServerLang()}`}`,
-  ).then(async (res) => {
-    return res.ok
-      ? ((await res.json()) as BatchCategoriesResponse)
-      : Promise.reject(res);
-  });
+  );

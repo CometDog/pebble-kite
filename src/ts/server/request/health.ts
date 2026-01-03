@@ -1,3 +1,5 @@
+import { fetchJSON } from "../fetchUtils";
+
 type HealthResponse = {
   health: boolean;
   hasBatch: boolean;
@@ -9,8 +11,4 @@ type HealthResponse = {
 };
 
 export const healthRequest = () =>
-  fetch("https://news.kagi.com/api/health").then(async (res) => {
-    return res.ok
-      ? ((await res.json()) as HealthResponse)
-      : Promise.reject(res);
-  });
+  fetchJSON<HealthResponse>("https://news.kagi.com/api/health");

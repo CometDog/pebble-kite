@@ -1,3 +1,4 @@
+import { fetchJSON } from "../fetchUtils";
 import { getServerLang } from "../localeManager";
 import { CategoryMetadata } from "../type/CategoryMetadata";
 
@@ -6,10 +7,6 @@ type CategoriesMetadataResponse = {
 };
 
 export const categoriesMetadataRequest = () =>
-  fetch(
+  fetchJSON<CategoriesMetadataResponse>(
     `https://news.kagi.com/api/categories/metadata${getServerLang() && `?lang=${getServerLang()}`}`,
-  ).then(async (res) => {
-    return res.ok
-      ? ((await res.json()) as CategoriesMetadataResponse)
-      : Promise.reject(res);
-  });
+  );
