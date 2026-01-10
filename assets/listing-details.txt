@@ -11,6 +11,8 @@ Daily press review from Kagi News with support for all features practical on the
 
 Select a news category and go through the list of news stories available for that day. Click through to see additional details (Historical Background, Highlights, Quick Questions, etc). Each section has sources cited, each with a QR code you can scan with your phone to read the full source articles.
 
+!NEW! In addition to News, the Kagi Small Web feed has been included in configuration under the new "Additional Feeds" section. Learn more about Kagi Small Web here: https://blog.kagi.com/small-web
+
 Please submit any issues on GitHub:
 https://github.com/CometDog/pebble-kite
 
