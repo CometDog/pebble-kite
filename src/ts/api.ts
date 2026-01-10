@@ -1,5 +1,8 @@
 import { batchCategoriesRequest } from "./server/request/batchCategories";
-import { batchCategoryStoriesRequest } from "./server/request/batchCategoryStories";
+import {
+  batchCategoryStoriesRequest,
+  BatchCategoryStoriesResponse,
+} from "./server/request/batchCategoryStories";
 import type {
   CurrentData,
   CategorizedStories,
@@ -8,6 +11,11 @@ import type {
 } from "./types";
 import type { BatchCategory } from "./server/type/BatchCategory";
 import { CONCURRENT_BATCH_SIZE } from "./types";
+import { getAdditionalFeeds } from "./handlers";
+import {
+  smallWebFeedRequest,
+  SmallWebFeedResponse,
+} from "./server/request/smallWebFeed";
 
 let categoryBatchMap: CurrentData = { batchId: "", categorizedStories: [] };
 
@@ -112,68 +120,96 @@ const updateStories = async ({
   categoryId: string;
   maxStoryCount: number;
 }) => {
-  const response = await batchCategoryStoriesRequest({
-    batchId: "latest",
-    categoryId,
-    limit: maxStoryCount,
-  });
-  return response.stories.map(
-    (story) =>
-      normalizeValue({
-        id: story.id,
-        read: false,
-        category: story.category,
-        title: story.title,
-        shortSummary: story.short_summary,
-        historical_background: story.historical_background,
-        articles:
-          story.articles?.map((article) => ({
-            link: article.link,
-            domain: article.domain,
-          })) ?? [],
-        perspectives:
-          story.perspectives?.map((perspective) => ({
-            text: perspective.text,
-            sources:
-              perspective.sources?.map((source) => ({
-                name: source.name,
-                url: source.url,
-              })) ?? [],
-          })) ?? [],
-        talking_points:
-          story.talking_points?.map((talkingPoint) => talkingPoint) ?? [],
-        technical_details:
-          story.technical_details?.map((technicalDetail) => technicalDetail) ??
-          [],
-        industry_impact: story.industry_impact?.map((impact) => impact) ?? [],
-        suggested_qna:
-          story.suggested_qna?.map((qna) => ({
-            question: qna.question,
-            answer: qna.answer,
-          })) ?? [],
-        timeline:
-          story.timeline?.map((timeline) => ({
-            date: timeline.date,
-            content: timeline.content,
-          })) ?? [],
-        humanitarian_impact: story.humanitarian_impact,
-        travel_advisory: story.travel_advisory ?? [],
-        did_you_know: story.did_you_know ?? [],
-        quote:
-          story.quote && story.quote_attribution
-            ? {
-                text: story.quote ?? "",
-                author: story.quote_author ?? "",
-                source: story.quote_attribution ?? "",
-                url: story.quote_source_url ?? "",
-              }
-            : undefined,
-        international_reactions: story.international_reactions ?? [],
-        user_action_items: story.user_action_items ?? [],
-        scientific_significance: story.scientific_significance ?? [],
-        performance_statistics: story.performance_statistics ?? [],
-      }) as SimpleStory,
-  );
+  let response:
+    | { type: "smallWebFeed"; data: SmallWebFeedResponse }
+    | { type: "news"; data: BatchCategoryStoriesResponse }
+    | null = null;
+  if (categoryId === "smallWebFeed") {
+    response = { type: "smallWebFeed", data: await smallWebFeedRequest() };
+  } else {
+    response = {
+      type: "news",
+      data: await batchCategoryStoriesRequest({
+        batchId: "latest",
+        categoryId,
+        limit: maxStoryCount,
+      }),
+    };
+  }
+  if (!response) return [];
+
+  if (response.type === "smallWebFeed") {
+    return response.data.entries.map(
+      (entry) =>
+        normalizeValue({
+          id: entry.id,
+          read: false,
+          category: "Small Web",
+          title: entry.title,
+          shortSummary: entry.short_summary,
+          articles: entry.articles,
+        }) as SimpleStory,
+    );
+  } else {
+    return response.data.stories.map(
+      (story) =>
+        normalizeValue({
+          id: story.id,
+          read: false,
+          category: story.category,
+          title: story.title,
+          shortSummary: story.short_summary,
+          historical_background: story.historical_background,
+          articles:
+            story.articles?.map((article) => ({
+              link: article.link,
+              domain: article.domain,
+            })) ?? [],
+          perspectives:
+            story.perspectives?.map((perspective) => ({
+              text: perspective.text,
+              sources:
+                perspective.sources?.map((source) => ({
+                  name: source.name,
+                  url: source.url,
+                })) ?? [],
+            })) ?? [],
+          talking_points:
+            story.talking_points?.map((talkingPoint) => talkingPoint) ?? [],
+          technical_details:
+            story.technical_details?.map(
+              (technicalDetail) => technicalDetail,
+            ) ?? [],
+          industry_impact: story.industry_impact?.map((impact) => impact) ?? [],
+          suggested_qna:
+            story.suggested_qna?.map((qna) => ({
+              question: qna.question,
+              answer: qna.answer,
+            })) ?? [],
+          timeline:
+            story.timeline?.map((timeline) => ({
+              date: timeline.date,
+              content: timeline.content,
+            })) ?? [],
+          humanitarian_impact: story.humanitarian_impact,
+          travel_advisory: story.travel_advisory ?? [],
+          did_you_know: story.did_you_know ?? [],
+          quote:
+            story.quote && story.quote_attribution
+              ? {
+                  text: story.quote ?? "",
+                  author: story.quote_author ?? "",
+                  source: story.quote_attribution ?? "",
+                  url: story.quote_source_url ?? "",
+                }
+              : undefined,
+          international_reactions: story.international_reactions ?? [],
+          user_action_items: story.user_action_items ?? [],
+          scientific_significance: story.scientific_significance ?? [],
+          performance_statistics: story.performance_statistics ?? [],
+        }) as SimpleStory,
+    );
+  }
 };
 
 const sortData = (data: CurrentData) => {
@@ -216,6 +252,17 @@ export const updateCategories = async ({
           selectedCategoryNames.includes(category.categoryName),
       ),
     };
+  }
+  if (getAdditionalFeeds().includes("Small Web")) {
+    filtered.categories.push({
+      id: "smallWebFeed",
+      categoryName: "Small Web",
+      categoryId: "smallWebFeed",
+      sourceLanguage: "English",
+      timestamp: 0,
+      readCount: 0,
+      clusterCount: "",
+    });
   }
 
   const categorizedStories: CategorizedStories[] = [];

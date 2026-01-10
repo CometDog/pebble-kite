@@ -89,6 +89,18 @@ void clear_level_2_story_view(void);
 // ============================================================================
 
 /**
+ * Set the count of additional feeds included in the categories
+ * @param count The number of additional feeds
+ */
+void set_additional_feeds_count(uint8_t count);
+
+/**
+ * Get the count of additional feeds included in the categories
+ * @return The number of additional feeds
+ */
+uint8_t get_additional_feeds_count(void);
+
+/**
  * Push new categories data from a received string
  * @param categories_string Pipe-separated categories string
  */

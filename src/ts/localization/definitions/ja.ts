@@ -5,6 +5,8 @@ export const strings: InterfaceStrings = {
     loading: "読み込み中...",
   },
   title: {
+    feeds: "フィード",
+    news: "ニュース",
     category: "カテゴリー",
     stories: "ニュース",
     availableDetails: "利用可能な詳細",
@@ -127,5 +129,8 @@ export const strings: InterfaceStrings = {
     usa: "アメリカ",
     watches_and_horology: "時計と時計製造",
     world: "世界",
+  },
+  feature: {
+    small_web_feed: "小規模ウェブ",
   },
 } as const;

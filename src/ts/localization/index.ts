@@ -37,14 +37,16 @@ export const getInterfaceStrings = (lang?: string): InterfaceStrings => {
   }
 };
 
-export const filterInterfaceStringSectionsAndCategories = ({
+export const filterInterfaceStringOptionals = ({
   strings,
   sectionKeys,
   categoryKeys,
+  featureKeys,
 }: {
   strings: InterfaceStrings;
   sectionKeys: string[];
   categoryKeys: string[];
+  featureKeys: string[];
 }): DeepPartial<InterfaceStrings> => {
   const filteredStrings: DeepPartial<InterfaceStrings> = {
     general: { ...strings.general },
@@ -77,6 +79,18 @@ export const filterInterfaceStringSectionsAndCategories = ({
     }
   }
 
+  // Filter feeds to only include those in featureKeys
+  if (featureKeys.length > 0) {
+    filteredStrings.feature = {};
+    for (const [key, value] of Object.entries(enStrings.feature)) {
+      if (featureKeys.includes(value)) {
+        // Force unwrap, we know it exists from initialization above
+        filteredStrings!.feature![key as keyof typeof strings.feature] =
+          strings.feature[key as keyof typeof strings.feature];
+      }
+    }
+  }
+
   return filteredStrings;
 };
 
@@ -102,6 +116,12 @@ export function flattenInterfaceStrings(
   }
 
   if (strings.title) {
+    if (strings.title.feeds !== undefined) {
+      flatStrings["title.feeds"] = strings.title.feeds;
+    }
+    if (strings.title.news !== undefined) {
+      flatStrings["title.news"] = strings.title.news;
+    }
     if (strings.title.category !== undefined) {
       flatStrings["title.category"] = strings.title.category;
     }
@@ -126,6 +146,15 @@ export function flattenInterfaceStrings(
     for (const [key, value] of Object.entries(strings.category)) {
       if (typeof value === "string") {
         const newKey = `category.${key}`;
+        flatStrings[newKey] = value;
+      }
+    }
+  }
+
+  if (strings.feature) {
+    for (const [key, value] of Object.entries(strings.feature)) {
+      if (typeof value === "string") {
+        const newKey = `feature.${key}`;
         flatStrings[newKey] = value;
       }
     }

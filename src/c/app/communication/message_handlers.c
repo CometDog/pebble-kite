@@ -67,14 +67,19 @@ void handle_get_category_names_message(DictionaryIterator *iter)
 
     if (strcmp(state_tuple->value->cstring, "success") == 0)
     {
-        Tuple *category_names_tuple = dict_find(iter, MESSAGE_KEY_data);
+        Tuple *category_names_tuple = dict_find(iter, MESSAGE_KEY_data1);
         if (!category_names_tuple)
         {
             ERROR_LOG("KNCMessageHandling", "Category names message missing data");
             return;
         }
-
         push_local_categories(category_names_tuple->value->cstring);
+
+        Tuple *additional_feeds_count_tuple = dict_find(iter, MESSAGE_KEY_data2);
+        if (additional_feeds_count_tuple)
+        {
+            set_additional_feeds_count(additional_feeds_count_tuple->value->int8);
+        }
 
         Tuple *next_page_tuple = dict_find(iter, MESSAGE_KEY_nextPage);
         if (next_page_tuple)

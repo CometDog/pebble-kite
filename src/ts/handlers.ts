@@ -5,6 +5,7 @@ import { createLogger } from "../lib";
 import { addReadStory, getCategoryBatchMap, updateCategories } from "./api";
 import { updateQrCodeBitmap, getQrCodeChunk } from "./qr";
 import { onThisDayRequest } from "./server/request/onThisDay";
+
 import {
   availableCategories,
   availableSections,
@@ -21,6 +22,7 @@ import type {
   SimpleStory,
   StoryDetailType,
   CategorizedStories,
+  AdditionalFeature,
 } from "./types";
 
 const log = createLogger("KNJSHandler");
@@ -28,6 +30,7 @@ const log = createLogger("KNJSHandler");
 let selectedCategoryNames: AvailableCategory[] = [...defaultCategories];
 let selectedSectionNames: AvailableSection[] = [...defaultSections];
 let selectedMaxStoryCount: number = defaultMaxStories;
+let additionalFeeds: AdditionalFeature[] = [];
 
 let currentStory: SimpleStory | null = null;
 
@@ -59,7 +62,14 @@ export const setSelectedCategoriesFromBoolean = (selected: boolean[]) => {
   selectedCategoryNames = availableCategories.filter((_, i) => selected[i]);
 };
 
-export const getSelectedCategoryNames = () => selectedCategoryNames;
+export const getSelectedCategoryNames = ({
+  includeAdditionalFeeds = false,
+} = {}) => {
+  if (includeAdditionalFeeds) {
+    return [...additionalFeeds, ...selectedCategoryNames];
+  }
+  return selectedCategoryNames;
+};
 
 export const setSelectedSections = (selected: AvailableSection[]) => {
   selectedSectionNames = selected;
@@ -235,12 +245,16 @@ export const handleGetCategoryNames = ({ page = 1 }: { page?: number }) => {
       state: "error",
       error: "No data",
     });
-  const names = batch.categorizedStories.map((cs) => cs.category.name);
-  const { pageItems, nextPage } = paginate(names, page);
+  const regularNames = batch.categorizedStories.map((cs) => cs.category.name);
+  // Add enabled additional feeds as pseudo-categories
+  // TODO: This is horrible. Why would Additional Feeds end up in Regular Names? I don't know why but it happens
+  const allNames = [...new Set([...additionalFeeds, ...regularNames])];
+  const { pageItems, nextPage } = paginate(allNames, page);
   sendAppMessage({
     type: "get_category_names",
     state: "success",
-    data: pageItems.join("||"),
+    data1: pageItems.join("||"),
+    data2: additionalFeeds.length,
     ...(nextPage && { nextPage }),
   });
 };
@@ -445,7 +459,7 @@ export const handleGetAvailableDetails = ({
   )
     available.push(StoryDetailEnum.QnA);
   if (
-    selectedSectionNames.includes("Action items") &&
+    selectedSectionNames.includes("Action Items") &&
     newStory.user_action_items &&
     newStory.user_action_items.length
   )
@@ -767,6 +781,14 @@ export const handleAddReadStory = (storyId: string) => {
   // For performance reasons, this doesn't send back to the watch the index of the
   // story that was marked as read. The watch app is expected to keep track of
   // which stories have been read already locally until the next full update.
+};
+
+export const setAdditionalFeeds = (...feeds: AdditionalFeature[]) => {
+  additionalFeeds = feeds;
+};
+
+export const getAdditionalFeeds = () => {
+  return additionalFeeds;
 };
 
 // I don't think any of these belong in handlers but I haven't moved them somewhere better yet

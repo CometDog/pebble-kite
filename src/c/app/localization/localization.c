@@ -12,6 +12,8 @@ static const char *s_string_keys[STRING_COUNT] = {
     // general
     "STRING_LOADING",
     // menus
+    "STRING_FEEDS",
+    "STRING_NEWS",
     "STRING_CATEGORIES",
     "STRING_STORIES",
     "STRING_AVAILABLE_DETAILS",
@@ -131,6 +133,8 @@ static const char *s_string_keys[STRING_COUNT] = {
     "STRING_CATEGORY_USA",
     "STRING_CATEGORY_WATCHES_AND_HOROLOGY",
     "STRING_CATEGORY_WORLD",
+    // Additional Feeds
+    "STRING_FEEDS_SMALL_WEB_FEED",
 };
 
 static void free_dynamic_strings(void)
@@ -264,6 +268,8 @@ static const KeyMap s_dotted_map[] = {
     {"general.loading", STRING_LOADING},
 
     /* title */
+    {"title.feeds", STRING_FEEDS},
+    {"title.news", STRING_NEWS},
     {"title.category", STRING_CATEGORIES},
     {"title.stories", STRING_STORIES},
     {"title.availableDetails", STRING_AVAILABLE_DETAILS},
@@ -386,6 +392,9 @@ static const KeyMap s_dotted_map[] = {
     {"category.usa", STRING_CATEGORY_USA},
     {"category.watches_and_horology", STRING_CATEGORY_WATCHES_AND_HOROLOGY},
     {"category.world", STRING_CATEGORY_WORLD},
+
+    /* additional feeds */
+    {"feature.small_web_feed", STRING_FEEDS_SMALL_WEB_FEED},
 };
 
 static int lookup_dotted_key(const char *key)
@@ -778,6 +787,8 @@ const char *localization_translate_category(const char *category_name)
         string_id = STRING_CATEGORY_USA_WASHINGTON;
     else if (strcmp(category_name, "Privacy") == 0)
         string_id = STRING_CATEGORY_PRIVACY;
+    else if (strcmp(category_name, "Small Web") == 0)
+        string_id = STRING_FEEDS_SMALL_WEB_FEED;
     // If no mapping found, return original name
     if (string_id == STRING_COUNT)
     {

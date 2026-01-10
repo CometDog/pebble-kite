@@ -5,6 +5,8 @@ export const strings: InterfaceStrings = {
     loading: "Cargando...",
   },
   title: {
+    feeds: "Fuentes",
+    news: "Noticias",
     category: "Categorías",
     stories: "Historias",
     availableDetails: "Detalles disponibles",
@@ -127,5 +129,8 @@ export const strings: InterfaceStrings = {
     usa: "EE. UU.",
     watches_and_horology: "Relojes y Relojería",
     world: "Mundo",
+  },
+  feature: {
+    small_web_feed: "Pequeña Fuente",
   },
 } as const;

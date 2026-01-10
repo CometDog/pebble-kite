@@ -1,11 +1,13 @@
 import {
   AvailableCategory,
   AvailableSection,
+  AdditionalFeature,
   availableCategories,
   availableSections,
   defaultCategories,
   defaultMaxStories,
   defaultSections,
+  additionalFeeds,
 } from "./types";
 import { createLogger } from "../lib/logger";
 
@@ -13,6 +15,7 @@ const log = createLogger("KNJSConfig");
 
 /**
  * Application configuration interface
+ * @property selectedAdditionalFeeds The selected additional feeds
  * @property newsRefreshPinSetting Whether the news refresh Timeline pin is enabled
  * @property selectedTextSize The selected text size
  * @property selectedInterfaceLanguage The selected interface language
@@ -22,6 +25,7 @@ const log = createLogger("KNJSConfig");
  * @property selectedCategoryNames The enabled category names
  */
 export interface AppConfig {
+  selectedAdditionalFeeds: AdditionalFeature[];
   newsRefreshPinSetting: boolean;
   selectedTextSize: number;
   selectedInterfaceLanguage: string;
@@ -32,6 +36,7 @@ export interface AppConfig {
 }
 
 const CONFIG_KEYS: Record<keyof AppConfig, string> = {
+  selectedAdditionalFeeds: "selectedAdditionalFeeds",
   newsRefreshPinSetting: "newsRefreshPinSetting",
   selectedTextSize: "selectedTextSize",
   selectedInterfaceLanguage: "selectedInterfaceLanguage",
@@ -42,6 +47,7 @@ const CONFIG_KEYS: Record<keyof AppConfig, string> = {
 };
 
 const CONFIG_DEFAULTS: AppConfig = {
+  selectedAdditionalFeeds: [],
   newsRefreshPinSetting: false,
   selectedTextSize: 0,
   selectedInterfaceLanguage: "",
@@ -101,6 +107,7 @@ export const setConfig = <K extends keyof AppConfig>(
  * @returns The complete application configuration
  */
 export const getAllConfig = (): AppConfig => ({
+  selectedAdditionalFeeds: getConfig("selectedAdditionalFeeds"),
   newsRefreshPinSetting: getConfig("newsRefreshPinSetting"),
   selectedTextSize: getConfig("selectedTextSize"),
   selectedInterfaceLanguage: getConfig("selectedInterfaceLanguage"),
@@ -135,6 +142,18 @@ export const sectionsToBoolean = (
 };
 
 /**
+ * Convert additional feature names to boolean array for Clay
+ * @param featureNames The feature names to convert (if not provided, uses stored config)
+ * @returns Boolean array representing selected additional feeds
+ */
+export const feedsToBoolean = (
+  featureNames?: AdditionalFeature[],
+): boolean[] => {
+  const names = featureNames ?? getConfig("selectedAdditionalFeeds");
+  return additionalFeeds.map((feat) => names.includes(feat));
+};
+
+/**
  * Convert boolean array to category names
  * @param booleans The boolean array to convert
  * @returns The selected category names
@@ -155,6 +174,15 @@ export const booleanToSections = (booleans: boolean[]): AvailableSection[] => {
 };
 
 /**
+ * Convert boolean array to additional feature names
+ * @param booleans The boolean array to convert
+ * @returns The selected additional feature names
+ */
+export const booleanToFeeds = (booleans: boolean[]): AdditionalFeature[] => {
+  return additionalFeeds.filter((_, i) => booleans[i]);
+};
+
+/**
  * Generate Clay settings object from stored configuration
  * @param debugMode Whether debug mode is enabled
  * @returns Clay settings object
@@ -167,6 +195,7 @@ export const generateClaySettings = (
   return {
     UserCategories: categoriesToBoolean(config.selectedCategoryNames),
     UserSections: sectionsToBoolean(config.selectedSectionNames),
+    AdditionalFeeds: feedsToBoolean(config.selectedAdditionalFeeds),
     UserInterfaceLanguage: config.selectedInterfaceLanguage,
     UserContentLanguage: config.selectedContentLanguage,
     UserMaxStories: config.selectedMaxStoryCount,

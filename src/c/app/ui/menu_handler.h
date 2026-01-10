@@ -4,11 +4,25 @@
 
 typedef struct
 {
-    const char *title;                  // Menu title displayed in header
-    uint16_t (*get_num_items)(void);    // Callback to get number of items
-    char **(*get_items)(void);          // Callback to get array of items
-    void (*select_callback)(int index); // Callback when item is selected
-    bool (*is_item_read)(int index);    // Optional callback to check if item is read
+    int section_index;
+    const char *title;
+    int num_items;
+} SectionInfo;
+
+typedef struct
+{
+    // TODO: This could get cleaned up but for now it's a mess to handle single and multi-section menus
+    const char *title;                                                              // Menu title (used for single section menus)
+    uint16_t (*get_num_sections)(void);                                             // Optional: number of sections (NULL for single section)
+    uint16_t (*get_num_items)(void);                                                // Callback to get number of items (for single section)
+    uint16_t (*get_num_items_in_section)(uint16_t section_index);                   // Callback for multi-section menus
+    char **(*get_items)(void);                                                      // Callback to get array of items (for single section)
+    char **(*get_items_in_section)(uint16_t section_index);                         // Callback for multi-section menus
+    const char *(*get_section_title)(uint16_t section_index);                       // Callback to get section title
+    void (*select_callback)(int index);                                             // Callback when item is selected (for single section)
+    void (*select_callback_in_section)(uint16_t section_index, uint16_t row_index); // Callback for multi-section
+    bool (*is_item_read)(int index);                                                // Optional callback to check if item is read (for single section)
+    bool (*is_item_read_in_section)(uint16_t section_index, uint16_t row_index);    // Optional for multi-section
 } MenuConfig;
 
 /**
@@ -44,3 +58,10 @@ void menu_handler_destroy_window(Window *window);
  * @param window The window containing the menu to update
  */
 void menu_handler_request_update(Window *window);
+
+/**
+ * Update the menu title
+ * @param window The window containing the menu
+ * @param new_title The new title string
+ */
+void menu_handler_update_title(Window *window, const char *new_title);

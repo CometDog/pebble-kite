@@ -7,6 +7,7 @@ Window *detail_list_create(Window **window, const char *title, uint16_t (*get_co
 {
     if (!window)
         return NULL;
+
     MenuConfig config = {
         .title = title, .get_num_items = get_count, .get_items = get_items, .select_callback = select_callback};
 

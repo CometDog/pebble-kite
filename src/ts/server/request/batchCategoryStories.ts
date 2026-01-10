@@ -3,7 +3,7 @@ import { Story } from "../type/Story";
 import { StoryDomain } from "../type/StoryDomain";
 import { fetchJSON } from "../fetchUtils";
 
-type BatchCategoryStoriesResponse = {
+export type BatchCategoryStoriesResponse = {
   batchId: string;
   categoryId: string;
   categoryName: string;

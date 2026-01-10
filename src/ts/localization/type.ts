@@ -3,6 +3,8 @@ export type InterfaceStrings = {
     loading: string;
   };
   title: {
+    feeds: string;
+    news: string;
     category: string;
     stories: string;
     availableDetails: string;
@@ -125,5 +127,8 @@ export type InterfaceStrings = {
     usa: string;
     watches_and_horology: string;
     world: string;
+  };
+  feature: {
+    small_web_feed: string;
   };
 };

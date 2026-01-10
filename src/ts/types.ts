@@ -202,7 +202,7 @@ export const availableSections = [
   "Timeline",
   "International Reactions",
   "Quick Questions",
-  "Action items",
+  "Action Items",
   "Did You Know?",
 ] as const;
 
@@ -211,5 +211,9 @@ export type AvailableSection = (typeof availableSections)[number];
 export const defaultSections: Partial<AvailableSection>[] = [
   ...availableSections,
 ];
+
+export const additionalFeeds = ["Small Web"] as const;
+
+export type AdditionalFeature = (typeof additionalFeeds)[number];
 
 export const defaultMaxStories = 12;

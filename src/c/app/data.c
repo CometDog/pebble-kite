@@ -75,6 +75,7 @@ typedef struct
 {
     char *categories[MAX_ITEMS_HIGH];
     uint16_t categories_count;
+    uint8_t additional_feeds_count;
 } CategoriesLevel;
 
 typedef struct
@@ -110,7 +111,7 @@ typedef struct
     uint8_t qr_size;
 } SelectedDetailLevel;
 
-static CategoriesLevel level_1_categories = {{0}, 0};
+static CategoriesLevel level_1_categories = {{0}, 0, 0};
 static StoryViewLevel level_2_story_view = {NULL, {0}, {0}, 0, NULL, NULL, NULL};
 static AvailableDetailsLevel level_3_available_details = {{0}, 0};
 static SelectedDetailLevel level_4_selected_detail = {0};
@@ -118,6 +119,16 @@ static SelectedDetailLevel level_4_selected_detail = {0};
 // ============================================================================
 // Level 1: Categories Implementation
 // ============================================================================
+
+void set_additional_feeds_count(uint8_t count)
+{
+    level_1_categories.additional_feeds_count = count;
+}
+
+uint8_t get_additional_feeds_count(void)
+{
+    return level_1_categories.additional_feeds_count;
+}
 
 void push_local_categories(char *categories_string)
 {

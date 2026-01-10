@@ -7,6 +7,8 @@ typedef enum
     // General
     STRING_LOADING,
     // Main menu
+    STRING_FEEDS,
+    STRING_NEWS,
     STRING_CATEGORIES,
     STRING_STORIES,
     STRING_AVAILABLE_DETAILS,
@@ -127,6 +129,8 @@ typedef enum
     STRING_CATEGORY_USA,
     STRING_CATEGORY_WATCHES_AND_HOROLOGY,
     STRING_CATEGORY_WORLD,
+    // Additional Feeds
+    STRING_FEEDS_SMALL_WEB_FEED,
     // Count hack, must be last
     STRING_COUNT
 } StringId;

@@ -11,10 +11,12 @@ import {
   booleanToCategories,
   booleanToSections,
   generateClaySettings,
+  booleanToFeeds,
 } from "./config";
 import { healthRequest } from "./server/request/health";
 import * as handlers from "./handlers";
 import {
+  additionalFeeds,
   availableCategories,
   availableSections,
   defaultCategories,
@@ -28,7 +30,7 @@ import {
   isDebugMode,
 } from "../lib/logger";
 import {
-  filterInterfaceStringSectionsAndCategories,
+  filterInterfaceStringOptionals,
   flattenInterfaceStrings,
   getInterfaceStrings,
 } from "./localization";
@@ -73,12 +75,16 @@ Pebble.addEventListener("ready", async () => {
       const selectedCategoryNames = getConfig("selectedCategoryNames");
       handlers.setSelectedCategories(selectedCategoryNames);
 
+      const selectedAdditionalFeeds = getConfig("selectedAdditionalFeeds");
+      handlers.setAdditionalFeeds(...selectedAdditionalFeeds);
+
       const interfaceLanguage = getConfig("selectedInterfaceLanguage");
       const interfaceStrings = flattenInterfaceStrings(
-        filterInterfaceStringSectionsAndCategories({
+        filterInterfaceStringOptionals({
           strings: getInterfaceStrings(interfaceLanguage),
           sectionKeys: selectedSectionNames ?? defaultSections,
           categoryKeys: selectedCategoryNames ?? defaultCategories,
+          featureKeys: selectedAdditionalFeeds ?? defaultCategories,
         }),
       );
       console.log(
@@ -104,10 +110,12 @@ Pebble.addEventListener("ready", async () => {
 Pebble.addEventListener("showConfiguration", () => {
   try {
     const claySettings = generateClaySettings(isDebugMode());
+    console.log("Generated Clay settings:", claySettings);
     localStorage.setItem("clay-settings", JSON.stringify(claySettings));
     Pebble.openURL(clay.generateUrl());
   } catch (e) {
     log.error("Failed to open Clay configuration", e);
+    console.error("Clay config error:", e);
   }
 });
 
@@ -119,8 +127,8 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
 
     const settings = clay.getSettings(event.response);
     console.log("Clay settings received:", JSON.stringify(settings));
-    // DebugMode is at key 10305 (after all category and section checkbox keys)
-    const debugModeKey = "10305";
+    // DebugMode is at key 10405 (after all category and section checkbox keys)
+    const debugModeKey = "10405";
     const rawDebugValue = settings[debugModeKey];
     const debugModeValue = rawDebugValue === true || rawDebugValue === 1;
 
@@ -150,15 +158,26 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
     const selectedSectionNames = booleanToSections(newSelectedSections);
     setConfig("selectedSectionNames", selectedSectionNames);
 
-    // Interface language is key 10300
-    const newInterfaceLanguage = settings["10300"] as string;
+    // Additional Feeds are at keys 10300-10399
+    const newSelectedFeeds: boolean[] = additionalFeeds.map((_, idx) => {
+      const key = (10300 + idx).toString();
+      const val = settings[key];
+      return val === true || val === 1;
+    });
+    const selectedAdditionalFeeds = booleanToFeeds(newSelectedFeeds);
+    setConfig("selectedAdditionalFeeds", selectedAdditionalFeeds);
+    handlers.setAdditionalFeeds(...selectedAdditionalFeeds);
+
+    // Interface language is key 10400
+    const newInterfaceLanguage = settings["10400"] as string;
     setConfig("selectedInterfaceLanguage", newInterfaceLanguage);
     const interfaceLanguage = getConfig("selectedInterfaceLanguage");
     const interfaceStrings = flattenInterfaceStrings(
-      filterInterfaceStringSectionsAndCategories({
+      filterInterfaceStringOptionals({
         strings: getInterfaceStrings(interfaceLanguage),
         sectionKeys: selectedSectionNames ?? defaultSections,
         categoryKeys: selectedNames ?? defaultCategories,
+        featureKeys: selectedAdditionalFeeds ?? defaultCategories,
       }),
     );
     PebbleTS.sendAppMessage({
@@ -166,45 +185,45 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
       data: JSON.stringify(interfaceStrings),
     });
 
-    // Content language is key 10301
-    const newContentLanguage = settings["10301"] as string;
+    // Content language is key 10401
+    const newContentLanguage = settings["10401"] as string;
     setServerLang(newContentLanguage);
     setConfig("selectedContentLanguage", newContentLanguage);
 
-    // Max story count is key 10302
-    const newMaxStoryCount = settings["10302"] as number;
+    // Max story count is key 10402
+    const newMaxStoryCount = settings["10402"] as number;
     handlers.setMaxStoryCount(newMaxStoryCount);
     setConfig("selectedMaxStoryCount", newMaxStoryCount);
 
-    // Text size is key 10303
-    const newTextSize = settings["10303"] as number;
+    // Text size is key 10403
+    const newTextSize = settings["10403"] as number;
     setConfig("selectedTextSize", newTextSize);
     PebbleTS.sendAppMessage({
       type: "set_text_size",
       data: newTextSize,
     });
 
-    // News refresh timeline pin setting is key 10304
-    const newsRefreshPinSetting = settings["10304"] as boolean;
+    // News refresh timeline pin setting is key 10404
+    const newsRefreshPinSetting = settings["10404"] as boolean;
     setConfig("newsRefreshPinSetting", newsRefreshPinSetting);
     if (newsRefreshPinSetting) {
       handlers.pushNewsRefreshPinToTimeline();
     }
 
-    // Clear full cache on save is key 10306
-    const clearFullCacheOnSave = settings["10306"] as boolean;
+    // Clear full cache on save is key 10406
+    const clearFullCacheOnSave = settings["10406"] as boolean;
     if (clearFullCacheOnSave) {
       log.info("Clearing full cache as per user request");
       handlers.clearFullCache();
     } else {
-      // Clear timeline pin memory on save is key 10307
-      const clearPinCacheOnSave = settings["10307"] as boolean;
+      // Clear timeline pin memory on save is key 10407
+      const clearPinCacheOnSave = settings["10407"] as boolean;
       if (clearPinCacheOnSave) {
         log.info("Clearing timeline pin cache as per user request");
         handlers.clearPinCache();
       }
-      // Clear read stories memory on save is key 10308
-      const clearReadStoriesOnSave = settings["10308"] as boolean;
+      // Clear read stories memory on save is key 10408
+      const clearReadStoriesOnSave = settings["10408"] as boolean;
       if (clearReadStoriesOnSave) {
         log.info("Clearing read stories cache as per user request");
         handlers.clearReadStoriesCache();

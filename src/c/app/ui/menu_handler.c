@@ -52,12 +52,21 @@ static bool is_window_tracked(Window *window)
 
 static uint16_t get_number_of_sections(struct MenuLayer *menu_layer, void *callback_context)
 {
+    MenuData *data = callback_context;
+    if (data->config.get_num_sections)
+    {
+        return data->config.get_num_sections();
+    }
     return 1;
 }
 
 static uint16_t get_number_of_rows(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context)
 {
     MenuData *data = callback_context;
+    if (data->config.get_num_items_in_section)
+    {
+        return data->config.get_num_items_in_section(section_index);
+    }
     return data->config.get_num_items();
 }
 
@@ -76,8 +85,28 @@ static bool any_item_exceeds_length(char **items, uint16_t count, size_t max_len
 static void draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context)
 {
     MenuData *data = callback_context;
-    char **items = data->config.get_items();
-    uint16_t count = data->config.get_num_items();
+    char **items;
+    uint16_t count;
+    bool is_read = false;
+
+    if (data->config.get_items_in_section)
+    {
+        items = data->config.get_items_in_section(cell_index->section);
+        count = data->config.get_num_items_in_section(cell_index->section);
+        if (data->config.is_item_read_in_section)
+        {
+            is_read = data->config.is_item_read_in_section(cell_index->section, cell_index->row);
+        }
+    }
+    else
+    {
+        items = data->config.get_items();
+        count = data->config.get_num_items();
+        if (data->config.is_item_read)
+        {
+            is_read = data->config.is_item_read(cell_index->row);
+        }
+    }
 
     if (cell_index->row < count)
     {
@@ -85,7 +114,7 @@ static void draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_ind
         int16_t content_width = bounds.size.w - (UI_MENU_X_PADDING * 2);
 
         GFont font = ui_get_system_font_menu();
-        if (data->config.is_item_read && data->config.is_item_read(cell_index->row))
+        if (is_read)
         {
             font = ui_get_system_font_menu_read();
         }
@@ -114,12 +143,22 @@ static void draw_header(GContext *ctx, const Layer *cell_layer, uint16_t section
     graphics_context_set_fill_color(ctx, UI_COLOR_MENU_HEADER_BACKGROUND);
     graphics_fill_rect(ctx, bounds, 0, GCornerNone);
 
+    const char *title;
+    if (data->config.get_section_title)
+    {
+        title = data->config.get_section_title(section_index);
+    }
+    else
+    {
+        title = data->config.title;
+    }
+
     // Draw header text with ContentSize-aware font
     graphics_context_set_text_color(ctx, UI_COLOR_MENU_HEADER_TEXT);
     GRect text_bounds = GRect(bounds.origin.x + UI_MENU_HEADER_X_PADDING, bounds.size.h - UI_LINE_HEIGHT_REGULAR,
                               content_width, bounds.size.h);
-    graphics_draw_text(ctx, data->config.title, ui_get_system_font_menu_title(), text_bounds,
-                       GTextOverflowModeTrailingEllipsis, UI_MENU_TEXT_ALIGNMENT, NULL);
+    graphics_draw_text(ctx, title, ui_get_system_font_menu_title(), text_bounds, GTextOverflowModeTrailingEllipsis,
+                       UI_MENU_TEXT_ALIGNMENT, NULL);
 }
 
 static int16_t get_header_height(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context)
@@ -143,8 +182,28 @@ static int16_t get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_ind
         return UI_MENU_CELL_HEIGHT_DEFAULT + UI_MENU_CELL_PADDING_Y;
     }
 
-    char **items = data->config.get_items();
-    uint16_t count = data->config.get_num_items();
+    char **items;
+    uint16_t count;
+    bool is_read = false;
+
+    if (data->config.get_items_in_section)
+    {
+        items = data->config.get_items_in_section(cell_index->section);
+        count = data->config.get_num_items_in_section(cell_index->section);
+        if (data->config.is_item_read_in_section)
+        {
+            is_read = data->config.is_item_read_in_section(cell_index->section, cell_index->row);
+        }
+    }
+    else
+    {
+        items = data->config.get_items();
+        count = data->config.get_num_items();
+        if (data->config.is_item_read)
+        {
+            is_read = data->config.is_item_read(cell_index->row);
+        }
+    }
 
     if (cell_index->row >= count)
     {
@@ -156,7 +215,7 @@ static int16_t get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_ind
 
     // Calculate amount of space the text would take
     GFont font = ui_get_system_font_menu();
-    if (data->config.is_item_read && data->config.is_item_read(cell_index->row))
+    if (is_read)
     {
         font = ui_get_system_font_menu_read();
     }
@@ -185,7 +244,11 @@ static int16_t get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_ind
 static void select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context)
 {
     MenuData *data = callback_context;
-    if (data->config.select_callback)
+    if (data->config.select_callback_in_section)
+    {
+        data->config.select_callback_in_section(cell_index->section, cell_index->row);
+    }
+    else if (data->config.select_callback)
     {
         data->config.select_callback(cell_index->row);
     }
@@ -206,8 +269,26 @@ Window *s_menu_handler_create_window(MenuConfig config, bool never_multiline)
 
     menu_data->config = config;
     menu_data->never_multiline = never_multiline;
-    menu_data->use_multiline =
-        never_multiline ? false : any_item_exceeds_length(config.get_items(), config.get_num_items(), 30);
+
+    bool exceeds_length = false;
+    if (!never_multiline)
+    {
+        if (config.get_num_sections)
+        {
+            uint16_t num_sections = config.get_num_sections();
+            for (uint16_t section = 0; section < num_sections && !exceeds_length; section++)
+            {
+                char **items = config.get_items_in_section(section);
+                uint16_t count = config.get_num_items_in_section(section);
+                exceeds_length = any_item_exceeds_length(items, count, 30);
+            }
+        }
+        else
+        {
+            exceeds_length = any_item_exceeds_length(config.get_items(), config.get_num_items(), 30);
+        }
+    }
+    menu_data->use_multiline = exceeds_length;
 
     Layer *window_layer = window_get_root_layer(window);
     GRect bounds = layer_get_bounds(window_layer);
@@ -283,13 +364,73 @@ void menu_handler_request_update(Window *window)
         return;
 
     MenuData *menu_data = window_get_user_data(window);
+    if (menu_data && menu_data->config.get_num_items && menu_data->config.get_num_items() == 1)
+    {
+        // If there's now only one item, auto-select it
+        if (menu_data->config.select_callback)
+        {
+            menu_data->config.select_callback(0);
+            return;
+        }
+    }
+
     if (menu_data && menu_data->menu_layer)
     {
-        menu_data->use_multiline =
-            menu_data->never_multiline
-                ? false
-                : any_item_exceeds_length(menu_data->config.get_items(), menu_data->config.get_num_items(), 20);
+        bool exceeds_length = false;
+        if (menu_data->config.get_num_sections)
+        {
+            uint16_t num_sections = menu_data->config.get_num_sections();
+            for (uint16_t section = 0; section < num_sections && !exceeds_length; section++)
+            {
+                char **items = menu_data->config.get_items_in_section(section);
+                uint16_t count = menu_data->config.get_num_items_in_section(section);
+                exceeds_length = any_item_exceeds_length(items, count, 20);
+            }
+        }
+        else
+        {
+            exceeds_length =
+                any_item_exceeds_length(menu_data->config.get_items(), menu_data->config.get_num_items(), 20);
+        }
+
+        menu_data->use_multiline = menu_data->never_multiline ? false : exceeds_length;
         menu_layer_reload_data(menu_data->menu_layer);
+    }
+}
+
+void menu_handler_update_sections(Window *window, SectionInfo section_info)
+{
+    if (!window)
+        return;
+
+    if (!is_window_tracked(window))
+        return;
+
+    MenuData *menu_data = window_get_user_data(window);
+    if (menu_data && menu_data->menu_layer)
+    {
+        // Currently only single section menus are supported
+        if (section_info.section_index == 0)
+        {
+            menu_data->config.title = section_info.title;
+            menu_layer_reload_data(menu_data->menu_layer);
+        }
+    }
+}
+
+void menu_handler_update_title(Window *window, const char *new_title)
+{
+    if (!window)
+        return;
+
+    MenuData *menu_data = window_get_user_data(window);
+    if (menu_data)
+    {
+        menu_data->config.title = new_title;
+        if (menu_data->menu_layer)
+        {
+            menu_layer_reload_data(menu_data->menu_layer);
+        }
     }
 }
 

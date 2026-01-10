@@ -47,12 +47,18 @@ export function decodeUTF8(buffer: ArrayBuffer): string {
 }
 
 // Helper to fetch and parse JSON with proper UTF-8 decoding
-export async function fetchJSON<T>(url: string): Promise<T> {
+export async function fetchText(url: string): Promise<string> {
   const res = await fetch(url);
   if (!res.ok) {
     return Promise.reject(res);
   }
   const buffer = await res.arrayBuffer();
-  const text = decodeUTF8(buffer);
+  console.log(`Fetched ${url}, ${buffer.byteLength} bytes`);
+  return decodeUTF8(buffer);
+}
+
+// Helper to fetch and parse JSON with proper UTF-8 decoding
+export async function fetchJSON<T>(url: string): Promise<T> {
+  const text = await fetchText(url);
   return JSON.parse(text) as T;
 }

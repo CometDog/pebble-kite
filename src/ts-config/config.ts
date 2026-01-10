@@ -233,7 +233,7 @@ export default [
           true, // Timeline
           true, // International Reactions
           true, // Quick Questions
-          true, // Action items,
+          true, // Action Items
           true, // Did You Know?
         ],
         options: [
@@ -250,9 +250,18 @@ export default [
           "Timeline",
           "International Reactions",
           "Quick Questions",
-          "Action items",
+          "Action Items",
           "Did You Know?",
         ],
+      },
+      {
+        type: "checkboxgroup",
+        messageKey: "AdditionalFeeds",
+        label: "Additional Feeds",
+        defaultValue: [false],
+        description:
+          "Feeds that are separate from News Feed within the Kagiverse. May not be localized in all languages. May be out of sync with the main news feed.",
+        options: ["Small Web"],
       },
       {
         type: "select",
