@@ -282,10 +282,10 @@ export const handleGetStoryTitles = ({
   const { pageItems, nextPage } = paginate(titles, page);
   const processed = shortData
     ? pageItems.map((title) =>
-        title.length > SHORT_TITLE_LENGTH
-          ? title.slice(0, SHORT_TITLE_LENGTH - 3) + "..."
-          : title,
-      )
+      title.length > SHORT_TITLE_LENGTH
+        ? title.slice(0, SHORT_TITLE_LENGTH - 3) + "..."
+        : title,
+    )
     : pageItems;
 
   // This is redundant to the code above and should be DRY'd up
@@ -801,7 +801,7 @@ export const pushNewsRefreshPinToTimeline = () => {
       currentTime.getUTCFullYear(),
       currentTime.getUTCMonth(),
       currentTime.getUTCDate(),
-      13, // 1 PM UTC, 1 hour late to give time for the update to be ready
+      12, // 12 PM UTC, the update might be late, but this is when it is scheduled and I want to give the user time to react to the quick view event and read today's news before it is gone
       0,
       0,
     );
