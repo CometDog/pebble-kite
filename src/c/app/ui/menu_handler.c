@@ -163,14 +163,7 @@ static void draw_header(GContext *ctx, const Layer *cell_layer, uint16_t section
 
 static int16_t get_header_height(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context)
 {
-#ifdef PBL_ROUND
-    // This is built to handle drawing a header with a special full height background for Time Round but I have not
-    // picked a color yet so it does nothing special
-    GRect bounds = layer_get_bounds(menu_layer_get_layer(menu_layer));
-    return (bounds.size.h / 2) - (UI_MENU_CELL_HEIGHT_BASE / 2);
-#else
     return UI_LINE_HEIGHT_REGULAR;
-#endif
 }
 
 static int16_t get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context)
