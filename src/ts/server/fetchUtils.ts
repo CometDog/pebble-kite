@@ -1,3 +1,7 @@
+import { createLogger } from "../../lib";
+
+const log = createLogger("KNJSFetchUtils");
+
 // Decode UTF-8 from ArrayBuffer
 // PebbleKit.ts's fetch implementation doesn't properly handle UTF-8 in res.json(),
 // so we need to manually decode UTF-8 bytes
@@ -53,7 +57,7 @@ export async function fetchText(url: string): Promise<string> {
     return Promise.reject(res);
   }
   const buffer = await res.arrayBuffer();
-  console.log(`Fetched ${url}, ${buffer.byteLength} bytes`);
+  log.debug(`Fetched ${url}, ${buffer.byteLength} bytes`);
   return decodeUTF8(buffer);
 }
 

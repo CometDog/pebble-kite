@@ -72,18 +72,3 @@ void error_log(const char *tag, const char *message)
         send_log_to_phone(LOG_LEVEL_ERROR, tag, message);
     }
 }
-
-void debug_logger_notify(const char *title, const char *message)
-{
-    // Always send, regardless of debug mode
-#ifndef RELEASE
-    APP_LOG(APP_LOG_LEVEL_INFO, "[DebugLogger] Notify: %s - %s", title, message);
-#endif
-
-    if (!send_debug_notify(title, message))
-    {
-#ifndef RELEASE
-        APP_LOG(APP_LOG_LEVEL_ERROR, "[DebugLogger] Failed to send debug notify");
-#endif
-    }
-}

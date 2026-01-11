@@ -87,10 +87,7 @@ Pebble.addEventListener("ready", async () => {
           featureKeys: selectedAdditionalFeeds ?? defaultCategories,
         }),
       );
-      console.log(
-        "Sending interface strings:",
-        JSON.stringify(interfaceStrings),
-      );
+      log.debug("Sending interface strings:", JSON.stringify(interfaceStrings));
       PebbleTS.sendAppMessage({
         type: "send_interface_strings",
         data: JSON.stringify(interfaceStrings),
@@ -110,12 +107,12 @@ Pebble.addEventListener("ready", async () => {
 Pebble.addEventListener("showConfiguration", () => {
   try {
     const claySettings = generateClaySettings(isDebugMode());
-    console.log("Generated Clay settings:", claySettings);
+    log.debug("Generated Clay settings:", claySettings);
     localStorage.setItem("clay-settings", JSON.stringify(claySettings));
     Pebble.openURL(clay.generateUrl());
   } catch (e) {
     log.error("Failed to open Clay configuration", e);
-    console.error("Clay config error:", e);
+    log.error("Clay config error:", e);
   }
 });
 
@@ -126,7 +123,7 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
     PebbleTS.sendAppMessage({ type: "restart_app" });
 
     const settings = clay.getSettings(event.response);
-    console.log("Clay settings received:", JSON.stringify(settings));
+    log.debug("Clay settings received:", JSON.stringify(settings));
     // DebugMode is at key 10405 (after all category and section checkbox keys)
     const debugModeKey = "10405";
     const rawDebugValue = settings[debugModeKey];

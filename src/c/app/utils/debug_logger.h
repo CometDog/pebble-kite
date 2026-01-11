@@ -70,14 +70,6 @@ void warn_log(const char *tag, const char *message);
  */
 void error_log(const char *tag, const char *message);
 
-/**
- * Force send a notification to the phone regardless of debug mode
- * Useful for critical errors the user must see
- * @param title: Notification title
- * @param message: Notification message
- */
-void debug_logger_notify(const char *title, const char *message);
-
 /*
  * Formatted logging macros (uses snprintf internally)
  * Example: DEBUG_LOG("MyTag", "Value is %d", 42);
@@ -86,36 +78,34 @@ void debug_logger_notify(const char *title, const char *message);
  * @param ...: Format arguments
  */
 
+static char _shared_log_buf[96];
+
 #define DEBUG_LOG(tag, fmt, ...)                                                                                       \
     do                                                                                                                 \
     {                                                                                                                  \
-        char _log_buf[128];                                                                                            \
-        snprintf(_log_buf, sizeof(_log_buf), fmt, ##__VA_ARGS__);                                                      \
-        debug_log(tag, _log_buf);                                                                                      \
+        snprintf(_shared_log_buf, sizeof(_shared_log_buf), fmt, ##__VA_ARGS__);                                        \
+        debug_log(tag, _shared_log_buf);                                                                               \
     } while (0)
 
 #define INFO_LOG(tag, fmt, ...)                                                                                        \
     do                                                                                                                 \
     {                                                                                                                  \
-        char _log_buf[128];                                                                                            \
-        snprintf(_log_buf, sizeof(_log_buf), fmt, ##__VA_ARGS__);                                                      \
-        info_log(tag, _log_buf);                                                                                       \
+        snprintf(_shared_log_buf, sizeof(_shared_log_buf), fmt, ##__VA_ARGS__);                                        \
+        info_log(tag, _shared_log_buf);                                                                                \
     } while (0)
 
 #define WARN_LOG(tag, fmt, ...)                                                                                        \
     do                                                                                                                 \
     {                                                                                                                  \
-        char _log_buf[128];                                                                                            \
-        snprintf(_log_buf, sizeof(_log_buf), fmt, ##__VA_ARGS__);                                                      \
-        warn_log(tag, _log_buf);                                                                                       \
+        snprintf(_shared_log_buf, sizeof(_shared_log_buf), fmt, ##__VA_ARGS__);                                        \
+        warn_log(tag, _shared_log_buf);                                                                                \
     } while (0)
 
 #define ERROR_LOG(tag, fmt, ...)                                                                                       \
     do                                                                                                                 \
     {                                                                                                                  \
-        char _log_buf[128];                                                                                            \
-        snprintf(_log_buf, sizeof(_log_buf), fmt, ##__VA_ARGS__);                                                      \
-        error_log(tag, _log_buf);                                                                                      \
+        snprintf(_shared_log_buf, sizeof(_shared_log_buf), fmt, ##__VA_ARGS__);                                        \
+        error_log(tag, _shared_log_buf);                                                                               \
     } while (0)
 
 /* In release builds we don't want debug/info logging code included

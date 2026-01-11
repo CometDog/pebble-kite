@@ -7,6 +7,9 @@ import { strings as ptStrings } from "./definitions/pt";
 import { strings as ruStrings } from "./definitions/ru";
 import { strings as jaStrings } from "./definitions/ja";
 import { InterfaceStrings } from "./type";
+import { createLogger } from "../../lib";
+
+const log = createLogger("KNJSLocalization");
 
 type DeepPartial<B> = {
   [X in keyof B]?: B[X] extends object ? DeepPartial<B[X]> : B[X];
@@ -55,11 +58,8 @@ export const filterInterfaceStringOptionals = ({
     category: {},
   };
 
-  console.log(
-    "Filtering interface strings with sections:",
-    sectionKeys,
-    "and categories:",
-    categoryKeys,
+  log.debug(
+    `Filtering interface strings with sections: ${sectionKeys} and categories: ${categoryKeys}`,
   );
   // Filter sections to only include those in sectionKeys
   for (const [key, value] of Object.entries(enStrings.section)) {
