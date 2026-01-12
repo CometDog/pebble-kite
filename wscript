@@ -39,12 +39,21 @@ def build(ctx):
     for platform in ctx.env.TARGET_PLATFORMS:
         ctx.env = ctx.all_envs[platform]
         ctx.set_group(ctx.env.PLATFORM_NAME)
+
         if DEBUG_BUILD:
             try:
                 defs = ctx.env.DEFINES
                 ctx.env.DEFINES = [d for d in defs if d != 'RELEASE']
             except Exception:
                 pass
+
+        if platform == 'aplite':
+            # Size optimization for Aplite
+            ctx.env.append_value('CFLAGS', ['-Os'])
+            # Always run Aplite in release mode to gain memory savings  
+            ctx.env.append_value('DEFINES', ['RELEASE'])
+        else:
+            ctx.env.append_value('CFLAGS', ['-O2'])
 
         app_elf = '{}/pebble-app.elf'.format(ctx.env.BUILD_DIR)
         ctx.pbl_build(source=ctx.path.ant_glob('src/c/**/*.c'), target=app_elf, bin_type='app')

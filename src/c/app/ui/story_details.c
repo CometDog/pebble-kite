@@ -33,14 +33,15 @@ char **get_modified_item_names(void)
     char **details = details_data->available_details;
     size_t count = details_data->available_details_count;
 
-    static char *modified_details[20];
-    for (uint16_t i = 0; i < count && i < 20; i++)
+    static char *modified_details[15];
+    size_t max_count = 15;
+    for (uint16_t i = 0; i < count && i < max_count; i++)
     {
         modified_details[i] = (char *)detail_type_get_display_name(details[i]);
     }
 
     // Null out the rest
-    for (uint16_t j = count; j < 20; ++j)
+    for (uint16_t j = count; j < max_count; ++j)
     {
         modified_details[j] = NULL;
     }

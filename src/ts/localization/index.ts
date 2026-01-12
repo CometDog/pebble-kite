@@ -142,20 +142,25 @@ export function flattenInterfaceStrings(
     }
   }
 
-  if (strings.category) {
-    for (const [key, value] of Object.entries(strings.category)) {
+  let categoryIndex = 0;
+  if (strings.feature) {
+    for (const [_, value] of Object.entries(strings.feature)) {
       if (typeof value === "string") {
-        const newKey = `category.${key}`;
+        const newKey = `category.${(categoryIndex + 10).toString(36)}`;
         flatStrings[newKey] = value;
+        categoryIndex++;
       }
     }
   }
 
-  if (strings.feature) {
-    for (const [key, value] of Object.entries(strings.feature)) {
+  if (strings.category) {
+    for (const [_, value] of Object.entries(strings.category).slice(
+      0,
+      20 - categoryIndex,
+    )) {
       if (typeof value === "string") {
-        const newKey = `feature.${key}`;
-        flatStrings[newKey] = value;
+        flatStrings[`category.${(categoryIndex + 10).toString(36)}`] = value;
+        categoryIndex++;
       }
     }
   }

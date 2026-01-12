@@ -33,108 +33,27 @@ static const char *s_string_keys[STRING_COUNT] = {
     "STRING_SCIENTIFIC_SIGNIFICANCE",
     "STRING_PERFORMANCE_STATISTICS",
     "STRING_SOURCES",
-    // categories
-    "STRING_CATEGORY_THREE_D_PRINTING",
-    "STRING_CATEGORY_AFRICA",
-    "STRING_CATEGORY_AI",
-    "STRING_CATEGORY_APPLE",
-    "STRING_CATEGORY_ARGENTINA",
-    "STRING_CATEGORY_AUSTRALIA",
-    "STRING_CATEGORY_AUSTRIA",
-    "STRING_CATEGORY_BAY",
-    "STRING_CATEGORY_BELGIUM",
-    "STRING_CATEGORY_BITCOIN",
-    "STRING_CATEGORY_BRAZIL",
-    "STRING_CATEGORY_BUSINESS",
-    "STRING_CATEGORY_CANADA",
-    "STRING_CATEGORY_CATHOLIC",
-    "STRING_CATEGORY_CHINA",
-    "STRING_CATEGORY_COFFEE",
-    "STRING_CATEGORY_COLOMBIA",
-    "STRING_CATEGORY_COSTA_RICA",
-    "STRING_CATEGORY_CROATIA",
-    "STRING_CATEGORY_CRYPTOCURRENCY",
-    "STRING_CATEGORY_CYBERSECURITY",
-    "STRING_CATEGORY_CZECH_REPUBLIC",
-    "STRING_CATEGORY_DENMARK",
-    "STRING_CATEGORY_ECONOMY",
-    "STRING_CATEGORY_ESTONIA",
-    "STRING_CATEGORY_EUROPE",
-    "STRING_CATEGORY_FINLAND",
-    "STRING_CATEGORY_FORMULA_1",
-    "STRING_CATEGORY_FRANCE",
-    "STRING_CATEGORY_FRENCH_MUSIC",
-    "STRING_CATEGORY_GAMING",
-    "STRING_CATEGORY_GERMANY_HESSE",
-    "STRING_CATEGORY_GERMANY",
-    "STRING_CATEGORY_GOOGLE",
-    "STRING_CATEGORY_GREECE",
-    "STRING_CATEGORY_HEALTHCARE_USA",
-    "STRING_CATEGORY_HONG_KONG",
-    "STRING_CATEGORY_HUNGARY",
-    "STRING_CATEGORY_INDIA_TAMIL_NADU",
-    "STRING_CATEGORY_INDIA",
-    "STRING_CATEGORY_IRACING_AND_SIM_RACING",
-    "STRING_CATEGORY_IRAN",
-    "STRING_CATEGORY_IRELAND",
-    "STRING_CATEGORY_ISRAEL",
-    "STRING_CATEGORY_ITALY",
-    "STRING_CATEGORY_JAPAN",
-    "STRING_CATEGORY_LINUX_OSS",
-    "STRING_CATEGORY_LITHUANIA",
-    "STRING_CATEGORY_MEXICO",
-    "STRING_CATEGORY_MICROSOFT",
-    "STRING_CATEGORY_NEW_ZEALAND",
-    "STRING_CATEGORY_NFL",
-    "STRING_CATEGORY_NHL",
-    "STRING_CATEGORY_NINTENDO",
-    "STRING_CATEGORY_NORWAY",
-    "STRING_CATEGORY_PAKISTAN",
-    "STRING_CATEGORY_PALESTINE",
-    "STRING_CATEGORY_PHILIPPINES",
-    "STRING_CATEGORY_PODCASTING",
-    "STRING_CATEGORY_POLAND",
-    "STRING_CATEGORY_PORTUGAL",
-    "STRING_CATEGORY_PRIVACY",
-    "STRING_CATEGORY_ROMANIA",
-    "STRING_CATEGORY_RUSSIA",
-    "STRING_CATEGORY_SCIENCE",
-    "STRING_CATEGORY_SERBIA",
-    "STRING_CATEGORY_SIMULATION_GAMES",
-    "STRING_CATEGORY_SINGAPORE",
-    "STRING_CATEGORY_SLOVAKIA",
-    "STRING_CATEGORY_SLOVENIA",
-    "STRING_CATEGORY_SOUTH_KOREA",
-    "STRING_CATEGORY_SPAIN",
-    "STRING_CATEGORY_SPORTS",
-    "STRING_CATEGORY_SWEDEN",
-    "STRING_CATEGORY_SWITZERLAND_DE",
-    "STRING_CATEGORY_SWITZERLAND_FR",
-    "STRING_CATEGORY_TAIWAN",
-    "STRING_CATEGORY_TECHNOLOGY",
-    "STRING_CATEGORY_THAILAND",
-    "STRING_CATEGORY_THE_NETHERLANDS",
-    "STRING_CATEGORY_TURKEY",
-    "STRING_CATEGORY_UK",
-    "STRING_CATEGORY_UKRAINE",
-    "STRING_CATEGORY_USA_AUSTIN",
-    "STRING_CATEGORY_USA_CHICAGO",
-    "STRING_CATEGORY_USA_COLORADO",
-    "STRING_CATEGORY_USA_HAWAII",
-    "STRING_CATEGORY_USA_MICHIGAN",
-    "STRING_CATEGORY_USA_MINNESOTA",
-    "STRING_CATEGORY_USA_NEVADA",
-    "STRING_CATEGORY_USA_NYC",
-    "STRING_CATEGORY_USA_OHIO",
-    "STRING_CATEGORY_USA_UTAH",
-    "STRING_CATEGORY_USA_VERMONT",
-    "STRING_CATEGORY_USA_VIRGINIA",
-    "STRING_CATEGORY_USA_WASHINGTON",
-    "STRING_CATEGORY_USA",
-    "STRING_CATEGORY_WATCHES_AND_HOROLOGY",
-    "STRING_CATEGORY_WORLD",
-    // Additional Feeds
-    "STRING_FEEDS_SMALL_WEB_FEED",
+    // Generic category slots (up to 20)
+    "STRING_CATEGORY_A",
+    "STRING_CATEGORY_B",
+    "STRING_CATEGORY_C",
+    "STRING_CATEGORY_D",
+    "STRING_CATEGORY_E",
+    "STRING_CATEGORY_F",
+    "STRING_CATEGORY_G",
+    "STRING_CATEGORY_H",
+    "STRING_CATEGORY_I",
+    "STRING_CATEGORY_J",
+    "STRING_CATEGORY_K",
+    "STRING_CATEGORY_L",
+    "STRING_CATEGORY_M",
+    "STRING_CATEGORY_N",
+    "STRING_CATEGORY_O",
+    "STRING_CATEGORY_P",
+    "STRING_CATEGORY_Q",
+    "STRING_CATEGORY_R",
+    "STRING_CATEGORY_S",
+    "STRING_CATEGORY_T",
 };
 
 static void free_dynamic_strings(void)
@@ -292,109 +211,27 @@ static const KeyMap s_dotted_map[] = {
     {"section.performanceStatistics", STRING_PERFORMANCE_STATISTICS},
     {"section.sources", STRING_SOURCES},
 
-    /* categories (keys match JS type names) */
-    {"category.three_d_printing", STRING_CATEGORY_THREE_D_PRINTING},
-    {"category.africa", STRING_CATEGORY_AFRICA},
-    {"category.ai", STRING_CATEGORY_AI},
-    {"category.apple", STRING_CATEGORY_APPLE},
-    {"category.argentina", STRING_CATEGORY_ARGENTINA},
-    {"category.australia", STRING_CATEGORY_AUSTRALIA},
-    {"category.austria", STRING_CATEGORY_AUSTRIA},
-    {"category.bay", STRING_CATEGORY_BAY},
-    {"category.belgium", STRING_CATEGORY_BELGIUM},
-    {"category.bitcoin", STRING_CATEGORY_BITCOIN},
-    {"category.brazil", STRING_CATEGORY_BRAZIL},
-    {"category.business", STRING_CATEGORY_BUSINESS},
-    {"category.canada", STRING_CATEGORY_CANADA},
-    {"category.catholic", STRING_CATEGORY_CATHOLIC},
-    {"category.china", STRING_CATEGORY_CHINA},
-    {"category.coffee", STRING_CATEGORY_COFFEE},
-    {"category.colombia", STRING_CATEGORY_COLOMBIA},
-    {"category.costa_rica", STRING_CATEGORY_COSTA_RICA},
-    {"category.croatia", STRING_CATEGORY_CROATIA},
-    {"category.cryptocurrency", STRING_CATEGORY_CRYPTOCURRENCY},
-    {"category.cybersecurity", STRING_CATEGORY_CYBERSECURITY},
-    {"category.czech_republic", STRING_CATEGORY_CZECH_REPUBLIC},
-    {"category.denmark", STRING_CATEGORY_DENMARK},
-    {"category.economy", STRING_CATEGORY_ECONOMY},
-    {"category.estonia", STRING_CATEGORY_ESTONIA},
-    {"category.europe", STRING_CATEGORY_EUROPE},
-    {"category.finland", STRING_CATEGORY_FINLAND},
-    {"category.formula_1", STRING_CATEGORY_FORMULA_1},
-    {"category.france", STRING_CATEGORY_FRANCE},
-    {"category.french_music", STRING_CATEGORY_FRENCH_MUSIC},
-    {"category.gaming", STRING_CATEGORY_GAMING},
-    {"category.germany_hesse", STRING_CATEGORY_GERMANY_HESSE},
-    {"category.germany", STRING_CATEGORY_GERMANY},
-    {"category.google", STRING_CATEGORY_GOOGLE},
-    {"category.greece", STRING_CATEGORY_GREECE},
-    {"category.healthcare_usa", STRING_CATEGORY_HEALTHCARE_USA},
-    {"category.hong_kong", STRING_CATEGORY_HONG_KONG},
-    {"category.hungary", STRING_CATEGORY_HUNGARY},
-    {"category.india_tamil_nadu", STRING_CATEGORY_INDIA_TAMIL_NADU},
-    {"category.india", STRING_CATEGORY_INDIA},
-    {"category.iracing", STRING_CATEGORY_IRACING_AND_SIM_RACING},
-    {"category.iran", STRING_CATEGORY_IRAN},
-    {"category.ireland", STRING_CATEGORY_IRELAND},
-    {"category.israel", STRING_CATEGORY_ISRAEL},
-    {"category.italy", STRING_CATEGORY_ITALY},
-    {"category.japan", STRING_CATEGORY_JAPAN},
-    {"category.linux_oss", STRING_CATEGORY_LINUX_OSS},
-    {"category.lithuania", STRING_CATEGORY_LITHUANIA},
-    {"category.mexico", STRING_CATEGORY_MEXICO},
-    {"category.microsoft", STRING_CATEGORY_MICROSOFT},
-    {"category.new_zealand", STRING_CATEGORY_NEW_ZEALAND},
-    {"category.nfl", STRING_CATEGORY_NFL},
-    {"category.nhl", STRING_CATEGORY_NHL},
-    {"category.nintendo", STRING_CATEGORY_NINTENDO},
-    {"category.norway", STRING_CATEGORY_NORWAY},
-    {"category.pakistan", STRING_CATEGORY_PAKISTAN},
-    {"category.palestine", STRING_CATEGORY_PALESTINE},
-    {"category.philippines", STRING_CATEGORY_PHILIPPINES},
-    {"category.podcasting", STRING_CATEGORY_PODCASTING},
-    {"category.poland", STRING_CATEGORY_POLAND},
-    {"category.portugal", STRING_CATEGORY_PORTUGAL},
-    {"category.privacy", STRING_CATEGORY_PRIVACY},
-    {"category.romania", STRING_CATEGORY_ROMANIA},
-    {"category.russia", STRING_CATEGORY_RUSSIA},
-    {"category.science", STRING_CATEGORY_SCIENCE},
-    {"category.serbia", STRING_CATEGORY_SERBIA},
-    {"category.simulation_games", STRING_CATEGORY_SIMULATION_GAMES},
-    {"category.singapore", STRING_CATEGORY_SINGAPORE},
-    {"category.slovakia", STRING_CATEGORY_SLOVAKIA},
-    {"category.slovenia", STRING_CATEGORY_SLOVENIA},
-    {"category.south_korea", STRING_CATEGORY_SOUTH_KOREA},
-    {"category.spain", STRING_CATEGORY_SPAIN},
-    {"category.sports", STRING_CATEGORY_SPORTS},
-    {"category.sweden", STRING_CATEGORY_SWEDEN},
-    {"category.switzerland_de", STRING_CATEGORY_SWITZERLAND_DE},
-    {"category.switzerland_fr", STRING_CATEGORY_SWITZERLAND_FR},
-    {"category.taiwan", STRING_CATEGORY_TAIWAN},
-    {"category.technology", STRING_CATEGORY_TECHNOLOGY},
-    {"category.thailand", STRING_CATEGORY_THAILAND},
-    {"category.the_netherlands", STRING_CATEGORY_THE_NETHERLANDS},
-    {"category.turkey", STRING_CATEGORY_TURKEY},
-    {"category.uk", STRING_CATEGORY_UK},
-    {"category.ukraine", STRING_CATEGORY_UKRAINE},
-    {"category.usa_austin", STRING_CATEGORY_USA_AUSTIN},
-    {"category.usa_chicago", STRING_CATEGORY_USA_CHICAGO},
-    {"category.usa_colorado", STRING_CATEGORY_USA_COLORADO},
-    {"category.usa_hawaii", STRING_CATEGORY_USA_HAWAII},
-    {"category.usa_michigan", STRING_CATEGORY_USA_MICHIGAN},
-    {"category.usa_minnesota", STRING_CATEGORY_USA_MINNESOTA},
-    {"category.usa_nevada", STRING_CATEGORY_USA_NEVADA},
-    {"category.usa_nyc", STRING_CATEGORY_USA_NYC},
-    {"category.usa_ohio", STRING_CATEGORY_USA_OHIO},
-    {"category.usa_utah", STRING_CATEGORY_USA_UTAH},
-    {"category.usa_vermont", STRING_CATEGORY_USA_VERMONT},
-    {"category.usa_virginia", STRING_CATEGORY_USA_VIRGINIA},
-    {"category.usa_washington", STRING_CATEGORY_USA_WASHINGTON},
-    {"category.usa", STRING_CATEGORY_USA},
-    {"category.watches_and_horology", STRING_CATEGORY_WATCHES_AND_HOROLOGY},
-    {"category.world", STRING_CATEGORY_WORLD},
-
-    /* additional feeds */
-    {"feature.small_web_feed", STRING_FEEDS_SMALL_WEB_FEED},
+    /* generic category slots (up to 20) */
+    {"category.a", STRING_CATEGORY_A},
+    {"category.b", STRING_CATEGORY_B},
+    {"category.c", STRING_CATEGORY_C},
+    {"category.d", STRING_CATEGORY_D},
+    {"category.e", STRING_CATEGORY_E},
+    {"category.f", STRING_CATEGORY_F},
+    {"category.g", STRING_CATEGORY_G},
+    {"category.h", STRING_CATEGORY_H},
+    {"category.i", STRING_CATEGORY_I},
+    {"category.j", STRING_CATEGORY_J},
+    {"category.k", STRING_CATEGORY_K},
+    {"category.l", STRING_CATEGORY_L},
+    {"category.m", STRING_CATEGORY_M},
+    {"category.n", STRING_CATEGORY_N},
+    {"category.o", STRING_CATEGORY_O},
+    {"category.p", STRING_CATEGORY_P},
+    {"category.q", STRING_CATEGORY_Q},
+    {"category.r", STRING_CATEGORY_R},
+    {"category.s", STRING_CATEGORY_S},
+    {"category.t", STRING_CATEGORY_T},
 };
 
 static int lookup_dotted_key(const char *key)
@@ -581,220 +418,12 @@ const char *localization_get_string(StringId string_id)
     return str ? str : "";
 }
 
-const char *localization_translate_category(const char *category_name)
+const char *localization_get_category_by_index(uint8_t index)
 {
-    if (!category_name || strlen(category_name) == 0)
+    // TODO: This index max should be based on the MAX_ITEMS for categories in the data file
+    if (index >= 20)
     {
-        return category_name;
+        return "";
     }
-
-    // Map category names to StringId enums
-    StringId string_id = STRING_COUNT;
-
-    if (strcmp(category_name, "AI") == 0)
-        string_id = STRING_CATEGORY_AI;
-    else if (strcmp(category_name, "Africa") == 0)
-        string_id = STRING_CATEGORY_AFRICA;
-    else if (strcmp(category_name, "Apple") == 0)
-        string_id = STRING_CATEGORY_APPLE;
-    else if (strcmp(category_name, "Australia") == 0)
-        string_id = STRING_CATEGORY_AUSTRALIA;
-    else if (strcmp(category_name, "Austria") == 0)
-        string_id = STRING_CATEGORY_AUSTRIA;
-    else if (strcmp(category_name, "Bay") == 0)
-        string_id = STRING_CATEGORY_BAY;
-    else if (strcmp(category_name, "Belgium") == 0)
-        string_id = STRING_CATEGORY_BELGIUM;
-    else if (strcmp(category_name, "Bitcoin") == 0)
-        string_id = STRING_CATEGORY_BITCOIN;
-    else if (strcmp(category_name, "Brazil") == 0)
-        string_id = STRING_CATEGORY_BRAZIL;
-    else if (strcmp(category_name, "Business") == 0)
-        string_id = STRING_CATEGORY_BUSINESS;
-    else if (strcmp(category_name, "Canada") == 0)
-        string_id = STRING_CATEGORY_CANADA;
-    else if (strcmp(category_name, "Catholic") == 0)
-        string_id = STRING_CATEGORY_CATHOLIC;
-    else if (strcmp(category_name, "China") == 0)
-        string_id = STRING_CATEGORY_CHINA;
-    else if (strcmp(category_name, "Coffee") == 0)
-        string_id = STRING_CATEGORY_COFFEE;
-    else if (strcmp(category_name, "Colombia") == 0)
-        string_id = STRING_CATEGORY_COLOMBIA;
-    else if (strcmp(category_name, "Costa Rica") == 0)
-        string_id = STRING_CATEGORY_COSTA_RICA;
-    else if (strcmp(category_name, "Croatia") == 0)
-        string_id = STRING_CATEGORY_CROATIA;
-    else if (strcmp(category_name, "Cryptocurrency") == 0)
-        string_id = STRING_CATEGORY_CRYPTOCURRENCY;
-    else if (strcmp(category_name, "Cybersecurity") == 0)
-        string_id = STRING_CATEGORY_CYBERSECURITY;
-    else if (strcmp(category_name, "Czech Republic") == 0)
-        string_id = STRING_CATEGORY_CZECH_REPUBLIC;
-    else if (strcmp(category_name, "Denmark") == 0)
-        string_id = STRING_CATEGORY_DENMARK;
-    else if (strcmp(category_name, "Economy") == 0)
-        string_id = STRING_CATEGORY_ECONOMY;
-    else if (strcmp(category_name, "Estonia") == 0)
-        string_id = STRING_CATEGORY_ESTONIA;
-    else if (strcmp(category_name, "Europe") == 0)
-        string_id = STRING_CATEGORY_EUROPE;
-    else if (strcmp(category_name, "Finland") == 0)
-        string_id = STRING_CATEGORY_FINLAND;
-    else if (strcmp(category_name, "Formula 1") == 0)
-        string_id = STRING_CATEGORY_FORMULA_1;
-    else if (strcmp(category_name, "France") == 0)
-        string_id = STRING_CATEGORY_FRANCE;
-    else if (strcmp(category_name, "Gaming") == 0)
-        string_id = STRING_CATEGORY_GAMING;
-    else if (strcmp(category_name, "Germany | Hesse") == 0)
-        string_id = STRING_CATEGORY_GERMANY_HESSE;
-    else if (strcmp(category_name, "Germany") == 0)
-        string_id = STRING_CATEGORY_GERMANY;
-    else if (strcmp(category_name, "Greece") == 0)
-        string_id = STRING_CATEGORY_GREECE;
-    else if (strcmp(category_name, "Hungary") == 0)
-        string_id = STRING_CATEGORY_HUNGARY;
-    else if (strcmp(category_name, "India") == 0)
-        string_id = STRING_CATEGORY_INDIA;
-    else if (strcmp(category_name, "Iran") == 0)
-        string_id = STRING_CATEGORY_IRAN;
-    else if (strcmp(category_name, "Ireland") == 0)
-        string_id = STRING_CATEGORY_IRELAND;
-    else if (strcmp(category_name, "Israel") == 0)
-        string_id = STRING_CATEGORY_ISRAEL;
-    else if (strcmp(category_name, "Italy") == 0)
-        string_id = STRING_CATEGORY_ITALY;
-    else if (strcmp(category_name, "Japan") == 0)
-        string_id = STRING_CATEGORY_JAPAN;
-    else if (strcmp(category_name, "Linux & OSS") == 0)
-        string_id = STRING_CATEGORY_LINUX_OSS;
-    else if (strcmp(category_name, "Lithuania") == 0)
-        string_id = STRING_CATEGORY_LITHUANIA;
-    else if (strcmp(category_name, "Mexico") == 0)
-        string_id = STRING_CATEGORY_MEXICO;
-    else if (strcmp(category_name, "NFL") == 0)
-        string_id = STRING_CATEGORY_NFL;
-    else if (strcmp(category_name, "NHL") == 0)
-        string_id = STRING_CATEGORY_NHL;
-    else if (strcmp(category_name, "New Zealand") == 0)
-        string_id = STRING_CATEGORY_NEW_ZEALAND;
-    else if (strcmp(category_name, "Nintendo") == 0)
-        string_id = STRING_CATEGORY_NINTENDO;
-    else if (strcmp(category_name, "Norway") == 0)
-        string_id = STRING_CATEGORY_NORWAY;
-    else if (strcmp(category_name, "Pakistan") == 0)
-        string_id = STRING_CATEGORY_PAKISTAN;
-    else if (strcmp(category_name, "Palestine") == 0)
-        string_id = STRING_CATEGORY_PALESTINE;
-    else if (strcmp(category_name, "Philippines") == 0)
-        string_id = STRING_CATEGORY_PHILIPPINES;
-    else if (strcmp(category_name, "Podcasting") == 0)
-        string_id = STRING_CATEGORY_PODCASTING;
-    else if (strcmp(category_name, "Poland") == 0)
-        string_id = STRING_CATEGORY_POLAND;
-    else if (strcmp(category_name, "Portugal") == 0)
-        string_id = STRING_CATEGORY_PORTUGAL;
-    else if (strcmp(category_name, "Romania") == 0)
-        string_id = STRING_CATEGORY_ROMANIA;
-    else if (strcmp(category_name, "Russia") == 0)
-        string_id = STRING_CATEGORY_RUSSIA;
-    else if (strcmp(category_name, "Science") == 0)
-        string_id = STRING_CATEGORY_SCIENCE;
-    else if (strcmp(category_name, "Serbia") == 0)
-        string_id = STRING_CATEGORY_SERBIA;
-    else if (strcmp(category_name, "Simulation Games") == 0)
-        string_id = STRING_CATEGORY_SIMULATION_GAMES;
-    else if (strcmp(category_name, "Singapore") == 0)
-        string_id = STRING_CATEGORY_SINGAPORE;
-    else if (strcmp(category_name, "Slovakia") == 0)
-        string_id = STRING_CATEGORY_SLOVAKIA;
-    else if (strcmp(category_name, "Slovenia") == 0)
-        string_id = STRING_CATEGORY_SLOVENIA;
-    else if (strcmp(category_name, "South Korea") == 0)
-        string_id = STRING_CATEGORY_SOUTH_KOREA;
-    else if (strcmp(category_name, "Spain") == 0)
-        string_id = STRING_CATEGORY_SPAIN;
-    else if (strcmp(category_name, "Sports") == 0)
-        string_id = STRING_CATEGORY_SPORTS;
-    else if (strcmp(category_name, "Sweden") == 0)
-        string_id = STRING_CATEGORY_SWEDEN;
-    else if (strcmp(category_name, "Switzerland (DE)") == 0)
-        string_id = STRING_CATEGORY_SWITZERLAND_DE;
-    else if (strcmp(category_name, "Switzerland (FR)") == 0)
-        string_id = STRING_CATEGORY_SWITZERLAND_FR;
-    else if (strcmp(category_name, "Taiwan") == 0)
-        string_id = STRING_CATEGORY_TAIWAN;
-    else if (strcmp(category_name, "Technology") == 0)
-        string_id = STRING_CATEGORY_TECHNOLOGY;
-    else if (strcmp(category_name, "Thailand") == 0)
-        string_id = STRING_CATEGORY_THAILAND;
-    else if (strcmp(category_name, "The Netherlands") == 0)
-        string_id = STRING_CATEGORY_THE_NETHERLANDS;
-    else if (strcmp(category_name, "Turkey") == 0)
-        string_id = STRING_CATEGORY_TURKEY;
-    else if (strcmp(category_name, "UK") == 0)
-        string_id = STRING_CATEGORY_UK;
-    else if (strcmp(category_name, "Ukraine") == 0)
-        string_id = STRING_CATEGORY_UKRAINE;
-    else if (strcmp(category_name, "USA | Austin, TX") == 0)
-        string_id = STRING_CATEGORY_USA_AUSTIN;
-    else if (strcmp(category_name, "USA | Chicago") == 0)
-        string_id = STRING_CATEGORY_USA_CHICAGO;
-    else if (strcmp(category_name, "USA | Colorado") == 0)
-        string_id = STRING_CATEGORY_USA_COLORADO;
-    else if (strcmp(category_name, "USA | Michigan") == 0)
-        string_id = STRING_CATEGORY_USA_MICHIGAN;
-    else if (strcmp(category_name, "USA | Minnesota") == 0)
-        string_id = STRING_CATEGORY_USA_MINNESOTA;
-    else if (strcmp(category_name, "USA | Nevada") == 0)
-        string_id = STRING_CATEGORY_USA_NEVADA;
-    else if (strcmp(category_name, "USA | New York City") == 0)
-        string_id = STRING_CATEGORY_USA_NYC;
-    else if (strcmp(category_name, "USA | Ohio") == 0)
-        string_id = STRING_CATEGORY_USA_OHIO;
-    else if (strcmp(category_name, "USA | Utah") == 0)
-        string_id = STRING_CATEGORY_USA_UTAH;
-    else if (strcmp(category_name, "USA | Virginia") == 0)
-        string_id = STRING_CATEGORY_USA_VIRGINIA;
-    else if (strcmp(category_name, "USA") == 0)
-        string_id = STRING_CATEGORY_USA;
-    else if (strcmp(category_name, "World") == 0)
-        string_id = STRING_CATEGORY_WORLD;
-    else if (strcmp(category_name, "iRacing & Sim Racing") == 0)
-        string_id = STRING_CATEGORY_IRACING_AND_SIM_RACING;
-    else if (strcmp(category_name, "3D Printing") == 0)
-        string_id = STRING_CATEGORY_THREE_D_PRINTING;
-    else if (strcmp(category_name, "Argentina") == 0)
-        string_id = STRING_CATEGORY_ARGENTINA;
-    else if (strcmp(category_name, "Google") == 0)
-        string_id = STRING_CATEGORY_GOOGLE;
-    else if (strcmp(category_name, "Healthcare | USA") == 0)
-        string_id = STRING_CATEGORY_HEALTHCARE_USA;
-    else if (strcmp(category_name, "Hong Kong") == 0)
-        string_id = STRING_CATEGORY_HONG_KONG;
-    else if (strcmp(category_name, "India | Tamil Nadu") == 0)
-        string_id = STRING_CATEGORY_INDIA_TAMIL_NADU;
-    else if (strcmp(category_name, "Microsoft") == 0)
-        string_id = STRING_CATEGORY_MICROSOFT;
-    else if (strcmp(category_name, "Watches & Horology") == 0)
-        string_id = STRING_CATEGORY_WATCHES_AND_HOROLOGY;
-    else if (strcmp(category_name, "USA | Hawaii") == 0)
-        string_id = STRING_CATEGORY_USA_HAWAII;
-    else if (strcmp(category_name, "USA | Vermont") == 0)
-        string_id = STRING_CATEGORY_USA_VERMONT;
-    else if (strcmp(category_name, "USA | Washington") == 0)
-        string_id = STRING_CATEGORY_USA_WASHINGTON;
-    else if (strcmp(category_name, "Privacy") == 0)
-        string_id = STRING_CATEGORY_PRIVACY;
-    else if (strcmp(category_name, "Small Web") == 0)
-        string_id = STRING_FEEDS_SMALL_WEB_FEED;
-    // If no mapping found, return original name
-    if (string_id == STRING_COUNT)
-    {
-        return category_name;
-    }
-
-    // Return translated string
-    return localization_get_string(string_id);
+    return localization_get_string(STRING_CATEGORY_A + index);
 }

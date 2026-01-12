@@ -11,7 +11,7 @@ export default [
         messageKey: "UserCategories",
         label: "Categories",
         description:
-          "NOTE: Some categories may have limited content available. If there are no summaries for the day they will not show up in the app. Categories are manually kept up to date based on Kagi feeds. Selecting a large number of categories  (30+) may cause unexpected behavior.",
+          "NOTE: Some categories may have limited content available. If there are no summaries for the day they will not show up in the app. Categories are manually kept up to date based on Kagi feeds. Selecting more than 20 categories is unsupported and will cause unexpected behavior.",
         defaultValue: [
           false,
           false,

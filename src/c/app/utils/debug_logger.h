@@ -78,7 +78,11 @@ void error_log(const char *tag, const char *message);
  * @param ...: Format arguments
  */
 
+#ifdef PBL_BW
+static char _shared_log_buf[64];
+#else
 static char _shared_log_buf[96];
+#endif
 
 #define DEBUG_LOG(tag, fmt, ...)                                                                                       \
     do                                                                                                                 \
@@ -121,4 +125,17 @@ static char _shared_log_buf[96];
     do                                                                                                                 \
     {                                                                                                                  \
     } while (0)
+
+#ifdef PBL_PLATFORM_APLITE
+#undef WARN_LOG
+#undef ERROR_LOG
+#define WARN_LOG(tag, fmt, ...)                                                                                        \
+    do                                                                                                                 \
+    {                                                                                                                  \
+    } while (0)
+#define ERROR_LOG(tag, fmt, ...)                                                                                       \
+    do                                                                                                                 \
+    {                                                                                                                  \
+    } while (0)
+#endif
 #endif

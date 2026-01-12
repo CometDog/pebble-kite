@@ -1,35 +1,20 @@
 #include "data.h"
 #include "localization/localization.h"
-#include "ui/background/background_detail_text_window.h"
 #include "ui/categories.h"
-#include "ui/humanitarian_impact/humanitarian_impact_detail_text_window.h"
-#include "ui/industry_impact/industry_impact_detail_list_window.h"
-#include "ui/industry_impact/industry_impact_detail_text_window.h"
+#include "ui/detail_window_registry.h"
 #include "ui/main_story/main_story_list_window.h"
 #include "ui/main_story/main_story_text_window.h"
-#include "ui/perspective/perspective_detail_text_window.h"
-#include "ui/qna/qna_detail_list_window.h"
-#include "ui/qna/qna_detail_text_window.h"
 #include "ui/qr_view.h"
-#include "ui/quote/quote_detail_text_window.h"
 #include "ui/source/source_detail_list_window.h"
 #include "ui/splash_screen.h"
 #include "ui/story_details.h"
-#include "ui/talking_point/talking_point_detail_list_window.h"
-#include "ui/talking_point/talking_point_detail_text_window.h"
-#include "ui/technical_detail/technical_detail_detail_list_window.h"
-#include "ui/technical_detail/technical_detail_detail_text_window.h"
-#include "ui/timeline/timeline_detail_list_window.h"
-#include "ui/timeline/timeline_detail_text_window.h"
-#include "ui/travel_advisory/travel_advisory_detail_text_window.h"
 #include "utils/debug_logger.h"
 #include "utils/string_utils.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_ITEMS_HIGH 100
-#define MAX_ITEMS_LOW 20
+#define MAX_ITEMS 20
 #define QR_MAX_CAPACITY 512
 
 /**
@@ -73,7 +58,7 @@
 // Navigation hierarchy levels - matches UI stack
 typedef struct
 {
-    char *categories[MAX_ITEMS_HIGH];
+    char *categories[MAX_ITEMS];
     uint16_t categories_count;
     uint8_t additional_feeds_count;
 } CategoriesLevel;
@@ -81,8 +66,9 @@ typedef struct
 typedef struct
 {
     char *selected_category;
-    char *story_titles[MAX_ITEMS_LOW];
-    bool stories_read[MAX_ITEMS_LOW];
+    int selected_category_index;
+    char *story_titles[MAX_ITEMS];
+    bool stories_read[MAX_ITEMS];
     uint16_t story_titles_count;
     char *story_id;
     char *story_full_title;
@@ -91,19 +77,19 @@ typedef struct
 
 typedef struct
 {
-    char *available_details[MAX_ITEMS_LOW];
+    char *available_details[MAX_ITEMS];
     uint16_t available_details_count;
 } AvailableDetailsLevel;
 
 typedef struct
 {
     char *detail_type;
-    char *detail_options[MAX_ITEMS_LOW];
+    char *detail_options[MAX_ITEMS];
     uint16_t detail_options_count;
     char *detail_title;
     char *detail_text;
     bool has_sources;
-    char *sources[MAX_ITEMS_LOW];
+    char *sources[MAX_ITEMS];
     uint16_t sources_count;
     uint8_t *qr_code_chunks;
     uint16_t qr_code_chunks_capacity;
@@ -112,7 +98,7 @@ typedef struct
 } SelectedDetailLevel;
 
 static CategoriesLevel level_1_categories = {{0}, 0, 0};
-static StoryViewLevel level_2_story_view = {NULL, {0}, {0}, 0, NULL, NULL, NULL};
+static StoryViewLevel level_2_story_view = {NULL, 0, {0}, {0}, 0, NULL, NULL, NULL};
 static AvailableDetailsLevel level_3_available_details = {{0}, 0};
 static SelectedDetailLevel level_4_selected_detail = {0};
 
@@ -134,7 +120,7 @@ void push_local_categories(char *categories_string)
 {
     bool was_empty = (level_1_categories.categories_count == 0);
     level_1_categories.categories_count += string_split_to_array(
-        level_1_categories.categories, level_1_categories.categories_count, MAX_ITEMS_HIGH, categories_string, "||");
+        level_1_categories.categories, level_1_categories.categories_count, MAX_ITEMS, categories_string, "||");
 
     // Dismiss splash screen on first category load
     if (was_empty && level_1_categories.categories_count > 0 && splash_screen_is_showing())
@@ -200,11 +186,22 @@ void set_selected_category(char *category_name)
     }
 }
 
+void set_selected_category_index(int index)
+{
+    if (index)
+    {
+        level_2_story_view.selected_category_index = index;
+    }
+    else
+    {
+        level_2_story_view.selected_category_index = 0;
+    }
+}
+
 void push_story_titles(char *story_titles_string)
 {
-    level_2_story_view.story_titles_count +=
-        string_split_to_array(level_2_story_view.story_titles, level_2_story_view.story_titles_count, MAX_ITEMS_LOW,
-                              story_titles_string, "||");
+    level_2_story_view.story_titles_count += string_split_to_array(
+        level_2_story_view.story_titles, level_2_story_view.story_titles_count, MAX_ITEMS, story_titles_string, "||");
     main_story_list_window_ui_update();
 }
 
@@ -212,6 +209,7 @@ const StoryListData *get_story_list_data(void)
 {
     static StoryListData data;
     data.selected_category = level_2_story_view.selected_category;
+    data.selected_category_index = level_2_story_view.selected_category_index;
     if (level_2_story_view.story_titles_count == 0)
     {
         static const char *loading_arr[1];
@@ -355,7 +353,7 @@ void set_available_details(char *details_string)
     }
     level_3_available_details.available_details_count =
         string_split_to_array(level_3_available_details.available_details,
-                              level_3_available_details.available_details_count, MAX_ITEMS_LOW, details_string, "||");
+                              level_3_available_details.available_details_count, MAX_ITEMS, details_string, "||");
     request_available_details_menu_update();
 }
 
@@ -429,7 +427,7 @@ void set_detail_options(char *options_string, void (*callback)(void))
     }
     level_4_selected_detail.detail_options_count =
         string_split_to_array(level_4_selected_detail.detail_options, level_4_selected_detail.detail_options_count,
-                              MAX_ITEMS_LOW, options_string, "||");
+                              MAX_ITEMS, options_string, "||");
     if (callback)
     {
         callback();
@@ -549,7 +547,7 @@ void set_detail_sources(char *sources, void (*callback)(void))
         clear_detail_sources_data();
     }
     level_4_selected_detail.sources_count = string_split_to_array(
-        level_4_selected_detail.sources, level_4_selected_detail.sources_count, MAX_ITEMS_LOW, sources, "||");
+        level_4_selected_detail.sources, level_4_selected_detail.sources_count, MAX_ITEMS, sources, "||");
     if (callback)
     {
         callback();

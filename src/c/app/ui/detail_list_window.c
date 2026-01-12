@@ -19,7 +19,7 @@ typedef struct
 } DetailListWindowContext;
 
 // Map windows to their contexts (since menu_handler uses window_set_user_data)
-#define MAX_DETAIL_WINDOWS 8
+#define MAX_DETAIL_WINDOWS 4
 static DetailListWindowContext *s_window_contexts[MAX_DETAIL_WINDOWS] = {0};
 
 static DetailListWindowContext *get_window_context(Window *window)
@@ -155,7 +155,7 @@ void detail_list_window_ui_init(Window **window, DataResource resource_requireme
         }
         else
         {
-            title = localization_translate_category(title);
+            title = localization_get_category_by_index(get_story_list_data()->selected_category_index);
         }
     }
     else if (detail_type == DETAIL_TYPE_DETAIL_SOURCES)

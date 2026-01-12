@@ -52,8 +52,9 @@ void navigation_proceed(NavigationTier current_tier, const char *detail_type, bo
 /**
  * Navigate to story titles from categories
  * @param category: The category name
+ * @param category_index: The index of the selected category
  */
-void navigation_open_story_titles(const char *category);
+void navigation_open_story_titles(const char *category, int category_index);
 
 /**
  * Navigate to a story summary from story list

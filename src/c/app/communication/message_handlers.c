@@ -2,37 +2,13 @@
 #include "../app.h"
 #include "../communication.h"
 #include "../data.h"
+#include "../detail_types.h"
 #include "../localization/localization.h"
-#include "../ui/action_items/action_items_detail_list_window.h"
-#include "../ui/action_items/action_items_detail_text_window.h"
-#include "../ui/background/background_detail_text_window.h"
 #include "../ui/categories.h"
-#include "../ui/did_you_know/did_you_know_detail_text_window.h"
-#include "../ui/humanitarian_impact/humanitarian_impact_detail_text_window.h"
-#include "../ui/industry_impact/industry_impact_detail_list_window.h"
-#include "../ui/industry_impact/industry_impact_detail_text_window.h"
-#include "../ui/international_reactions/international_reactions_detail_list_window.h"
-#include "../ui/international_reactions/international_reactions_detail_text_window.h"
+#include "../ui/detail_window_registry.h"
 #include "../ui/main_story/main_story_list_window.h"
-#include "../ui/performance_statistics/performance_statistics_detail_list_window.h"
-#include "../ui/performance_statistics/performance_statistics_detail_text_window.h"
-#include "../ui/perspective/perspective_detail_list_window.h"
-#include "../ui/perspective/perspective_detail_text_window.h"
-#include "../ui/qna/qna_detail_list_window.h"
-#include "../ui/qna/qna_detail_text_window.h"
-#include "../ui/quote/quote_detail_text_window.h"
-#include "../ui/scientific_significance/scientific_significance_detail_list_window.h"
-#include "../ui/scientific_significance/scientific_significance_detail_text_window.h"
 #include "../ui/source/active_detail_source_list_window.h"
 #include "../ui/source/source_detail_list_window.h"
-#include "../ui/talking_point/talking_point_detail_list_window.h"
-#include "../ui/talking_point/talking_point_detail_text_window.h"
-#include "../ui/technical_detail/technical_detail_detail_list_window.h"
-#include "../ui/technical_detail/technical_detail_detail_text_window.h"
-#include "../ui/timeline/timeline_detail_list_window.h"
-#include "../ui/timeline/timeline_detail_text_window.h"
-#include "../ui/travel_advisory/travel_advisory_detail_list_window.h"
-#include "../ui/travel_advisory/travel_advisory_detail_text_window.h"
 #include "../ui/ui_config.h"
 #include "../utils/debug_logger.h"
 
@@ -259,208 +235,22 @@ void handle_get_story_detail_message(DictionaryIterator *iter)
             return;
         }
 
+        const char *detail_type_name = story_detail_type_tuple->value->cstring;
+        const DetailTypeInfo *info = detail_type_from_api_name(detail_type_name);
+
+        if (!info)
+        {
+            ERROR_LOG("KNCMessageHandling", "Unknown story detail type: %s", detail_type_name);
+            return;
+        }
+
         void (*set_detail)(char *data, void (*ui_update_callback)(void)) = NULL;
         void (*ui_update_callback)(void) = NULL;
-        if (strcmp(story_detail_type_tuple->value->cstring, "Background") == 0)
+
+        // Special handling for Quote title (author)
+        if (info->detail_type == DETAIL_TYPE_QUOTE && story_detail_extra_tuple)
         {
-            set_detail = set_detail_text;
-            ui_update_callback = background_detail_text_window_ui_update;
-        }
-        else if (strcmp(story_detail_type_tuple->value->cstring, "Articles") == 0)
-        {
-            set_detail = set_detail_options;
-            ui_update_callback = source_detail_list_window_ui_update;
-        }
-        else if (strcmp(story_detail_type_tuple->value->cstring, "Perspectives") == 0)
-        {
-            if (story_detail_extra_tuple && story_detail_tuple)
-            {
-                if (strcmp(story_detail_extra_tuple->value->cstring, "povs") == 0)
-                {
-                    set_detail = set_detail_options;
-                    ui_update_callback = perspective_detail_list_window_ui_update;
-                }
-                else if (strcmp(story_detail_extra_tuple->value->cstring, "text") == 0)
-                {
-                    set_detail = set_detail_text;
-                    ui_update_callback = perspective_detail_text_window_ui_update;
-                }
-                else
-                {
-                    ERROR_LOG("KNCMessageHandling", "Unknown Perspective detail key: %s",
-                              story_detail_extra_tuple->value->cstring);
-                }
-            }
-            else
-            {
-                ERROR_LOG("KNCMessageHandling", "Missing data for PerspectivePovs detail");
-            }
-        }
-        else if (strcmp(story_detail_type_tuple->value->cstring, "TalkingPoints") == 0)
-        {
-            if (story_detail_extra_tuple && story_detail_tuple)
-            {
-                if (strcmp(story_detail_extra_tuple->value->cstring, "povs") == 0)
-                {
-                    set_detail = set_detail_options;
-                    ui_update_callback = talking_point_detail_list_window_ui_update;
-                }
-                else if (strcmp(story_detail_extra_tuple->value->cstring, "text") == 0)
-                {
-                    set_detail = set_detail_text;
-                    ui_update_callback = talking_point_detail_text_window_ui_update;
-                }
-                else
-                {
-                    ERROR_LOG("KNCMessageHandling", "Unknown Talking Points detail key: %s",
-                              story_detail_extra_tuple->value->cstring);
-                }
-            }
-            else
-            {
-                ERROR_LOG("KNCMessageHandling", "Missing data for Talking Points detail");
-            }
-        }
-        else if (strcmp(story_detail_type_tuple->value->cstring, "TechnicalDetails") == 0)
-        {
-            if (story_detail_extra_tuple && story_detail_tuple)
-            {
-                if (strcmp(story_detail_extra_tuple->value->cstring, "povs") == 0)
-                {
-                    set_detail = set_detail_options;
-                    ui_update_callback = technical_detail_detail_list_window_ui_update;
-                }
-                else if (strcmp(story_detail_extra_tuple->value->cstring, "text") == 0)
-                {
-                    set_detail = set_detail_text;
-                    ui_update_callback = technical_detail_detail_text_window_ui_update;
-                }
-                else
-                {
-                    ERROR_LOG("KNCMessageHandling", "Unknown Technical Details detail key: %s",
-                              story_detail_extra_tuple->value->cstring);
-                }
-            }
-            else
-            {
-                ERROR_LOG("KNCMessageHandling", "Missing data for Technical Details detail");
-            }
-        }
-        else if (strcmp(story_detail_type_tuple->value->cstring, "IndustryImpact") == 0)
-        {
-            if (story_detail_extra_tuple && story_detail_tuple)
-            {
-                if (strcmp(story_detail_extra_tuple->value->cstring, "povs") == 0)
-                {
-                    set_detail = set_detail_options;
-                    ui_update_callback = industry_impact_detail_list_window_ui_update;
-                }
-                else if (strcmp(story_detail_extra_tuple->value->cstring, "text") == 0)
-                {
-                    set_detail = set_detail_text;
-                    ui_update_callback = industry_impact_detail_text_window_ui_update;
-                }
-                else
-                {
-                    ERROR_LOG("KNCMessageHandling", "Unknown Industry Impact detail key: %s",
-                              story_detail_extra_tuple->value->cstring);
-                }
-            }
-            else
-            {
-                ERROR_LOG("KNCMessageHandling", "Missing data for Industry Impact detail");
-            }
-        }
-        else if (strcmp(story_detail_type_tuple->value->cstring, "QnA") == 0)
-        {
-            if (story_detail_extra_tuple && story_detail_tuple)
-            {
-                if (strcmp(story_detail_extra_tuple->value->cstring, "qnas") == 0)
-                {
-                    set_detail = set_detail_options;
-                    ui_update_callback = qna_detail_list_window_ui_update;
-                }
-                else if (strcmp(story_detail_extra_tuple->value->cstring, "text") == 0)
-                {
-                    set_detail = set_detail_text;
-                    ui_update_callback = qna_detail_text_window_ui_update;
-                }
-                else
-                {
-                    ERROR_LOG("KNCMessageHandling", "Unknown QnA detail key: %s",
-                              story_detail_extra_tuple->value->cstring);
-                }
-            }
-            else
-            {
-                ERROR_LOG("KNCMessageHandling", "Missing data for QnA detail");
-            }
-        }
-        else if (strcmp(story_detail_type_tuple->value->cstring, "Timeline") == 0)
-        {
-            if (story_detail_extra_tuple && story_detail_tuple)
-            {
-                if (strcmp(story_detail_extra_tuple->value->cstring, "dates") == 0)
-                {
-                    set_detail = set_detail_options;
-                    ui_update_callback = timeline_detail_list_window_ui_update;
-                }
-                else if (strcmp(story_detail_extra_tuple->value->cstring, "text") == 0)
-                {
-                    set_detail = set_detail_text;
-                    ui_update_callback = timeline_detail_text_window_ui_update;
-                }
-                else
-                {
-                    ERROR_LOG("KNCMessageHandling", "Unknown Timeline detail key: %s",
-                              story_detail_extra_tuple->value->cstring);
-                }
-            }
-            else
-            {
-                ERROR_LOG("KNCMessageHandling", "Missing data for Timeline detail");
-            }
-        }
-        else if (strcmp(story_detail_type_tuple->value->cstring, "HumanitarianImpact") == 0)
-        {
-            set_detail = set_detail_text;
-            ui_update_callback = humanitarian_impact_detail_text_window_ui_update;
-        }
-        else if (strcmp(story_detail_type_tuple->value->cstring, "TravelAdvisory") == 0)
-        {
-            if (story_detail_extra_tuple && story_detail_tuple)
-            {
-                if (strcmp(story_detail_extra_tuple->value->cstring, "advisories") == 0)
-                {
-                    set_detail = set_detail_options;
-                    ui_update_callback = travel_advisory_detail_list_window_ui_update;
-                }
-                else if (strcmp(story_detail_extra_tuple->value->cstring, "text") == 0)
-                {
-                    set_detail = set_detail_text;
-                    ui_update_callback = travel_advisory_detail_text_window_ui_update;
-                }
-                else
-                {
-                    ERROR_LOG("KNCMessageHandling", "Unknown Travel Advisory detail key: %s",
-                              story_detail_extra_tuple->value->cstring);
-                }
-            }
-            else
-            {
-                ERROR_LOG("KNCMessageHandling", "Missing data for Travel Advisory detail");
-            }
-        }
-        else if (strcmp(story_detail_type_tuple->value->cstring, "DidYouKnow") == 0)
-        {
-            set_detail = set_detail_text;
-            ui_update_callback = did_you_know_detail_text_window_ui_update;
-        }
-        else if (strcmp(story_detail_type_tuple->value->cstring, "Quote") == 0)
-        {
-            // For Quote, data3 contains the author which is used as the title
-            if (story_detail_extra_tuple && story_detail_extra_tuple->value->cstring &&
-                strlen(story_detail_extra_tuple->value->cstring) > 0)
+            if (story_detail_extra_tuple->value->cstring && strlen(story_detail_extra_tuple->value->cstring) > 0)
             {
                 set_detail_title(story_detail_extra_tuple->value->cstring, NULL);
             }
@@ -468,117 +258,48 @@ void handle_get_story_detail_message(DictionaryIterator *iter)
             {
                 set_detail_title("Quote", NULL);
             }
+        }
+
+        // Special handling for Articles (sources) which uses a different window system
+        if (info->detail_type == DETAIL_TYPE_ARTICLES)
+        {
+            set_detail = set_detail_options;
+            ui_update_callback = source_detail_list_window_ui_update;
+        }
+        // For all other types, use the common registry
+        else if (story_detail_extra_tuple)
+        {
+            const char *data_type = story_detail_extra_tuple->value->cstring;
+
+            // Check if this is list data (povs, qnas, dates, advisories, etc.) or text data
+            if (strcmp(data_type, "text") == 0)
+            {
+                set_detail = set_detail_text;
+                ui_update_callback = detail_window_registry_update_text;
+            }
+            else if (info->has_list)
+            {
+                // Any other data type is list data
+                set_detail = set_detail_options;
+                ui_update_callback = detail_window_registry_update_list;
+            }
+            else
+            {
+                ERROR_LOG("KNCMessageHandling", "Unknown detail data type: %s for %s", data_type, detail_type_name);
+            }
+        }
+        // Text-only types (no preceding list data)
+        else if (info->has_text && !info->has_list)
+        {
             set_detail = set_detail_text;
-            ui_update_callback = quote_detail_text_window_ui_update;
+            ui_update_callback = detail_window_registry_update_text;
         }
-        else if (strcmp(story_detail_type_tuple->value->cstring, "InternationalReactions") == 0)
-        {
-            if (story_detail_extra_tuple && story_detail_tuple)
-            {
-                if (strcmp(story_detail_extra_tuple->value->cstring, "reactions") == 0)
-                {
-                    set_detail = set_detail_options;
-                    ui_update_callback = international_reactions_detail_list_window_ui_update;
-                }
-                else if (strcmp(story_detail_extra_tuple->value->cstring, "text") == 0)
-                {
-                    set_detail = set_detail_text;
-                    ui_update_callback = international_reactions_detail_text_window_ui_update;
-                }
-                else
-                {
-                    ERROR_LOG("KNCMessageHandling", "Unknown International Reactions detail key: %s",
-                              story_detail_extra_tuple->value->cstring);
-                }
-            }
-            else
-            {
-                ERROR_LOG("KNCMessageHandling", "Missing data for International Reactions detail");
-            }
-        }
-        else if (strcmp(story_detail_type_tuple->value->cstring, "UserActionItems") == 0)
-        {
-            if (story_detail_extra_tuple && story_detail_tuple)
-            {
-                if (strcmp(story_detail_extra_tuple->value->cstring, "action_items") == 0)
-                {
-                    set_detail = set_detail_options;
-                    ui_update_callback = action_items_detail_list_window_ui_update;
-                }
-                else if (strcmp(story_detail_extra_tuple->value->cstring, "text") == 0)
-                {
-                    set_detail = set_detail_text;
-                    ui_update_callback = action_items_detail_text_window_ui_update;
-                }
-                else
-                {
-                    ERROR_LOG("KNCMessageHandling", "Unknown Action Items detail key: %s",
-                              story_detail_extra_tuple->value->cstring);
-                }
-            }
-            else
-            {
-                ERROR_LOG("KNCMessageHandling", "Missing data for Action Items detail");
-            }
-        }
-        else if (strcmp(story_detail_type_tuple->value->cstring, "PerformanceStatistics") == 0)
-        {
-            if (story_detail_extra_tuple && story_detail_tuple)
-            {
-                if (strcmp(story_detail_extra_tuple->value->cstring, "statistics") == 0)
-                {
-                    set_detail = set_detail_options;
-                    ui_update_callback = performance_statistics_detail_list_window_ui_update;
-                }
-                else if (strcmp(story_detail_extra_tuple->value->cstring, "text") == 0)
-                {
-                    set_detail = set_detail_text;
-                    ui_update_callback = performance_statistics_detail_text_window_ui_update;
-                }
-                else
-                {
-                    ERROR_LOG("KNCMessageHandling", "Unknown Performance Statistics detail key: %s",
-                              story_detail_extra_tuple->value->cstring);
-                }
-            }
-            else
-            {
-                ERROR_LOG("KNCMessageHandling", "Missing data for Performance Statistics detail");
-            }
-        }
-        else if (strcmp(story_detail_type_tuple->value->cstring, "ScientificSignificance") == 0)
-        {
-            if (story_detail_extra_tuple && story_detail_tuple)
-            {
-                if (strcmp(story_detail_extra_tuple->value->cstring, "significance") == 0)
-                {
-                    set_detail = set_detail_options;
-                    ui_update_callback = scientific_significance_detail_list_window_ui_update;
-                }
-                else if (strcmp(story_detail_extra_tuple->value->cstring, "text") == 0)
-                {
-                    set_detail = set_detail_text;
-                    ui_update_callback = scientific_significance_detail_text_window_ui_update;
-                }
-                else
-                {
-                    ERROR_LOG("KNCMessageHandling", "Unknown Scientific Significance detail key: %s",
-                              story_detail_extra_tuple->value->cstring);
-                }
-            }
-            else
-            {
-                ERROR_LOG("KNCMessageHandling", "Missing data for Scientific Significance detail");
-            }
-        }
-        else
-        {
-            ERROR_LOG("KNCMessageHandling", "Unknown story detail type: %s", story_detail_type_tuple->value->cstring);
-        }
+
         if (set_detail && ui_update_callback)
         {
             set_detail(story_detail_tuple->value->cstring, ui_update_callback);
         }
+
         if (story_detail_sources_tuple)
         {
             set_detail_has_sources(story_detail_sources_tuple->value->int8 == 1 ? true : false, ui_update_callback);

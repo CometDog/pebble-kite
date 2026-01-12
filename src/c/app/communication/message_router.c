@@ -1,7 +1,7 @@
 #include "message_router.h"
 #include "../utils/debug_logger.h"
 
-#define MAX_HANDLERS 20
+#define MAX_HANDLERS 15
 
 typedef struct
 {

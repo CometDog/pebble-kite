@@ -12,6 +12,7 @@ typedef struct
 typedef struct
 {
     char *selected_category;
+    int selected_category_index;
     char **story_titles;
     bool *stories_read;
     uint16_t story_titles_count;
@@ -132,6 +133,12 @@ void clear_categories_data(void);
  * @param category_name The name of the selected category
  */
 void set_selected_category(char *category_name);
+
+/**
+ * Set the selected category index
+ * @param index The index of the selected category
+ */
+void set_selected_category_index(int index);
 
 /**
  * Push new story titles data from a received string

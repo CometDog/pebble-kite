@@ -39,8 +39,8 @@ void localization_set_strings(const char *strings_json);
 const char *localization_get_string(StringId string_id);
 
 /**
- * Translate a category name from English to the current locale
- * @param category_name The category name in English (e.g., "Business", "Gaming")
- * @return Localized category name, or the original name if no translation found
+ * Get a localized category string by index
+ * @param index The category index
+ * @return Localized category string, or empty string if index out of range
  */
-const char *localization_translate_category(const char *category_name);
+const char *localization_get_category_by_index(uint8_t index);

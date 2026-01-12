@@ -13,12 +13,13 @@
 static Window *s_main_window;
 static DataRegistrationHandle s_registration = NULL;
 
-static char *s_translated_categories[100];
+// TODO: This value for the array should be based on the MAX_ITEMS for categories in the data file
+static char *s_translated_categories[20];
 static uint16_t s_translated_count = 0;
 
 static void translate_categories_for_display(void)
 {
-    const CategoriesData *cat_data = get_categories_data();
+    const CategoriesData *category_data = get_categories_data();
 
     // Clear previous translations
     for (int i = 0; i < s_translated_count; ++i)
@@ -27,11 +28,18 @@ static void translate_categories_for_display(void)
     }
     s_translated_count = 0;
 
-    // Translate each category name
-    for (uint16_t i = 0; i < cat_data->categories_count; ++i)
+    // Translate category given the index
+    for (uint16_t i = 0; i < category_data->categories_count && i < 20; ++i)
     {
-        const char *translated = localization_translate_category(cat_data->categories[i]);
-        s_translated_categories[i] = (char *)translated;
+        const char *translated = localization_get_category_by_index(i);
+        if (translated && translated[0] != '\0')
+        {
+            s_translated_categories[i] = (char *)translated;
+        }
+        else
+        {
+            s_translated_categories[i] = category_data->categories[i];
+        }
         s_translated_count++;
     }
 }
@@ -125,7 +133,7 @@ static void category_select_handler_in_section(uint16_t section_index, uint16_t 
     if (actual_index < cat_data->categories_count)
     {
         char *category_name = cat_data->categories[actual_index];
-        navigation_open_story_titles(category_name);
+        navigation_open_story_titles(category_name, actual_index);
     }
 }
 
@@ -157,7 +165,7 @@ static void category_select_handler(int index)
     if (index < cat_data->categories_count)
     {
         char *category_name = cat_data->categories[index];
-        navigation_open_story_titles(category_name);
+        navigation_open_story_titles(category_name, index);
     }
 }
 

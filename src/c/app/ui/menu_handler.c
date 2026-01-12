@@ -82,6 +82,29 @@ static bool any_item_exceeds_length(char **items, uint16_t count, size_t max_len
     return false;
 }
 
+static void get_cell_items(MenuData *data, MenuIndex *cell_index, char ***items_out, uint16_t *count_out,
+                           bool *is_read_out)
+{
+    if (data->config.get_items_in_section)
+    {
+        *items_out = data->config.get_items_in_section(cell_index->section);
+        *count_out = data->config.get_num_items_in_section(cell_index->section);
+        if (data->config.is_item_read_in_section)
+        {
+            *is_read_out = data->config.is_item_read_in_section(cell_index->section, cell_index->row);
+        }
+    }
+    else
+    {
+        *items_out = data->config.get_items();
+        *count_out = data->config.get_num_items();
+        if (data->config.is_item_read)
+        {
+            *is_read_out = data->config.is_item_read(cell_index->row);
+        }
+    }
+}
+
 static void draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context)
 {
     MenuData *data = callback_context;
@@ -89,24 +112,7 @@ static void draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_ind
     uint16_t count;
     bool is_read = false;
 
-    if (data->config.get_items_in_section)
-    {
-        items = data->config.get_items_in_section(cell_index->section);
-        count = data->config.get_num_items_in_section(cell_index->section);
-        if (data->config.is_item_read_in_section)
-        {
-            is_read = data->config.is_item_read_in_section(cell_index->section, cell_index->row);
-        }
-    }
-    else
-    {
-        items = data->config.get_items();
-        count = data->config.get_num_items();
-        if (data->config.is_item_read)
-        {
-            is_read = data->config.is_item_read(cell_index->row);
-        }
-    }
+    get_cell_items(data, cell_index, &items, &count, &is_read);
 
     if (cell_index->row < count)
     {
@@ -179,24 +185,7 @@ static int16_t get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_ind
     uint16_t count;
     bool is_read = false;
 
-    if (data->config.get_items_in_section)
-    {
-        items = data->config.get_items_in_section(cell_index->section);
-        count = data->config.get_num_items_in_section(cell_index->section);
-        if (data->config.is_item_read_in_section)
-        {
-            is_read = data->config.is_item_read_in_section(cell_index->section, cell_index->row);
-        }
-    }
-    else
-    {
-        items = data->config.get_items();
-        count = data->config.get_num_items();
-        if (data->config.is_item_read)
-        {
-            is_read = data->config.is_item_read(cell_index->row);
-        }
-    }
+    get_cell_items(data, cell_index, &items, &count, &is_read);
 
     if (cell_index->row >= count)
     {

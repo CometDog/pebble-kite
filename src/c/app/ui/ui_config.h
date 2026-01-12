@@ -288,5 +288,5 @@ static inline GFont ui_get_system_font_menu_title(void)
 }
 
 // Configuration
-#define UI_MAX_TRACKED_WINDOWS 16
-#define UI_MAX_DETAIL_CONTEXTS 8
+#define UI_MAX_TRACKED_WINDOWS 8
+#define UI_MAX_DETAIL_CONTEXTS 4

@@ -9,7 +9,7 @@
 #define APP_MESSAGE_OUTBOX_SIZE_MAXIMUM APP_MESSAGE_OUTBOX_SIZE_MINIMUM
 #define APP_MESSAGE_OUTBOX_SIZE 512
 #define APP_MESSAGE_INBOX_SIZE 4096
-#define COMMUNICATION_QUEUE_MAX 16
+#define COMMUNICATION_QUEUE_MAX 12
 
 static void inbox_received_callback(DictionaryIterator *iter, void *context)
 {
