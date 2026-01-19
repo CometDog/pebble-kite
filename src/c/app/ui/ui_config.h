@@ -210,11 +210,11 @@ void ui_reload_fonts(void);
 
 #define UI_TEXT_SAFETY_PIXELS 2
 
-// Values taken directly from firmware source
+// Most values taken directly from firmware source
 #define UI_INDICATOR_RADIUS PBL_IF_ROUND_ELSE(12, 13)
 #define UI_INDICATOR_SAFE_AREA_OFFSET 0
 
-// Chalk as a overlap/safe area around the border because of the bezel that must be considered
+// Chalk has an overlap/safe area around the border because of the bezel that must be considered
 #ifdef PBL_PLATFORM_CHALK
 #define UI_INDICATOR_PEBBLE_ROUND_MD_OFFSET 1
 #define UI_INDICATOR_PEBBLE_ROUND_LG_OFFSET -1
@@ -236,6 +236,8 @@ void ui_reload_fonts(void);
 
 #define UI_QR_LOADING_TEXT_HEIGHT_BASE 24
 #define UI_QR_LOADING_TEXT_HEIGHT UI_SCALE_FOR_SIZE(UI_QR_LOADING_TEXT_HEIGHT_BASE)
+
+// Helper functions
 
 // Extern font handles (defined in ui_config.c)
 extern GFont ui_font_title;
