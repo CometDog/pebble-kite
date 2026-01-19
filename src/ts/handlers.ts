@@ -4,6 +4,8 @@ const timelinejs = require("pebble-timeline-js");
 import { createLogger } from "../lib";
 import { addReadStory, getCategoryBatchMap, updateCategories } from "./api";
 import { updateQrCodeBitmap, getQrCodeChunk } from "./qr";
+import { clearCache, updateCachedBatchInfo } from "./server/cache/cacheManager";
+import { batchesRequest } from "./server/request/batches";
 import { onThisDayRequest } from "./server/request/onThisDay";
 
 import {
@@ -282,10 +284,10 @@ export const handleGetStoryTitles = ({
   const { pageItems, nextPage } = paginate(titles, page);
   const processed = shortData
     ? pageItems.map((title) =>
-      title.length > SHORT_TITLE_LENGTH
-        ? title.slice(0, SHORT_TITLE_LENGTH - 3) + "..."
-        : title,
-    )
+        title.length > SHORT_TITLE_LENGTH
+          ? title.slice(0, SHORT_TITLE_LENGTH - 3) + "..."
+          : title,
+      )
     : pageItems;
 
   // This is redundant to the code above and should be DRY'd up
@@ -872,7 +874,23 @@ export const clearReadStoriesCache = () => {
   localStorage.removeItem("readStories");
 };
 
-export const clearFullCache = () => {
+export const clearNetworkCache = async ({
+  repopulateBatchId,
+}: {
+  repopulateBatchId: boolean;
+}) => {
+  clearCache();
+  if (repopulateBatchId) {
+    const batchInfo = (await batchesRequest()).batches[0];
+    log.info(
+      `Current batch ID: ${batchInfo.id}, created at ${batchInfo.createdAt}`,
+    );
+    updateCachedBatchInfo(batchInfo);
+  }
+};
+
+export const clearFullCache = async () => {
   clearPinCache();
   clearReadStoriesCache();
+  await clearNetworkCache({ repopulateBatchId: true });
 };

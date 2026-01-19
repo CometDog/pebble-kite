@@ -1,4 +1,4 @@
-import { fetchText } from "../fetchUtils";
+import { cacheFirstFetchText } from "../cache/cacheFirstFetch";
 import { Story } from "../type/Story";
 
 export type SmallWebEntry = Pick<
@@ -86,7 +86,7 @@ export const smallWebFeedRequest = async (
 ): Promise<SmallWebFeedResponse> => {
   const url = `https://kagi.com/api/v1/smallweb/feed?limit=${limit + 6}`; // Request a few extra to account for filtering
 
-  const xmlText = await fetchText(url);
+  const xmlText = await cacheFirstFetchText(url);
   return {
     entries: parseAtomFeed(xmlText)
       .entries.filter((entry) => entry.short_summary.length > 0)

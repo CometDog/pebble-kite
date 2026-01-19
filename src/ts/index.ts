@@ -35,6 +35,8 @@ import {
   getInterfaceStrings,
 } from "./localization";
 import { setServerLang } from "./server/localeManager";
+import { clearCache, updateCachedBatchInfo } from "./server/cache/cacheManager";
+import { batchesRequest } from "./server/request/batches";
 
 const log = createLogger("KNJS");
 
@@ -51,6 +53,11 @@ Pebble.addEventListener("ready", async () => {
     const response = await healthRequest();
     if (response.health === true) {
       log.info("Kagi News API is healthy");
+      const batchInfo = (await batchesRequest()).batches[0];
+      log.info(
+        `Current batch ID: ${batchInfo.id}, created at ${batchInfo.createdAt}`,
+      );
+      updateCachedBatchInfo(batchInfo);
 
       const newsRefreshPinEnabled = getConfig("newsRefreshPinSetting");
       if (newsRefreshPinEnabled) {
@@ -118,6 +125,9 @@ Pebble.addEventListener("showConfiguration", () => {
 
 // @ts-ignore
 Pebble.addEventListener("webviewclosed", async (event: any) => {
+  // Dump the entire cache if Clay is closed to avoid problems
+  await handlers.clearNetworkCache({ repopulateBatchId: true });
+
   try {
     if (!event || !event.response) return;
     PebbleTS.sendAppMessage({ type: "restart_app" });
@@ -211,7 +221,7 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
     const clearFullCacheOnSave = settings["10406"] as boolean;
     if (clearFullCacheOnSave) {
       log.info("Clearing full cache as per user request");
-      handlers.clearFullCache();
+      await handlers.clearFullCache();
     } else {
       // Clear timeline pin memory on save is key 10407
       const clearPinCacheOnSave = settings["10407"] as boolean;
@@ -224,6 +234,13 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
       if (clearReadStoriesOnSave) {
         log.info("Clearing read stories cache as per user request");
         handlers.clearReadStoriesCache();
+      }
+      // Clear network cache on save is key 10409
+      // This is redundant because we always clear the network cache on Clay closing, but the certainty of it is useful to have
+      const clearNetworkCacheOnSave = settings["10409"] as boolean;
+      if (clearNetworkCacheOnSave) {
+        log.info("Clearing network cache as per user request");
+        await handlers.clearNetworkCache({ repopulateBatchId: true });
       }
     }
   } catch (err) {

@@ -1,4 +1,4 @@
-import { fetchJSON } from "../fetchUtils";
+import { cacheFirstFetchJSON } from "../cache/cacheFirstFetch";
 import { getServerLang } from "../localeManager";
 import { CategoryMetadata } from "../type/CategoryMetadata";
 
@@ -7,6 +7,6 @@ type CategoriesMetadataResponse = {
 };
 
 export const categoriesMetadataRequest = () =>
-  fetchJSON<CategoriesMetadataResponse>(
+  cacheFirstFetchJSON<CategoriesMetadataResponse>(
     `https://news.kagi.com/api/categories/metadata${getServerLang() && `?lang=${getServerLang()}`}`,
   );

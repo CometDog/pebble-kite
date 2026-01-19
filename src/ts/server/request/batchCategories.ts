@@ -1,4 +1,4 @@
-import { fetchJSON } from "../fetchUtils";
+import { cacheFirstFetchJSON } from "../cache/cacheFirstFetch";
 import { getServerLang } from "../localeManager";
 import { BatchCategory } from "../type/BatchCategory";
 
@@ -13,7 +13,7 @@ export const batchCategoriesRequest = ({
   batchId = "latest",
 }: {
   batchId?: string;
-}) =>
-  fetchJSON<BatchCategoriesResponse>(
+} = {}) =>
+  cacheFirstFetchJSON<BatchCategoriesResponse>(
     `https://news.kagi.com/api/batches/${batchId}/categories${getServerLang() && `?lang=${getServerLang()}`}`,
   );

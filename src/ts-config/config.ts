@@ -353,11 +353,12 @@ export default [
         type: "checkboxgroup",
         messageKey: "ClearCacheOnSave",
         label: "Clear Cache On Save",
-        defaultValue: [false, false, false],
+        defaultValue: [false, false, false, false],
         options: [
           "Clear full cache",
           "Clear timeline pin memory",
           "Clear read stories memory",
+          "Clear network cache",
         ],
       },
     ],

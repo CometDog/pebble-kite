@@ -1,7 +1,7 @@
 import { getServerLang } from "../localeManager";
 import { Story } from "../type/Story";
 import { StoryDomain } from "../type/StoryDomain";
-import { fetchJSON } from "../fetchUtils";
+import { cacheFirstFetchJSON } from "../cache/cacheFirstFetch";
 
 export type BatchCategoryStoriesResponse = {
   batchId: string;
@@ -23,6 +23,6 @@ export const batchCategoryStoriesRequest = ({
   categoryId: string;
   limit?: number;
 }) =>
-  fetchJSON<BatchCategoryStoriesResponse>(
+  cacheFirstFetchJSON<BatchCategoryStoriesResponse>(
     `https://news.kagi.com/api/batches/${batchId}/categories/${categoryId}/stories?limit=${limit}${getServerLang() && `&lang=${getServerLang()}`}`,
   );
