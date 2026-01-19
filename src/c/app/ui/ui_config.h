@@ -210,20 +210,32 @@ void ui_reload_fonts(void);
 
 #define UI_TEXT_SAFETY_PIXELS 2
 
-#define UI_INDICATOR_RADIUS 10
-#ifdef PBL_ROUND
-#define UI_INDICATOR_X_OFFSET 3
+// Values taken directly from firmware source
+#define UI_INDICATOR_RADIUS PBL_IF_ROUND_ELSE(12, 13)
+#define UI_INDICATOR_SAFE_AREA_OFFSET 0
+
+// Chalk as a overlap/safe area around the border because of the bezel that must be considered
+#ifdef PBL_PLATFORM_CHALK
+#define UI_INDICATOR_PEBBLE_ROUND_MD_OFFSET 1
+#define UI_INDICATOR_PEBBLE_ROUND_LG_OFFSET -1
 #else
-#define UI_INDICATOR_X_OFFSET 5
+#define UI_INDICATOR_PEBBLE_ROUND_MD_OFFSET 3
+#define UI_INDICATOR_PEBBLE_ROUND_LG_OFFSET 1
 #endif
+#define UI_INDICATOR_X_OFFSET                                                                                          \
+    (UI_INDICATOR_RADIUS + ((ui_effective_preferred_content_size() == PreferredContentSizeSmall)                       \
+                                ? PBL_IF_ROUND_ELSE(UI_INDICATOR_PEBBLE_ROUND_MD_OFFSET, 8)                            \
+                            : (ui_effective_preferred_content_size() == PreferredContentSizeLarge)                     \
+                                ? PBL_IF_ROUND_ELSE(UI_INDICATOR_PEBBLE_ROUND_LG_OFFSET, 4)                            \
+                            : (ui_effective_preferred_content_size() == PreferredContentSizeExtraLarge)                \
+                                ? PBL_IF_ROUND_ELSE(UI_INDICATOR_PEBBLE_ROUND_LG_OFFSET, 4)                            \
+                                : PBL_IF_ROUND_ELSE(UI_INDICATOR_PEBBLE_ROUND_MD_OFFSET, 8)))
 
 #define UI_QR_Y_FUDGE_BASE 24
 #define UI_QR_Y_FUDGE UI_SCALE_FOR_SIZE(UI_QR_Y_FUDGE_BASE)
 
 #define UI_QR_LOADING_TEXT_HEIGHT_BASE 24
 #define UI_QR_LOADING_TEXT_HEIGHT UI_SCALE_FOR_SIZE(UI_QR_LOADING_TEXT_HEIGHT_BASE)
-
-// Helper functions
 
 // Extern font handles (defined in ui_config.c)
 extern GFont ui_font_title;

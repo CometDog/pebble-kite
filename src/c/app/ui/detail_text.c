@@ -76,12 +76,17 @@ static void click_config_provider(void *context)
 
 static void indicator_layer_update_proc(Layer *layer, GContext *ctx)
 {
+    // Logic attempts to mirror that of the firmware handling of the action button indicator
     GRect bounds = layer_get_bounds(layer);
+
+    GRect indicator_bounds = GRect(0, 0, UI_INDICATOR_RADIUS * 2, UI_INDICATOR_RADIUS * 2);
+    grect_align(&indicator_bounds, &bounds, GAlignRight, false);
+    indicator_bounds.origin.x += UI_INDICATOR_X_OFFSET;
+
     graphics_context_set_fill_color(ctx, UI_COLOR_TEXT_PRIMARY);
-    // Draw a circle on the right edge (slightly off-screen) to indicate next page
-    const int16_t radius = UI_INDICATOR_RADIUS;
-    GPoint center = GPoint(bounds.size.w + UI_INDICATOR_X_OFFSET, bounds.size.h / 2);
-    graphics_fill_circle(ctx, center, radius);
+    graphics_fill_circle(
+        ctx, GPoint(indicator_bounds.origin.x + UI_INDICATOR_RADIUS, indicator_bounds.origin.y + UI_INDICATOR_RADIUS),
+        UI_INDICATOR_RADIUS);
 }
 
 static void update_content_for_window(Window *window)
