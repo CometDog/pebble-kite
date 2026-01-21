@@ -53,7 +53,7 @@ Pebble.addEventListener("ready", async () => {
     const response = await healthRequest();
     if (response.health === true) {
       log.info("Kagi News API is healthy");
-      const batchInfo = (await batchesRequest()).batches[0];
+      const batchInfo = await batchesRequest();
       log.info(
         `Current batch ID: ${batchInfo.id}, created at ${batchInfo.createdAt}`,
       );

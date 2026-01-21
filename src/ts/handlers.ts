@@ -881,7 +881,7 @@ export const clearNetworkCache = async ({
 }) => {
   clearCache();
   if (repopulateBatchId) {
-    const batchInfo = (await batchesRequest()).batches[0];
+    const batchInfo = await batchesRequest();
     log.info(
       `Current batch ID: ${batchInfo.id}, created at ${batchInfo.createdAt}`,
     );
