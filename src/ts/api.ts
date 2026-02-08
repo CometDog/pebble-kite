@@ -143,6 +143,7 @@ const updateStories = async ({
       (entry) =>
         normalizeValue({
           id: entry.id,
+          unique_domains: 1,
           read: false,
           category: "Small Web",
           title: entry.title,
@@ -155,6 +156,7 @@ const updateStories = async ({
       (story) =>
         normalizeValue({
           id: story.id,
+          unique_domains: story.unique_domains,
           read: false,
           category: story.category,
           title: story.title,
@@ -224,11 +226,9 @@ const sortData = (data: CurrentData) => {
   );
   const processedCategories = sortedCategories.map((categorized) => ({
     ...categorized,
-    stories: [...categorized.stories].sort((a, b) => {
-      if (a.id > b.id) return 1;
-      if (a.id < b.id) return -1;
-      return 0;
-    }),
+    stories: [...categorized.stories].sort(
+      (a, b) => b.unique_domains - a.unique_domains,
+    ),
   }));
   return { ...data, categorizedStories: processedCategories };
 };

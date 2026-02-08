@@ -26,6 +26,7 @@ export type StoryDetailType = keyof typeof StoryDetailEnum;
 
 export type SimpleStory = {
   id: string;
+  unique_domains: number;
   read: boolean;
   category: string;
   title: string;
