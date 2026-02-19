@@ -128,10 +128,10 @@ const handleDetailList = <T>(
       sendAppMessage({
         type: "get_story_detail",
         state: "success",
-        data1: detailType,
-        data2: content,
-        data3: "text",
-        data4: contentContainsSources(content) ? 1 : 0,
+        detailType: detailType,
+        detailContent: content,
+        detailContentType: "text",
+        detailHasSources: contentContainsSources(content) ? 1 : 0,
       });
       return true;
     }
@@ -155,9 +155,9 @@ const handleDetailList = <T>(
   sendAppMessage({
     type: "get_story_detail",
     state: "success",
-    data1: detailType,
-    data2: keys.join("||"),
-    data3: data3ForKeys,
+    detailType: detailType,
+    detailContent: keys.join("||"),
+    detailContentType: data3ForKeys,
   });
   return true;
 };
@@ -255,8 +255,8 @@ export const handleGetCategoryNames = ({ page = 1 }: { page?: number }) => {
   sendAppMessage({
     type: "get_category_names",
     state: "success",
-    data1: pageItems.join("||"),
-    data2: additionalFeeds.length,
+    categoryNamePage: pageItems.join("||"),
+    additionalFeedsCount: additionalFeeds.length,
     ...(nextPage && { nextPage }),
   });
 };
@@ -301,8 +301,8 @@ export const handleGetStoryTitles = ({
     state: "success",
     categoryName,
     shortData: shortData ? 1 : 0,
-    data1: processed.join("||"),
-    data2: readStories.map((read) => (read ? "1" : "0")).join("||"),
+    storyTitles: processed.join("||"),
+    storyReadStatuses: readStories.map((read) => (read ? "1" : "0")).join("||"),
     ...(nextPage && { nextPage }),
   });
 };
@@ -339,9 +339,9 @@ export const handleGetShortSummary = ({
   sendAppMessage({
     type: "get_short_summary",
     state: "success",
-    data1: fullTitle,
-    data2: shortSummary,
-    data3: storyId,
+    storyTitle: fullTitle,
+    storySummary: shortSummary,
+    storyId: storyId,
   });
 };
 
@@ -475,7 +475,7 @@ export const handleGetAvailableDetails = ({
   sendAppMessage({
     type: "get_available_details",
     state: "success",
-    data: available.join("||"),
+    availableDetailTypes: available.join("||"),
   });
 };
 
@@ -497,9 +497,11 @@ export const handleGetStoryDetail = ({
       sendAppMessage({
         type: "get_story_detail",
         state: "success",
-        data1: detailType,
-        data2: currentStory.historical_background,
-        data4: contentContainsSources(currentStory.historical_background)
+        detailType: detailType,
+        detailContent: currentStory.historical_background,
+        detailHasSources: contentContainsSources(
+          currentStory.historical_background,
+        )
           ? 1
           : 0,
       });
@@ -508,8 +510,9 @@ export const handleGetStoryDetail = ({
       sendAppMessage({
         type: "get_story_detail",
         state: "success",
-        data1: detailType,
-        data2: currentStory.articles?.map((a) => a.domain).join("||") ?? "",
+        detailType: detailType,
+        detailContent:
+          currentStory.articles?.map((a) => a.domain).join("||") ?? "",
       });
       break;
     case StoryDetailEnum.Perspectives:
@@ -585,9 +588,11 @@ export const handleGetStoryDetail = ({
       sendAppMessage({
         type: "get_story_detail",
         state: "success",
-        data1: detailType,
-        data2: currentStory.humanitarian_impact,
-        data4: contentContainsSources(currentStory.humanitarian_impact ?? "")
+        detailType: detailType,
+        detailContent: currentStory.humanitarian_impact,
+        detailHasSources: contentContainsSources(
+          currentStory.humanitarian_impact ?? "",
+        )
           ? 1
           : 0,
       });
@@ -607,19 +612,23 @@ export const handleGetStoryDetail = ({
       sendAppMessage({
         type: "get_story_detail",
         state: "success",
-        data1: detailType,
-        data2: currentStory.did_you_know,
-        data4: contentContainsSources(currentStory.did_you_know ?? "") ? 1 : 0,
+        detailType: detailType,
+        detailContent: currentStory.did_you_know,
+        detailHasSources: contentContainsSources(
+          currentStory.did_you_know ?? "",
+        )
+          ? 1
+          : 0,
       });
       break;
     case StoryDetailEnum.Quote:
       sendAppMessage({
         type: "get_story_detail",
         state: "success",
-        data1: detailType,
-        data2: currentStory.quote?.text ?? "",
-        data3: currentStory.quote?.author ?? "",
-        data4: currentStory.quote?.source ? 1 : 0,
+        detailType: detailType,
+        detailContent: currentStory.quote?.text ?? "",
+        detailContentType: currentStory.quote?.author ?? "",
+        detailHasSources: currentStory.quote?.source ? 1 : 0,
       });
       break;
     case StoryDetailEnum.InternationalReactions:
@@ -708,7 +717,7 @@ export const handleGetArticleDomainsFromContent = ({
   return sendAppMessage({
     type: "get_story_detail_sources",
     state: "success",
-    data: articleDomains?.join("||") || "",
+    articleDomains: articleDomains?.join("||") || "",
   });
 };
 
@@ -716,7 +725,7 @@ export const handleGetArticleDomainForQuote = () => {
   return sendAppMessage({
     type: "get_story_detail_sources",
     state: "success",
-    data: currentStory?.quote?.source,
+    articleDomains: currentStory?.quote?.source,
   });
 };
 
@@ -753,7 +762,7 @@ const handleUpdateQrCodeFromUrl = async (url?: string) => {
     sendAppMessage({
       type: "get_qr_code_bitmap",
       state: "success",
-      data: [],
+      qrData: [],
       qrSize: data.size,
       ...(totalChunks > 0 && { nextChunk: 1 }),
     });
@@ -773,7 +782,7 @@ export const handleGetQrCodeChunk = ({ chunk }: { chunk: number }) => {
   sendAppMessage({
     type: "get_qr_code_bitmap",
     state: "success",
-    data: res.chunkData,
+    qrData: res.chunkData,
     ...(res.isNext && { nextChunk: res.nextChunk }),
   });
 };

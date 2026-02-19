@@ -35,7 +35,7 @@ import {
   getInterfaceStrings,
 } from "./localization";
 import { setServerLang } from "./server/localeManager";
-import { clearCache, updateCachedBatchInfo } from "./server/cache/cacheManager";
+import { updateCachedBatchInfo } from "./server/cache/cacheManager";
 import { batchesRequest } from "./server/request/batches";
 
 const log = createLogger("KNJS");
@@ -46,7 +46,7 @@ Pebble.addEventListener("ready", async () => {
 
   PebbleTS.sendAppMessage({
     type: "set_debug_mode",
-    data: isDebugMode() ? 1 : 0,
+    isDebugMode: isDebugMode() ? 1 : 0,
   });
 
   try {
@@ -67,7 +67,7 @@ Pebble.addEventListener("ready", async () => {
       const textSize = getConfig("selectedTextSize");
       PebbleTS.sendAppMessage({
         type: "set_text_size",
-        data: textSize,
+        textSize: textSize,
       });
 
       const contentLanguage = getConfig("selectedContentLanguage");
@@ -97,7 +97,7 @@ Pebble.addEventListener("ready", async () => {
       log.debug("Sending interface strings:", JSON.stringify(interfaceStrings));
       PebbleTS.sendAppMessage({
         type: "send_interface_strings",
-        data: JSON.stringify(interfaceStrings),
+        interfaceStrings: JSON.stringify(interfaceStrings),
       });
 
       await handlers.handleUpdateCategories();
@@ -142,7 +142,7 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
     setDebugMode(debugModeValue);
     PebbleTS.sendAppMessage({
       type: "set_debug_mode",
-      data: debugModeValue ? 1 : 0,
+      isDebugMode: debugModeValue ? 1 : 0,
     });
 
     // Categories are at keys 10000-10199
@@ -189,7 +189,7 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
     );
     PebbleTS.sendAppMessage({
       type: "send_interface_strings",
-      data: JSON.stringify(interfaceStrings),
+      interfaceStrings: JSON.stringify(interfaceStrings),
     });
 
     // Content language is key 10401
@@ -207,7 +207,7 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
     setConfig("selectedTextSize", newTextSize);
     PebbleTS.sendAppMessage({
       type: "set_text_size",
-      data: newTextSize,
+      textSize: newTextSize,
     });
 
     // News refresh timeline pin setting is key 10404

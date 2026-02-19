@@ -43,7 +43,7 @@ void handle_get_category_names_message(DictionaryIterator *iter)
 
     if (strcmp(state_tuple->value->cstring, "success") == 0)
     {
-        Tuple *category_names_tuple = dict_find(iter, MESSAGE_KEY_data1);
+        Tuple *category_names_tuple = dict_find(iter, MESSAGE_KEY_categoryNamePage);
         if (!category_names_tuple)
         {
             ERROR_LOG("KNCMessageHandling", "Category names message missing data");
@@ -51,7 +51,7 @@ void handle_get_category_names_message(DictionaryIterator *iter)
         }
         push_local_categories(category_names_tuple->value->cstring);
 
-        Tuple *additional_feeds_count_tuple = dict_find(iter, MESSAGE_KEY_data2);
+        Tuple *additional_feeds_count_tuple = dict_find(iter, MESSAGE_KEY_additionalFeedsCount);
         if (additional_feeds_count_tuple)
         {
             set_additional_feeds_count(additional_feeds_count_tuple->value->int8);
@@ -82,8 +82,8 @@ void handle_get_story_titles_message(DictionaryIterator *iter)
     {
         Tuple *category_name_tuple = dict_find(iter, MESSAGE_KEY_categoryName);
         Tuple *short_data_tuple = dict_find(iter, MESSAGE_KEY_shortData);
-        Tuple *story_titles = dict_find(iter, MESSAGE_KEY_data1);
-        Tuple *story_read_statuses = dict_find(iter, MESSAGE_KEY_data2);
+        Tuple *story_titles = dict_find(iter, MESSAGE_KEY_storyTitles);
+        Tuple *story_read_statuses = dict_find(iter, MESSAGE_KEY_storyReadStatuses);
 
         if (!story_titles || !category_name_tuple)
         {
@@ -122,9 +122,9 @@ void handle_get_short_summary_message(DictionaryIterator *iter)
 
     if (strcmp(state_tuple->value->cstring, "success") == 0)
     {
-        Tuple *full_title_tuple = dict_find(iter, MESSAGE_KEY_data1);
-        Tuple *full_short_summary_tuple = dict_find(iter, MESSAGE_KEY_data2);
-        Tuple *story_id_tuple = dict_find(iter, MESSAGE_KEY_data3);
+        Tuple *full_title_tuple = dict_find(iter, MESSAGE_KEY_storyTitle);
+        Tuple *full_short_summary_tuple = dict_find(iter, MESSAGE_KEY_storySummary);
+        Tuple *story_id_tuple = dict_find(iter, MESSAGE_KEY_storyId);
         if (!full_title_tuple || !full_short_summary_tuple || !story_id_tuple)
         {
             ERROR_LOG("KNCMessageHandling", "Full data message missing title, short summary, or story ID");
@@ -151,7 +151,7 @@ void handle_get_qr_code_bitmap_message(DictionaryIterator *iter)
 
     if (strcmp(state_tuple->value->cstring, "success") == 0)
     {
-        Tuple *bitmap_data_tuple = dict_find(iter, MESSAGE_KEY_data);
+        Tuple *bitmap_data_tuple = dict_find(iter, MESSAGE_KEY_qrData);
         Tuple *next_chunk_tuple = dict_find(iter, MESSAGE_KEY_nextChunk);
         Tuple *qr_size_tuple = dict_find(iter, MESSAGE_KEY_qrSize);
         if (!bitmap_data_tuple)
@@ -199,7 +199,7 @@ void handle_get_story_available_details_message(DictionaryIterator *iter)
 
     if (strcmp(state_tuple->value->cstring, "success") == 0)
     {
-        Tuple *available_details_tuple = dict_find(iter, MESSAGE_KEY_data);
+        Tuple *available_details_tuple = dict_find(iter, MESSAGE_KEY_availableDetailTypes);
         if (!available_details_tuple)
         {
             ERROR_LOG("KNCMessageHandling", "Available details message missing data");
@@ -225,10 +225,10 @@ void handle_get_story_detail_message(DictionaryIterator *iter)
 
     if (strcmp(state_tuple->value->cstring, "success") == 0)
     {
-        Tuple *story_detail_type_tuple = dict_find(iter, MESSAGE_KEY_data1);
-        Tuple *story_detail_tuple = dict_find(iter, MESSAGE_KEY_data2);
-        Tuple *story_detail_extra_tuple = dict_find(iter, MESSAGE_KEY_data3);
-        Tuple *story_detail_sources_tuple = dict_find(iter, MESSAGE_KEY_data4);
+        Tuple *story_detail_type_tuple = dict_find(iter, MESSAGE_KEY_detailType);
+        Tuple *story_detail_tuple = dict_find(iter, MESSAGE_KEY_detailContent);
+        Tuple *story_detail_extra_tuple = dict_find(iter, MESSAGE_KEY_detailContentType);
+        Tuple *story_detail_sources_tuple = dict_find(iter, MESSAGE_KEY_detailHasSources);
         if (!story_detail_type_tuple || !story_detail_tuple)
         {
             ERROR_LOG("KNCMessageHandling", "Story detail message missing data");
@@ -322,7 +322,7 @@ void handle_get_story_detail_sources_message(DictionaryIterator *iter)
 
     if (strcmp(state_tuple->value->cstring, "success") == 0)
     {
-        Tuple *story_detail_sources_tuple = dict_find(iter, MESSAGE_KEY_data);
+        Tuple *story_detail_sources_tuple = dict_find(iter, MESSAGE_KEY_articleDomains);
         if (!story_detail_sources_tuple)
         {
             ERROR_LOG("KNCMessageHandling", "Story detail sources message missing data");
@@ -339,7 +339,7 @@ void handle_get_story_detail_sources_message(DictionaryIterator *iter)
 
 void handle_set_debug_mode_message(DictionaryIterator *iter)
 {
-    Tuple *enabled_tuple = dict_find(iter, MESSAGE_KEY_data);
+    Tuple *enabled_tuple = dict_find(iter, MESSAGE_KEY_isDebugMode);
     if (!enabled_tuple)
     {
         ERROR_LOG("KNCMessageHandling", "Set debug mode message missing data");
@@ -358,7 +358,7 @@ void handle_restart_app_message(DictionaryIterator *iter)
 
 void handle_send_interface_strings_message(DictionaryIterator *iter)
 {
-    Tuple *strings_tuple = dict_find(iter, MESSAGE_KEY_data);
+    Tuple *strings_tuple = dict_find(iter, MESSAGE_KEY_interfaceStrings);
     if (!strings_tuple)
     {
         ERROR_LOG("KNCMessageHandling", "Send interface strings message missing data");
@@ -372,7 +372,7 @@ void handle_send_interface_strings_message(DictionaryIterator *iter)
 
 void handle_set_text_size_message(DictionaryIterator *iter)
 {
-    Tuple *text_size_tuple = dict_find(iter, MESSAGE_KEY_data);
+    Tuple *text_size_tuple = dict_find(iter, MESSAGE_KEY_textSize);
     if (!text_size_tuple)
     {
         ERROR_LOG("KNCMessageHandling", "Set text size message missing data");
