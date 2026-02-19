@@ -1,6 +1,8 @@
 import { createLogger } from "../../../lib";
+import * as packageJson from "../../../../package-lock.json";
 
 export interface CacheEntry<T> {
+  appVersion: string;
   data: T;
   timestamp: number;
   url: string;
@@ -8,6 +10,16 @@ export interface CacheEntry<T> {
 }
 
 const log = createLogger("KNJSCacheManager");
+
+const isCacheInvalid = <T>(entry: CacheEntry<T>): boolean => {
+  if (entry.appVersion !== packageJson.version) {
+    log.info(
+      `Cache invalidated due to app version mismatch (cache: ${entry.appVersion}, current: ${packageJson.version})`,
+    );
+    return true;
+  }
+  return false;
+};
 
 const getCachedBatchInfo = (): { id: string; createdAtTimestamp: number } => {
   try {
@@ -49,6 +61,7 @@ export const setCacheData = <T>(url: string, data: T) => {
   try {
     const cachedBatchInfo = getCachedBatchInfo();
     const entry: CacheEntry<T> = {
+      appVersion: packageJson.version,
       data,
       timestamp: cachedBatchInfo.createdAtTimestamp,
       url,
@@ -71,6 +84,10 @@ export const getCacheData = <T>(url: string): CacheEntry<T> | null => {
     }
 
     const entry: CacheEntry<T> = JSON.parse(cached);
+
+    if (isCacheInvalid(entry)) {
+      return null;
+    }
 
     return entry;
   } catch (error) {
