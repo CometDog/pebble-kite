@@ -16,7 +16,7 @@ type DeepPartial<B> = {
 };
 
 export const getInterfaceStrings = (lang?: string): InterfaceStrings => {
-  const langToUse = lang || navigator.language || "en";
+  const langToUse = lang || Pebble.getActiveWatchInfo?.()?.language || "en";
   const langCode = langToUse.split("_")[0].split("-")[0];
   switch (langCode) {
     case "en":
