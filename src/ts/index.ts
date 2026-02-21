@@ -37,6 +37,7 @@ import {
 import { setServerLang } from "./server/localeManager";
 import { updateCachedBatchInfo } from "./server/cache/cacheManager";
 import { batchesRequest } from "./server/request/batches";
+import * as timeline from "./timeline";
 
 const log = createLogger("KNJS");
 
@@ -61,7 +62,7 @@ Pebble.addEventListener("ready", async () => {
 
       const newsRefreshPinEnabled = getConfig("newsRefreshPinSetting");
       if (newsRefreshPinEnabled) {
-        handlers.pushNewsRefreshPinToTimeline();
+        timeline.pushNewsRefreshPinToTimeline();
       }
 
       const textSize = getConfig("selectedTextSize");
@@ -214,7 +215,7 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
     const newsRefreshPinSetting = settings["10404"] as boolean;
     setConfig("newsRefreshPinSetting", newsRefreshPinSetting);
     if (newsRefreshPinSetting) {
-      handlers.pushNewsRefreshPinToTimeline();
+      timeline.pushNewsRefreshPinToTimeline();
     }
 
     // Clear full cache on save is key 10406

@@ -23,12 +23,13 @@ static void draw_micro_qr(GContext *ctx)
     // Get screen bounds to calculate best scale
     GRect screen_bounds = layer_get_bounds(window_get_root_layer(s_qr_window));
 #ifdef PBL_ROUND
-    // 120x120 is a "safe" square inside of the circle
-    const int safe_size = 120;
+    // Determine the largest square that fits within the round screen
+    const int safe_size = (screen_bounds.size.w / 1.41421356237); // Approximation of sqrt(2)
     GRect bounds =
         GRect((screen_bounds.size.w - safe_size) / 2, (screen_bounds.size.h - safe_size) / 2, safe_size, safe_size);
 #else
     GRect bounds = screen_bounds;
+    bounds.size.h -= UI_QR_Y_FUDGE;
 #endif
     const int min_screen_dim = bounds.size.w < bounds.size.h ? bounds.size.w : bounds.size.h;
 
@@ -45,10 +46,10 @@ static void draw_micro_qr(GContext *ctx)
         return;
     }
 
-    // Center the QR code within `bounds` (with fudge for domain text)
+    // Center the QR code within `bounds`
     const int qr_total_size = width * scale;
     const int offset_x = (bounds.size.w - qr_total_size) / 2;
-    const int offset_y = ((bounds.size.h - UI_QR_Y_FUDGE) - qr_total_size) / 2;
+    const int offset_y = (bounds.size.h - qr_total_size) / 2;
 
     DEBUG_LOG("KNCQRView", "width=%d, scale=%d, size=%d, offset=(%d,%d)", width, scale, qr_total_size, offset_x,
               offset_y);
@@ -81,17 +82,15 @@ static void draw_micro_qr(GContext *ctx)
         GFont font = ui_get_system_font_caption();
         GRect text_bounds;
 #ifdef PBL_ROUND
-        // On round devices keep the QR strictly inside the 127x127 safe box and
-        // place the caption in the chin area below the safe box
-        const int chin_padding = 8;
+        // Place the caption in the chin area below the safe box
+        const int chin_padding = 32;
         const int text_x = bounds.origin.x + chin_padding;
         const int text_w = bounds.size.w - (chin_padding * 2);
-        const int text_y = bounds.origin.y + bounds.size.h - (UI_QR_Y_FUDGE / 2);
+        const int text_y = bounds.origin.y + bounds.size.h;
         const int text_h = UI_QR_Y_FUDGE;
         text_bounds = GRect(text_x, text_y, text_w, text_h);
 #else
-        text_bounds =
-            GRect(bounds.origin.x, bounds.origin.y + bounds.size.h - UI_QR_Y_FUDGE, bounds.size.w, UI_QR_Y_FUDGE);
+        text_bounds = GRect(bounds.origin.x, bounds.origin.y + bounds.size.h, bounds.size.w, UI_QR_Y_FUDGE);
 #endif
         graphics_context_set_text_color(ctx, UI_COLOR_TEXT_PRIMARY);
         graphics_draw_text(ctx, detail_data->detail_title, font, text_bounds, GTextOverflowModeTrailingEllipsis,

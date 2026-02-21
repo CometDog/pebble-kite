@@ -153,6 +153,12 @@ static void detail_window_load(Window *window)
     Layer *window_layer = window_get_root_layer(window);
     GRect bounds = layer_get_bounds(window_layer);
 
+    // TODO: Remove this. Current there is a bug in the firmware where width can't be greater than 255
+    if (bounds.size.w > 255)
+    {
+        bounds.origin.x = bounds.size.w - 255;
+        bounds.size.w = 255;
+    }
     ctx->scroll_layer = scroll_layer_create(bounds);
     scroll_layer_set_click_config_onto_window(ctx->scroll_layer, window);
     scroll_layer_set_callbacks(ctx->scroll_layer,

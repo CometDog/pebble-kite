@@ -250,7 +250,7 @@ void handle_get_story_detail_message(DictionaryIterator *iter)
         // Special handling for Quote title (author)
         if (info->detail_type == DETAIL_TYPE_QUOTE && story_detail_extra_tuple)
         {
-            if (story_detail_extra_tuple->value->cstring && strlen(story_detail_extra_tuple->value->cstring) > 0)
+            if (strlen(story_detail_extra_tuple->value->cstring) > 0)
             {
                 set_detail_title(story_detail_extra_tuple->value->cstring, NULL);
             }

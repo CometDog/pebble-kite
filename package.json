@@ -13,8 +13,7 @@
     "generate-message-keys": "node scripts/generate-message-keys.mjs"
   },
   "dependencies": {
-    "@rebble/clay": "^1.0.6",
-    "pebble-timeline-js": "^2.1.1",
+    "@rebble/clay": "^1.0.8",
     "qrcode-generator": "^2.0.4"
   },
   "devDependencies": {
@@ -41,7 +40,8 @@
       "chalk",
       "diorite",
       "emery",
-      "flint"
+      "flint",
+      "gabbro"
     ],
     "watchapp": {
       "watchface": false

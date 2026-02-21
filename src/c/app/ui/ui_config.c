@@ -93,7 +93,7 @@ PreferredContentSize ui_effective_preferred_content_size(void)
         return preferred_content_size();
     }
 
-#ifdef PBL_PLATFORM_EMERY
+#if defined(PBL_PLATFORM_EMERY) || defined(PBL_PLATFORM_GABBRO)
     switch (s_text_size_override)
     {
     case 1:
