@@ -38,9 +38,18 @@ void navigation_open_story_summary(const char *category, const char *story_title
 
     clear_story_data();
 
-    send_get_short_summary((char *)category, (char *)story_title);
-    set_story_full_title((char *)story_title);
-    main_story_text_window_ui_init(index);
+    if (strncmp(category, "TensionIndex", 12) == 0)
+    {
+        set_selected_category((char *)category);
+        send_get_tension_index_reason();
+        main_story_text_window_ui_init(index);
+    }
+    else
+    {
+        send_get_short_summary((char *)category, (char *)story_title);
+        set_story_full_title((char *)story_title);
+        main_story_text_window_ui_init(index);
+    }
 }
 
 void navigation_open_available_details(const char *category, const char *story_id)
@@ -91,13 +100,31 @@ void navigation_open_detail_text(const char *detail_type, const char *detail_tit
 
     // The detail_type should already be set, just set the specific title
     set_detail_title((char *)detail_title, NULL);
-    send_get_current_detail_text((char *)detail_type, (char *)detail_title);
 
     const DetailTypeInfo *info = detail_type_from_api_name(detail_type);
     if (!info)
     {
         ERROR_LOG("KNCNavigation", "Unknown detail type for text: %s", detail_type);
         return;
+    }
+
+    if (info->detail_type == DETAIL_TYPE_TENSION_INDEX)
+    {
+        s_current_tier = NAV_TIER_4_DETAIL_TEXT;
+        char tension_text[512];
+        snprintf(tension_text, sizeof(tension_text), "%s\n%s\n%s\n%s\n%s\n\n%s",
+                 localization_get_string(STRING_TENSION_INDEX_LEVEL_1),
+                 localization_get_string(STRING_TENSION_INDEX_LEVEL_2),
+                 localization_get_string(STRING_TENSION_INDEX_LEVEL_3),
+                 localization_get_string(STRING_TENSION_INDEX_LEVEL_4),
+                 localization_get_string(STRING_TENSION_INDEX_LEVEL_5),
+                 localization_get_string(STRING_TENSION_INDEX_EXPLANATION));
+        set_detail_title((char *)localization_get_string(STRING_TENSION_INDEX_EXPLANATION_TITLE), NULL);
+        set_detail_text(tension_text, NULL);
+    }
+    else
+    {
+        send_get_current_detail_text((char *)detail_type, (char *)detail_title);
     }
 
     detail_window_registry_init_text(info->detail_type);

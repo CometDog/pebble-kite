@@ -42,7 +42,14 @@ static void on_select_handler(void)
     mark_story_as_read();
     const StoryListData *list_data = get_story_list_data();
     const StoryData *story_data = get_story_data();
-    navigation_open_available_details(list_data->selected_category, story_data->story_id);
+    if (strncmp(list_data->selected_category, "TensionIndex", 12) == 0)
+    {
+        navigation_open_detail_text("TensionIndex", story_data->story_short_summary);
+    }
+    else
+    {
+        navigation_open_available_details(list_data->selected_category, story_data->story_id);
+    }
 }
 
 void main_story_text_window_ui_init(int index)
@@ -50,6 +57,7 @@ void main_story_text_window_ui_init(int index)
     s_story_index = index;
     s_marked_as_read = false;
     DataResource resources[] = {DATA_RESOURCE_PRIMARY_STORY_TITLE, DATA_RESOURCE_PRIMARY_STORY_TEXT};
+
     detail_text_window_ui_init(&s_main_window, get_story_title_wrapper, get_story_summary_wrapper, NULL, resources,
                                on_select_handler);
 

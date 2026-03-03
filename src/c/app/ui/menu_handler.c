@@ -223,17 +223,46 @@ static int16_t get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_ind
     return UI_MENU_CELL_HEIGHT_DEFAULT + UI_MENU_CELL_PADDING_Y;
 }
 
-static void select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context)
+static void select_click_handler(ClickRecognizerRef recognizer, void *context)
 {
-    MenuData *data = callback_context;
+    MenuData *data = context;
+    MenuIndex cell_index = menu_layer_get_selected_index(data->menu_layer);
     if (data->config.select_callback_in_section)
     {
-        data->config.select_callback_in_section(cell_index->section, cell_index->row);
+        data->config.select_callback_in_section(cell_index.section, cell_index.row);
     }
     else if (data->config.select_callback)
     {
-        data->config.select_callback(cell_index->row);
+        data->config.select_callback(cell_index.row);
     }
+}
+
+static void selection_will_change_up_click_handler(ClickRecognizerRef recognizer, void *context)
+{
+    MenuData *data = context;
+    MenuIndex selected_index = menu_layer_get_selected_index(data->menu_layer);
+    if (!click_recognizer_is_repeating(recognizer) && selected_index.section == 0 && selected_index.row == 0 &&
+        data->config.up_press_handler_from_top_of_list)
+    {
+        data->config.up_press_handler_from_top_of_list();
+    }
+    else
+    {
+        menu_layer_set_selected_next(data->menu_layer, true, MenuRowAlignCenter, true);
+    }
+}
+
+static void selection_will_change_down_click_handler(ClickRecognizerRef recognizer, void *context)
+{
+    MenuData *data = context;
+    menu_layer_set_selected_next(data->menu_layer, false, MenuRowAlignCenter, true);
+}
+
+static void click_config_provider(void *context)
+{
+    window_single_repeating_click_subscribe(BUTTON_ID_UP, 300, selection_will_change_up_click_handler);
+    window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
+    window_single_repeating_click_subscribe(BUTTON_ID_DOWN, 300, selection_will_change_down_click_handler);
 }
 
 Window *s_menu_handler_create_window(MenuConfig config, bool never_multiline)
@@ -274,6 +303,14 @@ Window *s_menu_handler_create_window(MenuConfig config, bool never_multiline)
 
     Layer *window_layer = window_get_root_layer(window);
     GRect bounds = layer_get_bounds(window_layer);
+    // Round watches have centered MenuLayers so no need to adjust for status bar
+#ifndef PBL_ROUND
+    if (config.has_status_bar)
+    {
+        bounds.origin.y += UI_CUSTOM_STATUS_BAR_HEIGHT;
+        bounds.size.h -= UI_CUSTOM_STATUS_BAR_HEIGHT;
+    }
+#endif
 
     menu_data->menu_layer = menu_layer_create(bounds);
     if (!menu_data->menu_layer)
@@ -289,13 +326,12 @@ Window *s_menu_handler_create_window(MenuConfig config, bool never_multiline)
                                                   .get_cell_height = get_cell_height,
                                                   .draw_row = draw_row,
                                                   .draw_header = draw_header,
-                                                  .get_header_height = get_header_height,
-                                                  .select_click = select_callback});
+                                                  .get_header_height = get_header_height});
 
     menu_layer_set_normal_colors(menu_data->menu_layer, GColorWhite, UI_COLOR_TEXT_PRIMARY);
     menu_layer_set_highlight_colors(menu_data->menu_layer, UI_COLOR_HIGHLIGHT, UI_COLOR_TEXT_ON_DARK);
 
-    menu_layer_set_click_config_onto_window(menu_data->menu_layer, window);
+    window_set_click_config_provider_with_context(window, click_config_provider, menu_data);
     layer_add_child(window_layer, menu_layer_get_layer(menu_data->menu_layer));
 
     window_set_user_data(window, menu_data);
@@ -320,7 +356,6 @@ void menu_handler_destroy_window(Window *window)
         return;
 
     untrack_window(window);
-
     window_set_window_handlers(window, (WindowHandlers){0});
 
     MenuData *menu_data = window_get_user_data(window);

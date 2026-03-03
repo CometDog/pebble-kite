@@ -11,6 +11,12 @@ typedef struct
 
 typedef struct
 {
+    int tension_index;
+    char *tension_reason;
+} TensionData;
+
+typedef struct
+{
     char *selected_category;
     int selected_category_index;
     char **story_titles;
@@ -85,6 +91,7 @@ void clear_level_3_available_details(void);
  * Clear Level 2: Story view (list, selected story data) and all deeper levels (3, 4)
  */
 void clear_level_2_story_view(void);
+
 // ============================================================================
 // Level 1: Categories API
 // ============================================================================
@@ -123,6 +130,24 @@ bool categories_loaded(void);
  * Clear all categories data
  */
 void clear_categories_data(void);
+
+/**
+ * Set the tension index
+ * @param index The tension index
+ */
+void set_tension_index(int index);
+
+/**
+ * Set the tension reason
+ * @param reason The tension reason string
+ */
+void set_tension_reason(const char *reason);
+
+/**
+ * Get the current tension index and reason
+ * @return Pointer to TensionData structure containing index and reason
+ */
+const TensionData *get_tension_index_data(void);
 
 // ============================================================================
 // Level 2: Story List + Story Data API

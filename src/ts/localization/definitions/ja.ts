@@ -3,6 +3,16 @@ import { InterfaceStrings } from "../type";
 export const strings: InterfaceStrings = {
   general: {
     loading: "読み込み中...",
+    tensionIndex: "世界の緊張度",
+    tensionIndexShort: "緊張度",
+    tensionIndexExplanationTitle: "世界の緊張度とは？",
+    tensionIndexLevel1: "0-20° クール - 落ち着いた期間、通常の活動",
+    tensionIndexLevel2: "21-40° マイルド - 通常の世界的緊張",
+    tensionIndexLevel3: "41-60° ウォーム - 懸念の高まり",
+    tensionIndexLevel4: "61-80° ホット - 深刻な状況",
+    tensionIndexLevel5: "81-100° クリティカル - 極端な危機",
+    tensionIndexExplanation:
+      "この世界の緊張度指数は、現在の世界のニュース見出しのAI分析によって生成されます。警戒を呼び起こすことを目的とするものではなく、ニュースストーリーを見る際に考慮すべき世界的な緊張の一般的なスナップショットを提供することを目的としています。",
   },
   title: {
     feeds: "フィード",

@@ -3,6 +3,16 @@ import { InterfaceStrings } from "../type";
 export const strings: InterfaceStrings = {
   general: {
     loading: "Laden...",
+    tensionIndex: "Weltweite Spannung",
+    tensionIndexShort: "Spannung",
+    tensionIndexExplanationTitle: "Was ist weltweite Spannung?",
+    tensionIndexLevel1: "0-20° Kühl - Ruhige Phase, routinemäßige Aktivität",
+    tensionIndexLevel2: "21-40° Mild - Normale globale Spannungen",
+    tensionIndexLevel3: "41-60° Warm - Erhöhte Besorgnis",
+    tensionIndexLevel4: "61-80° Heiß - Ernsthafte Situationen",
+    tensionIndexLevel5: "81-100° Kritisch - Extreme Krise",
+    tensionIndexExplanation:
+      "Dieser Weltspannungsindex wird durch KI-Analyse der aktuellen weltweiten Nachrichtenüberschriften generiert. Er soll keine Alarmstimmung erzeugen, sondern einen allgemeinen Überblick über die globalen Spannungen bieten, die bei der Betrachtung von Nachrichten berücksichtigt werden sollten.",
   },
   title: {
     feeds: "Feeds",

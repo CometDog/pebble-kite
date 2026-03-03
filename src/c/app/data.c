@@ -61,6 +61,7 @@ typedef struct
     char *categories[MAX_ITEMS];
     uint16_t categories_count;
     uint8_t additional_feeds_count;
+    int tension_index;
 } CategoriesLevel;
 
 typedef struct
@@ -97,7 +98,7 @@ typedef struct
     uint8_t qr_size;
 } SelectedDetailLevel;
 
-static CategoriesLevel level_1_categories = {{0}, 0, 0};
+static CategoriesLevel level_1_categories = {{0}, 0, 0, 0};
 static StoryViewLevel level_2_story_view = {NULL, 0, {0}, {0}, 0, NULL, NULL, NULL};
 static AvailableDetailsLevel level_3_available_details = {{0}, 0};
 static SelectedDetailLevel level_4_selected_detail = {0};
@@ -167,6 +168,36 @@ void clear_categories_data(void)
         }
     }
     level_1_categories.categories_count = 0;
+}
+
+void set_tension_index(int index)
+{
+    level_1_categories.tension_index = index;
+    request_categories_menu_update();
+}
+
+void set_tension_reason(const char *reason)
+{
+    clear_level_2_story_view();
+    level_2_story_view.selected_category = string_duplicate("TensionIndex");
+    level_2_story_view.selected_category_index = 0;
+    level_2_story_view.story_titles[0] = string_duplicate("Reason");
+    level_2_story_view.stories_read[0] = false;
+    level_2_story_view.story_titles_count = 1;
+    char tension_title[64];
+    snprintf(tension_title, sizeof(tension_title), "%s: %d°", localization_get_string(STRING_TENSION_INDEX),
+             get_tension_index_data()->tension_index);
+    level_2_story_view.story_full_title = string_duplicate(tension_title);
+    level_2_story_view.story_short_summary = string_duplicate(reason);
+    main_story_text_window_ui_update();
+}
+
+const TensionData *get_tension_index_data(void)
+{
+    static TensionData data;
+    data.tension_index = level_1_categories.tension_index;
+    data.tension_reason = level_2_story_view.story_short_summary;
+    return &data;
 }
 
 // ============================================================================

@@ -13,6 +13,7 @@ typedef struct
 {
     // TODO: This could get cleaned up but for now it's a mess to handle single and multi-section menus
     const char *title;                                                              // Menu title (used for single section menus)
+    bool has_status_bar;                                                            // Whether to reserve space for a status bar at the top
     uint16_t (*get_num_sections)(void);                                             // Optional: number of sections (NULL for single section)
     uint16_t (*get_num_items)(void);                                                // Callback to get number of items (for single section)
     uint16_t (*get_num_items_in_section)(uint16_t section_index);                   // Callback for multi-section menus
@@ -23,6 +24,7 @@ typedef struct
     void (*select_callback_in_section)(uint16_t section_index, uint16_t row_index); // Callback for multi-section
     bool (*is_item_read)(int index);                                                // Optional callback to check if item is read (for single section)
     bool (*is_item_read_in_section)(uint16_t section_index, uint16_t row_index);    // Optional for multi-section
+    void (*up_press_handler_from_top_of_list)(void);                                // Optional callback for up press on top item
 } MenuConfig;
 
 /**

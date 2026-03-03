@@ -11,6 +11,15 @@ static char *s_dynamic_strings[STRING_COUNT] = {0};
 static const char *s_string_keys[STRING_COUNT] = {
     // general
     "STRING_LOADING",
+    "STRING_TENSION_INDEX",
+    "STRING_TENSION_INDEX_SHORT",
+    "STRING_TENSION_INDEX_EXPLANATION_TITLE",
+    "STRING_TENSION_INDEX_LEVEL_1",
+    "STRING_TENSION_INDEX_LEVEL_2",
+    "STRING_TENSION_INDEX_LEVEL_3",
+    "STRING_TENSION_INDEX_LEVEL_4",
+    "STRING_TENSION_INDEX_LEVEL_5",
+    "STRING_TENSION_INDEX_EXPLANATION",
     // menus
     "STRING_FEEDS",
     "STRING_NEWS",
@@ -185,6 +194,15 @@ typedef struct
 static const KeyMap s_dotted_map[] = {
     /* general */
     {"general.loading", STRING_LOADING},
+    {"general.tensionIndex", STRING_TENSION_INDEX},
+    {"general.tensionIndexShort", STRING_TENSION_INDEX_SHORT},
+    {"general.tensionIndexExplanationTitle", STRING_TENSION_INDEX_EXPLANATION_TITLE},
+    {"general.tensionIndexLevel1", STRING_TENSION_INDEX_LEVEL_1},
+    {"general.tensionIndexLevel2", STRING_TENSION_INDEX_LEVEL_2},
+    {"general.tensionIndexLevel3", STRING_TENSION_INDEX_LEVEL_3},
+    {"general.tensionIndexLevel4", STRING_TENSION_INDEX_LEVEL_4},
+    {"general.tensionIndexLevel5", STRING_TENSION_INDEX_LEVEL_5},
+    {"general.tensionIndexExplanation", STRING_TENSION_INDEX_EXPLANATION},
 
     /* title */
     {"title.feeds", STRING_FEEDS},

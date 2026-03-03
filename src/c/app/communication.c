@@ -321,6 +321,11 @@ bool send_get_short_summary(char *category_name, char *story_title)
     return send_request_with_extra("get_short_summary", extras, 2);
 }
 
+bool send_get_tension_index_reason(void)
+{
+    return send_request("tension_index_update");
+}
+
 bool send_get_qr_code_bitmap(char *article_domain)
 {
     ExtraRequestKeyValuePair extras[] = {
@@ -407,6 +412,7 @@ void communication_init(void)
     message_router_register("send_interface_strings", handle_send_interface_strings_message);
     message_router_register("restart_app", handle_restart_app_message);
     message_router_register("set_text_size", handle_set_text_size_message);
+    message_router_register("tension_index_update", handle_show_tension_index_message);
 
     // Use the lesser of requested size and maximum allowed size.
     // However sizes smaller than requested will probably break things

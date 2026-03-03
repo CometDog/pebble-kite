@@ -68,6 +68,7 @@ export type CategorizedStories = {
 export type CurrentData = {
   batchId: string;
   categorizedStories: CategorizedStories[];
+  tensionIndex: { index: number; reason: string };
 };
 
 export type ReadStoriesStorageObject = {

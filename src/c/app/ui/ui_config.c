@@ -7,6 +7,7 @@ GFont ui_font_menu = NULL;
 GFont ui_font_menu_read = NULL;
 GFont ui_font_caption = NULL;
 GFont ui_font_menu_title = NULL;
+GFont ui_font_status_bar = NULL;
 
 // This was built to handle custom fonts but is just using system fonts for now
 void ui_load_fonts(void)
@@ -35,6 +36,10 @@ void ui_load_fonts(void)
     {
         ui_font_menu_title = fonts_get_system_font(UI_FONT_KEY_MENU_TITLE);
     }
+    if (!ui_font_status_bar)
+    {
+        ui_font_status_bar = fonts_get_system_font(UI_FONT_KEY_STATUS_BAR);
+    }
 }
 
 void ui_unload_fonts(void)
@@ -62,6 +67,10 @@ void ui_unload_fonts(void)
     if (ui_font_menu_title)
     {
         ui_font_menu_title = NULL;
+    }
+    if (ui_font_status_bar)
+    {
+        ui_font_status_bar = NULL;
     }
 }
 

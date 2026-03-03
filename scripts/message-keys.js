@@ -38,6 +38,8 @@ module.exports = [
   "storyTitle",
   "storyTitle",
   "storyTitles",
+  "tensionIndex",
+  "tensionReason",
   "textSize",
   "type",
 ];

@@ -16,8 +16,13 @@ import {
   smallWebFeedRequest,
   SmallWebFeedResponse,
 } from "./server/request/smallWebFeed";
+import { tensionRequest } from "./server/request/tension";
 
-let categoryBatchMap: CurrentData = { batchId: "", categorizedStories: [] };
+let categoryBatchMap: CurrentData = {
+  batchId: "",
+  categorizedStories: [],
+  tensionIndex: { index: -1, reason: "" },
+};
 
 export const getCategoryBatchMap = () => categoryBatchMap;
 
@@ -58,6 +63,7 @@ export const updateDataWithReadStories = (data: CurrentData): CurrentData => {
         read: existingReadStories.readStoryIds.includes(story.id) ?? false,
       })),
     })),
+    tensionIndex: data.tensionIndex,
   };
 };
 
@@ -199,11 +205,11 @@ const updateStories = async ({
           quote:
             story.quote && story.quote_attribution
               ? {
-                  text: story.quote ?? "",
-                  author: story.quote_author ?? "",
-                  source: story.quote_attribution ?? "",
-                  url: story.quote_source_url ?? "",
-                }
+                text: story.quote ?? "",
+                author: story.quote_author ?? "",
+                source: story.quote_attribution ?? "",
+                url: story.quote_source_url ?? "",
+              }
               : undefined,
           international_reactions: story.international_reactions ?? [],
           user_action_items: story.user_action_items ?? [],
@@ -283,6 +289,32 @@ export const updateCategories = async ({
     );
   }
 
-  const newMap = { batchId: categoriesResponse.batchId, categorizedStories };
+  const newMap = {
+    batchId: categoriesResponse.batchId,
+    categorizedStories,
+    tensionIndex: categoryBatchMap.tensionIndex,
+  };
   setCategoryBatchMap(sortData(newMap));
+};
+
+export const updateTension = async () => {
+  const tensionData = await tensionRequest({
+    batchId: "latest",
+  });
+  // Throw away the data if both values aren't defined or the description is empty
+  if (
+    tensionData.chaosIndex === undefined ||
+    tensionData.chaosDescription === undefined ||
+    tensionData.chaosDescription.length === 0
+  ) {
+    return;
+  }
+
+  setCategoryBatchMap({
+    ...getCategoryBatchMap(),
+    tensionIndex: {
+      index: tensionData.chaosIndex,
+      reason: normalizeValue(tensionData.chaosDescription),
+    },
+  });
 };

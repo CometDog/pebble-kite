@@ -64,3 +64,8 @@ void handle_restart_app_message(DictionaryIterator *iter);
  * @param iter Dictionary iterator containing the message
  */
 void handle_set_text_size_message(DictionaryIterator *iter);
+/**
+ * Handler for "show_tension_index" message from phone
+ * @param iter Dictionary iterator containing the message
+ */
+void handle_show_tension_index_message(DictionaryIterator *iter);

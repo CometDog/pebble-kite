@@ -291,6 +291,14 @@ export default [
         ],
       },
       {
+        type: "toggle",
+        messageKey: "ShowTensionIndex",
+        label: "Show Tension Index",
+        description:
+          "Show the World Tension Index in the status bar when greater than 50. The World Tension Index is a number from 0 to 100 that represents the overall level of tension in the world based on the news. A higher number means more tension. Pressing up from the top of the Categories screen will show more details about the current tension level.",
+        defaultValue: true,
+      },
+      {
         type: "checkboxgroup",
         messageKey: "AdditionalFeeds",
         label: "Additional Feeds",

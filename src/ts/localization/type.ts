@@ -1,6 +1,15 @@
 export type InterfaceStrings = {
   general: {
     loading: string;
+    tensionIndex: string;
+    tensionIndexShort: string;
+    tensionIndexExplanationTitle: string;
+    tensionIndexLevel1: string;
+    tensionIndexLevel2: string;
+    tensionIndexLevel3: string;
+    tensionIndexLevel4: string;
+    tensionIndexLevel5: string;
+    tensionIndexExplanation: string;
   };
   title: {
     feeds: string;

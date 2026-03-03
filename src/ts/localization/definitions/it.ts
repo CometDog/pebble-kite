@@ -3,6 +3,16 @@ import { InterfaceStrings } from "../type";
 export const strings: InterfaceStrings = {
   general: {
     loading: "Caricamento...",
+    tensionIndex: "Tensione Mondiale",
+    tensionIndexShort: "Tensione",
+    tensionIndexExplanationTitle: "Cos'è la Tensione Mondiale?",
+    tensionIndexLevel1: "0-20° Fresco - Periodo di calma, attività di routine",
+    tensionIndexLevel2: "21-40° Leggero - Tensioni globali normali",
+    tensionIndexLevel3: "41-60° Caldo - Preoccupazioni elevate",
+    tensionIndexLevel4: "61-80° Molto Caldo - Situazioni serie",
+    tensionIndexLevel5: "81-100° Critico - Crisi estrema",
+    tensionIndexExplanation:
+      "Questo indice di Tensione Mondiale è generato da analisi AI dei titoli delle notizie mondiali attuali. Non è destinato a creare allarme, ma a fornire una panoramica generale delle tensioni globali da considerare quando si visualizzano le storie di notizie.",
   },
   title: {
     feeds: "Feed",

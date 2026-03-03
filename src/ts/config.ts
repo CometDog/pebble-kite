@@ -23,6 +23,7 @@ const log = createLogger("KNJSConfig");
  * @property selectedMaxStoryCount The selected maximum story count
  * @property selectedSectionNames The enabled section names
  * @property selectedCategoryNames The enabled category names
+ * @property isTensionIndexEnabled Whether the tension index is enabled
  */
 export interface AppConfig {
   selectedAdditionalFeeds: AdditionalFeature[];
@@ -33,6 +34,7 @@ export interface AppConfig {
   selectedMaxStoryCount: number;
   selectedSectionNames: AvailableSection[];
   selectedCategoryNames: AvailableCategory[];
+  isTensionIndexEnabled: boolean;
 }
 
 const CONFIG_KEYS: Record<keyof AppConfig, string> = {
@@ -44,6 +46,7 @@ const CONFIG_KEYS: Record<keyof AppConfig, string> = {
   selectedMaxStoryCount: "selectedMaxStoryCount",
   selectedSectionNames: "selectedSectionNames",
   selectedCategoryNames: "selectedCategoryNames",
+  isTensionIndexEnabled: "isTensionIndexEnabled",
 };
 
 const CONFIG_DEFAULTS: AppConfig = {
@@ -55,6 +58,7 @@ const CONFIG_DEFAULTS: AppConfig = {
   selectedMaxStoryCount: defaultMaxStories,
   selectedSectionNames: defaultSections,
   selectedCategoryNames: defaultCategories,
+  isTensionIndexEnabled: true,
 };
 
 /**
@@ -107,6 +111,7 @@ export const setConfig = <K extends keyof AppConfig>(
  * @returns The complete application configuration
  */
 export const getAllConfig = (): AppConfig => ({
+  isTensionIndexEnabled: getConfig("isTensionIndexEnabled"),
   selectedAdditionalFeeds: getConfig("selectedAdditionalFeeds"),
   newsRefreshPinSetting: getConfig("newsRefreshPinSetting"),
   selectedTextSize: getConfig("selectedTextSize"),
@@ -203,5 +208,6 @@ export const generateClaySettings = (
     UserTimelinePins: [config.newsRefreshPinSetting],
     ClearCacheOnSave: [false, false, false, false], // Always default to false on load
     DebugMode: debugMode,
+    ShowTensionIndex: config.isTensionIndexEnabled,
   };
 };

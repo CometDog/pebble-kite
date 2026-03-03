@@ -86,6 +86,9 @@ Pebble.addEventListener("ready", async () => {
       const selectedAdditionalFeeds = getConfig("selectedAdditionalFeeds");
       handlers.setAdditionalFeeds(...selectedAdditionalFeeds);
 
+      const showTensionIndex = getConfig("isTensionIndexEnabled");
+      handlers.updateTensionIndex(showTensionIndex);
+
       const interfaceLanguage = getConfig("selectedInterfaceLanguage");
       const interfaceStrings = flattenInterfaceStrings(
         filterInterfaceStringOptionals({
@@ -135,8 +138,8 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
 
     const settings = clay.getSettings(event.response);
     log.debug("Clay settings received:", JSON.stringify(settings));
-    // DebugMode is at key 10405 (after all category and section checkbox keys)
-    const debugModeKey = "10405";
+    // DebugMode is at key 10406 (after all category and section checkbox keys)
+    const debugModeKey = "10406";
     const rawDebugValue = settings[debugModeKey];
     const debugModeValue = rawDebugValue === true || rawDebugValue === 1;
 
@@ -218,27 +221,32 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
       timeline.pushNewsRefreshPinToTimeline();
     }
 
-    // Clear full cache on save is key 10406
-    const clearFullCacheOnSave = settings["10406"] as boolean;
+    // Show tension index setting is key 10405
+    const showTensionIndex = settings["10405"] as boolean;
+    setConfig("isTensionIndexEnabled", showTensionIndex);
+    handlers.updateTensionIndex(showTensionIndex);
+
+    // Clear full cache on save is key 10407
+    const clearFullCacheOnSave = settings["10407"] as boolean;
     if (clearFullCacheOnSave) {
       log.info("Clearing full cache as per user request");
       await handlers.clearFullCache();
     } else {
-      // Clear timeline pin memory on save is key 10407
-      const clearPinCacheOnSave = settings["10407"] as boolean;
+      // Clear timeline pin memory on save is key 10408
+      const clearPinCacheOnSave = settings["10408"] as boolean;
       if (clearPinCacheOnSave) {
         log.info("Clearing timeline pin cache as per user request");
         handlers.clearPinCache();
       }
-      // Clear read stories memory on save is key 10408
-      const clearReadStoriesOnSave = settings["10408"] as boolean;
+      // Clear read stories memory on save is key 10409
+      const clearReadStoriesOnSave = settings["10409"] as boolean;
       if (clearReadStoriesOnSave) {
         log.info("Clearing read stories cache as per user request");
         handlers.clearReadStoriesCache();
       }
-      // Clear network cache on save is key 10409
+      // Clear network cache on save is key 10410
       // This is redundant because we always clear the network cache on Clay closing, but the certainty of it is useful to have
-      const clearNetworkCacheOnSave = settings["10409"] as boolean;
+      const clearNetworkCacheOnSave = settings["10410"] as boolean;
       if (clearNetworkCacheOnSave) {
         log.info("Clearing network cache as per user request");
         await handlers.clearNetworkCache({ repopulateBatchId: true });
@@ -402,6 +410,9 @@ Pebble.addEventListener("appmessage", async (event) => {
       if ("logTag" in payload && "logMessage" in payload) {
         log.notify(payload.logTag as string, payload.logMessage as string);
       }
+      break;
+    case "tension_index_update":
+      handlers.sendFullTensionInfo();
       break;
     default:
     // Do nothing

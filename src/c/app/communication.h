@@ -24,6 +24,11 @@ bool send_get_story_titles(int8_t page, char *category_name, bool short_data);
  */
 bool send_get_short_summary(char *category_name, char *story_title);
 /**
+ * Send a request to get the reason for the current tension index
+ * @return true if the request was successfully queued/sent, false otherwise
+ */
+bool send_get_tension_index_reason(void);
+/**
  * Send a request to get the QR code bitmap for a given article domain
  * @param article_domain The domain of the article to get the QR code for
  * @return true if the request was successfully queued/sent, false otherwise

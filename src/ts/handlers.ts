@@ -1,9 +1,13 @@
 import { createLogger } from "../lib";
-import { addReadStory, getCategoryBatchMap, updateCategories } from "./api";
+import {
+  addReadStory,
+  getCategoryBatchMap,
+  updateCategories,
+  updateTension,
+} from "./api";
 import { updateQrCodeBitmap, getQrCodeChunk } from "./qr";
 import { clearCache, updateCachedBatchInfo } from "./server/cache/cacheManager";
 import { batchesRequest } from "./server/request/batches";
-import { onThisDayRequest } from "./server/request/onThisDay";
 
 import {
   availableCategories,
@@ -261,10 +265,10 @@ export const handleGetStoryTitles = ({
   const { pageItems, nextPage } = paginate(titles, page);
   const processed = shortData
     ? pageItems.map((title) =>
-        title.length > SHORT_TITLE_LENGTH
-          ? title.slice(0, SHORT_TITLE_LENGTH - 3) + "..."
-          : title,
-      )
+      title.length > SHORT_TITLE_LENGTH
+        ? title.slice(0, SHORT_TITLE_LENGTH - 3) + "..."
+        : title,
+    )
     : pageItems;
 
   // This is redundant to the code above and should be DRY'd up
@@ -808,4 +812,36 @@ export const clearFullCache = async () => {
   clearPinCache();
   clearReadStoriesCache();
   await clearNetworkCache({ repopulateBatchId: true });
+};
+
+const minimumTensionIndexForNotification = 50;
+export const updateTensionIndex = async (tensionIndexEnabled: boolean) => {
+  if (tensionIndexEnabled) {
+    await updateTension();
+    if (
+      getCategoryBatchMap()?.tensionIndex?.index >=
+      minimumTensionIndexForNotification
+    ) {
+      sendAppMessage({
+        type: "tension_index_update",
+        tensionIndex: getCategoryBatchMap().tensionIndex.index,
+      });
+    }
+  } else {
+    sendAppMessage({
+      type: "tension_index_update",
+      tensionIndex: -1,
+    });
+  }
+};
+
+export const sendFullTensionInfo = () => {
+  const { index, reason } = getCategoryBatchMap().tensionIndex;
+  if (index >= minimumTensionIndexForNotification) {
+    sendAppMessage({
+      type: "tension_index_update",
+      tensionIndex: index,
+      tensionReason: reason,
+    });
+  }
 };

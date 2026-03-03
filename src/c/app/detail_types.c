@@ -8,6 +8,7 @@ static const DetailTypeInfo s_detail_types[] = {
     {DETAIL_TYPE_HUMANITARIAN_IMPACT, "HumanitarianImpact", STRING_HUMANITARIAN_IMPACT, false, true, NULL},
     {DETAIL_TYPE_DID_YOU_KNOW, "DidYouKnow", STRING_DID_YOU_KNOW, false, true, NULL},
     {DETAIL_TYPE_QUOTE, "Quote", STRING_QUOTE, false, true, NULL},
+    {DETAIL_TYPE_TENSION_INDEX, "TensionIndex", STRING_TENSION_INDEX_EXPLANATION_TITLE, false, true, NULL},
 
     // List + Text types
     {DETAIL_TYPE_TALKING_POINTS, "TalkingPoints", STRING_HIGHLIGHTS, true, true, "povs"},

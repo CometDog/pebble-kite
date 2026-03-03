@@ -113,6 +113,41 @@ export function flattenInterfaceStrings(
     if (strings.general.loading !== undefined) {
       flatStrings["general.loading"] = strings.general.loading;
     }
+    if (strings.general.tensionIndex !== undefined) {
+      flatStrings["general.tensionIndex"] = strings.general.tensionIndex;
+    }
+    if (strings.general.tensionIndexShort !== undefined) {
+      flatStrings["general.tensionIndexShort"] =
+        strings.general.tensionIndexShort;
+    }
+    if (strings.general.tensionIndexExplanationTitle !== undefined) {
+      flatStrings["general.tensionIndexExplanationTitle"] =
+        strings.general.tensionIndexExplanationTitle;
+    }
+    if (strings.general.tensionIndexLevel1 !== undefined) {
+      flatStrings["general.tensionIndexLevel1"] =
+        strings.general.tensionIndexLevel1;
+    }
+    if (strings.general.tensionIndexLevel2 !== undefined) {
+      flatStrings["general.tensionIndexLevel2"] =
+        strings.general.tensionIndexLevel2;
+    }
+    if (strings.general.tensionIndexLevel3 !== undefined) {
+      flatStrings["general.tensionIndexLevel3"] =
+        strings.general.tensionIndexLevel3;
+    }
+    if (strings.general.tensionIndexLevel4 !== undefined) {
+      flatStrings["general.tensionIndexLevel4"] =
+        strings.general.tensionIndexLevel4;
+    }
+    if (strings.general.tensionIndexLevel5 !== undefined) {
+      flatStrings["general.tensionIndexLevel5"] =
+        strings.general.tensionIndexLevel5;
+    }
+    if (strings.general.tensionIndexExplanation !== undefined) {
+      flatStrings["general.tensionIndexExplanation"] =
+        strings.general.tensionIndexExplanation;
+    }
   }
 
   if (strings.title) {

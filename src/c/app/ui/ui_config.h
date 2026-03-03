@@ -82,6 +82,11 @@ void ui_reload_fonts(void);
 #define UI_FONT_KEY_MENU_TITLE_LARGE FONT_KEY_GOTHIC_18_BOLD
 #define UI_FONT_KEY_MENU_TITLE_XLARGE FONT_KEY_GOTHIC_24_BOLD
 
+#define UI_FONT_KEY_STATUS_BAR_SMALL FONT_KEY_GOTHIC_09
+#define UI_FONT_KEY_STATUS_BAR_MEDIUM FONT_KEY_GOTHIC_14
+#define UI_FONT_KEY_STATUS_BAR_LARGE FONT_KEY_GOTHIC_18
+#define UI_FONT_KEY_STATUS_BAR_XLARGE FONT_KEY_GOTHIC_24
+
 #define UI_FONT_KEY_FOR_SIZE(small, medium, large, xlarge)                                                             \
     ((ui_effective_preferred_content_size() == PreferredContentSizeSmall)        ? (small)                             \
      : (ui_effective_preferred_content_size() == PreferredContentSizeLarge)      ? (large)                             \
@@ -107,6 +112,10 @@ void ui_reload_fonts(void);
 #define UI_FONT_KEY_MENU_TITLE                                                                                         \
     UI_FONT_KEY_FOR_SIZE(UI_FONT_KEY_MENU_TITLE_SMALL, UI_FONT_KEY_MENU_TITLE_MEDIUM, UI_FONT_KEY_MENU_TITLE_LARGE,    \
                          UI_FONT_KEY_MENU_TITLE_XLARGE)
+
+#define UI_FONT_KEY_STATUS_BAR                                                                                         \
+    UI_FONT_KEY_FOR_SIZE(UI_FONT_KEY_STATUS_BAR_SMALL, UI_FONT_KEY_STATUS_BAR_MEDIUM, UI_FONT_KEY_STATUS_BAR_LARGE,    \
+                         UI_FONT_KEY_STATUS_BAR_XLARGE)
 
 #define UI_FONT_KEY_MENU_READ_SMALL FONT_KEY_GOTHIC_14
 #define UI_FONT_KEY_MENU_READ_MEDIUM FONT_KEY_GOTHIC_18
@@ -237,6 +246,8 @@ void ui_reload_fonts(void);
 #define UI_QR_LOADING_TEXT_HEIGHT_BASE 24
 #define UI_QR_LOADING_TEXT_HEIGHT UI_SCALE_FOR_SIZE(UI_QR_LOADING_TEXT_HEIGHT_BASE)
 
+#define UI_CUSTOM_STATUS_BAR_HEIGHT UI_SCALE_FOR_SIZE(PBL_IF_ROUND_ELSE(24, 16))
+
 // Helper functions
 
 // Extern font handles (defined in ui_config.c)
@@ -246,6 +257,7 @@ extern GFont ui_font_menu;
 extern GFont ui_font_menu_read;
 extern GFont ui_font_caption;
 extern GFont ui_font_menu_title;
+extern GFont ui_font_status_bar;
 
 static inline GFont ui_get_system_font_title(void)
 {
@@ -299,6 +311,15 @@ static inline GFont ui_get_system_font_menu_title(void)
         ui_load_fonts();
     }
     return ui_font_menu_title;
+}
+
+static inline GFont ui_get_system_font_status_bar(void)
+{
+    if (!ui_font_status_bar)
+    {
+        ui_load_fonts();
+    }
+    return ui_font_status_bar;
 }
 
 // Configuration

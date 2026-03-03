@@ -385,3 +385,28 @@ void handle_set_text_size_message(DictionaryIterator *iter)
 
     ui_reload_fonts();
 }
+
+void handle_show_tension_index_message(DictionaryIterator *iter)
+{
+    Tuple *tension_index_tuple = dict_find(iter, MESSAGE_KEY_tensionIndex);
+
+    if (!tension_index_tuple)
+    {
+        ERROR_LOG("KNCMessageHandling", "Show tension index message missing index");
+        return;
+    }
+
+    int tension_index = tension_index_tuple->value->int32;
+    INFO_LOG("KNCMessageHandling", "Received show_tension_index message from phone, index: %d", tension_index);
+
+    set_tension_index(tension_index);
+
+    Tuple *tension_reason_tuple = dict_find(iter, MESSAGE_KEY_tensionReason);
+    if (tension_reason_tuple)
+    {
+        const char *tension_reason = tension_reason_tuple->value->cstring;
+        INFO_LOG("KNCMessageHandling", "Received show_tension_index message from phone, reason: %s", tension_reason);
+
+        set_tension_reason(tension_reason);
+    }
+}
