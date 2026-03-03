@@ -823,6 +823,7 @@ export const updateTensionIndex = async (tensionIndexEnabled: boolean) => {
       getCategoryBatchMap()?.tensionIndex?.index >=
       minimumTensionIndexForNotification
     ) {
+      // TODO: This should be moved to the start up tasks. Sending app messages here implies this is a user-initiated action, which this is not
       sendAppMessage({
         type: "tension_index_update",
         tensionIndex: getCategoryBatchMap().tensionIndex.index,
@@ -831,7 +832,7 @@ export const updateTensionIndex = async (tensionIndexEnabled: boolean) => {
   } else {
     sendAppMessage({
       type: "tension_index_update",
-      tensionIndex: -1,
+      tensionIndex: 0,
     });
   }
 };

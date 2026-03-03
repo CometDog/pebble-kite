@@ -112,8 +112,9 @@ Pebble.addEventListener("ready", async () => {
         interfaceStrings: JSON.stringify(interfaceStrings),
       });
 
+      // Categories must update first before tension. Both should be finished before notifying the watch
       await handlers.handleUpdateCategories();
-      handlers.updateTensionIndex(showTensionIndex);
+      await handlers.updateTensionIndex(showTensionIndex);
 
       log.info("Notifying watch that data is ready");
       sendAppMessageWithSession({
@@ -147,8 +148,8 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
 
   try {
     if (!event || !event.response) return;
-    sendAppMessageWithSession({ type: "restart_app" });
 
+    // TODO: Handling settings changes should be consolidated so it can be the same whether the app first starts or when config changes
     const settings = clay.getSettings(event.response);
     log.debug("Clay settings received:", JSON.stringify(settings));
     // DebugMode is at key 10406 (after all category and section checkbox keys)
@@ -157,10 +158,6 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
     const debugModeValue = rawDebugValue === true || rawDebugValue === 1;
 
     setDebugMode(debugModeValue);
-    sendAppMessageWithSession({
-      type: "set_debug_mode",
-      isDebugMode: debugModeValue ? 1 : 0,
-    });
 
     // Categories are at keys 10000-10199
     const newSelected: boolean[] = availableCategories.map((_, idx) => {
@@ -195,19 +192,6 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
     // Interface language is key 10400
     const newInterfaceLanguage = settings["10400"] as string;
     setConfig("selectedInterfaceLanguage", newInterfaceLanguage);
-    const interfaceLanguage = getConfig("selectedInterfaceLanguage");
-    const interfaceStrings = flattenInterfaceStrings(
-      filterInterfaceStringOptionals({
-        strings: getInterfaceStrings(interfaceLanguage),
-        sectionKeys: selectedSectionNames ?? defaultSections,
-        categoryKeys: selectedNames ?? defaultCategories,
-        featureKeys: selectedAdditionalFeeds ?? defaultCategories,
-      }),
-    );
-    sendAppMessageWithSession({
-      type: "send_interface_strings",
-      interfaceStrings: JSON.stringify(interfaceStrings),
-    });
 
     // Content language is key 10401
     const newContentLanguage = settings["10401"] as string;
@@ -222,10 +206,6 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
     // Text size is key 10403
     const newTextSize = settings["10403"] as number;
     setConfig("selectedTextSize", newTextSize);
-    sendAppMessageWithSession({
-      type: "set_text_size",
-      textSize: newTextSize,
-    });
 
     // News refresh timeline pin setting is key 10404
     const newsRefreshPinSetting = settings["10404"] as boolean;
@@ -237,7 +217,7 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
     // Show tension index setting is key 10405
     const showTensionIndex = settings["10405"] as boolean;
     setConfig("isTensionIndexEnabled", showTensionIndex);
-    handlers.updateTensionIndex(showTensionIndex);
+    // Do not update here, do it in the finally after categories are updated
 
     // Clear full cache on save is key 10407
     const clearFullCacheOnSave = settings["10407"] as boolean;
@@ -266,14 +246,45 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
       }
     }
   } catch (err) {
-    sendAppMessageWithSession({ type: "update_categories", state: "success" });
     log.error(
       "Error in webviewclosed handler",
       err instanceof Error ? err.message : String(err),
     );
   } finally {
-    await handlers.handleUpdateCategories();
-    sendAppMessageWithSession({ type: "update_categories", state: "success" });
+    // TODO: The order of operations for restarting the app should be consolidated
+    sendAppMessageWithSession({ type: "restart_app" }).then(async () => {
+      const interfaceLanguage = getConfig("selectedInterfaceLanguage");
+      const interfaceStrings = flattenInterfaceStrings(
+        filterInterfaceStringOptionals({
+          strings: getInterfaceStrings(interfaceLanguage),
+          sectionKeys: handlers.getSelectedSectionNames?.() ?? defaultSections,
+          categoryKeys:
+            handlers.getSelectedCategoryNames?.() ?? defaultCategories,
+          featureKeys: handlers.getAdditionalFeeds?.() ?? defaultCategories,
+        }),
+      );
+      Promise.all([
+        sendAppMessageWithSession({
+          type: "send_interface_strings",
+          interfaceStrings: JSON.stringify(interfaceStrings),
+        }),
+        sendAppMessageWithSession({
+          type: "set_debug_mode",
+          isDebugMode: isDebugMode() ? 1 : 0,
+        }),
+        sendAppMessageWithSession({
+          type: "set_text_size",
+          textSize: getConfig("selectedTextSize"),
+        }),
+      ]).then(async () => {
+        await handlers.handleUpdateCategories();
+        await handlers.updateTensionIndex(getConfig("isTensionIndexEnabled"));
+        sendAppMessageWithSession({
+          type: "update_categories",
+          state: "success",
+        });
+      });
+    });
   }
 });
 
