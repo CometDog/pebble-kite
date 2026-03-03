@@ -24,7 +24,7 @@ interface ClayItem {
 
 type ClayConfig = ClayItem[];
 
-interface Clay {
+export interface Clay {
   /**
    * Returns the URL to open in the webview for configuration.
    */
