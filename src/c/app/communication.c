@@ -399,6 +399,7 @@ void communication_init(void)
 {
     message_router_init();
 
+    message_router_register("provide_session_id", handle_provide_session_id_message);
     message_router_register("update_categories", handle_update_categories_message);
     message_router_register("get_category_names", handle_get_category_names_message);
     message_router_register("get_story_titles", handle_get_story_titles_message);

@@ -74,6 +74,17 @@ void data_init(void);
 void data_deinit(void);
 
 /**
+ * Set the session ID for communication with the phone
+ * @param session_id The session ID string
+ */
+void set_session_id(const char *session_id);
+/**
+ * Get the current session ID
+ * @return The session ID string
+ */
+const char *get_session_id(void);
+
+/**
  * Helper functions to clear specific navigation levels
  * Use these when navigating back in the UI hierarchy to clear data
  * at the appropriate level and all deeper levels

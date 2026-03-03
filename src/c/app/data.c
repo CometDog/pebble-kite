@@ -55,6 +55,8 @@
  *   clear_level_2_story_view();       // Clears levels 2, 3, and 4
  */
 
+char session_id[64];
+
 // Navigation hierarchy levels - matches UI stack
 typedef struct
 {
@@ -102,6 +104,20 @@ static CategoriesLevel level_1_categories = {{0}, 0, 0, 0};
 static StoryViewLevel level_2_story_view = {NULL, 0, {0}, {0}, 0, NULL, NULL, NULL};
 static AvailableDetailsLevel level_3_available_details = {{0}, 0};
 static SelectedDetailLevel level_4_selected_detail = {0};
+
+void set_session_id(const char *new_session_id)
+{
+    if (new_session_id)
+    {
+        strncpy(session_id, new_session_id, sizeof(session_id) - 1);
+        session_id[sizeof(session_id) - 1] = '\0';
+    }
+}
+
+const char *get_session_id(void)
+{
+    return session_id;
+}
 
 // ============================================================================
 // Level 1: Categories Implementation
@@ -330,13 +346,16 @@ void set_story_read(uint16_t index, bool story_read)
 
 void push_story_read_statuses(char *stories_read_string)
 {
-    char *temp_array[get_story_list_data()->story_titles_count];
-    string_split_to_array(temp_array, 0, get_story_list_data()->story_titles_count, stories_read_string, "||");
-    uint16_t index = 0;
-    while (index < get_story_list_data()->story_titles_count && temp_array[index] != NULL)
+    uint16_t count = level_2_story_view.story_titles_count;
+    if (count == 0)
+        return;
+
+    char *temp_array[MAX_ITEMS];
+    memset(temp_array, 0, sizeof(temp_array));
+    string_split_to_array(temp_array, 0, count, stories_read_string, "||");
+    for (uint16_t index = 0; index < count && temp_array[index] != NULL; index++)
     {
         level_2_story_view.stories_read[index] = (strcmp(temp_array[index], "1") == 0);
-        index++;
     }
     main_story_list_window_ui_update();
 }

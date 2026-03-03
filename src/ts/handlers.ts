@@ -8,6 +8,7 @@ import {
 import { updateQrCodeBitmap, getQrCodeChunk } from "./qr";
 import { clearCache, updateCachedBatchInfo } from "./server/cache/cacheManager";
 import { batchesRequest } from "./server/request/batches";
+import { sendAppMessageWithSession } from "./sessionBasedAppMessage";
 
 import {
   availableCategories,
@@ -71,7 +72,7 @@ export const setMaxStoryCount = (count: number) => {
 export const getMaxStoryCount = () => selectedMaxStoryCount;
 
 const sendAppMessage = (payload: Record<string, any>) =>
-  PebbleTS.sendAppMessage(payload);
+  sendAppMessageWithSession(payload);
 
 const paginate = <T>(items: T[], page = 1, pageSize = PAGE_SIZE) => {
   const start = (page - 1) * pageSize;
@@ -265,10 +266,10 @@ export const handleGetStoryTitles = ({
   const { pageItems, nextPage } = paginate(titles, page);
   const processed = shortData
     ? pageItems.map((title) =>
-      title.length > SHORT_TITLE_LENGTH
-        ? title.slice(0, SHORT_TITLE_LENGTH - 3) + "..."
-        : title,
-    )
+        title.length > SHORT_TITLE_LENGTH
+          ? title.slice(0, SHORT_TITLE_LENGTH - 3) + "..."
+          : title,
+      )
     : pageItems;
 
   // This is redundant to the code above and should be DRY'd up

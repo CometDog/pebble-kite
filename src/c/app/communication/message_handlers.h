@@ -3,6 +3,11 @@
 #include <pebble.h>
 
 /**
+ * Handler for "provide_session_id" message from phone
+ * @param iter Dictionary iterator containing the message
+ */
+void handle_provide_session_id_message(DictionaryIterator *iter);
+/**
  * Handler for "update_categories" message from phone
  * @param iter Dictionary iterator containing the message
  */

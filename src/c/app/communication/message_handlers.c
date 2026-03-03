@@ -12,8 +12,51 @@
 #include "../ui/ui_config.h"
 #include "../utils/debug_logger.h"
 
+static bool check_session_id(DictionaryIterator *iter)
+{
+    Tuple *session_id_tuple = dict_find(iter, MESSAGE_KEY_sessionId);
+    if (!session_id_tuple)
+    {
+        ERROR_LOG("KNCMessageHandling", "Provide session ID message missing session ID");
+        return false;
+    }
+    const char *session_id = session_id_tuple->value->cstring;
+    if (strcmp(session_id, get_session_id()) != 0)
+    {
+        ERROR_LOG("KNCMessageHandling", "Received session ID does not match current session ID");
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+void handle_provide_session_id_message(DictionaryIterator *iter)
+{
+    Tuple *session_id_tuple = dict_find(iter, MESSAGE_KEY_sessionId);
+    if (!session_id_tuple)
+    {
+        ERROR_LOG("KNCMessageHandling", "Provide session ID message missing session ID");
+        return;
+    }
+
+    const char *session_id = session_id_tuple->value->cstring;
+    if (!session_id || session_id[0] == '\0')
+    {
+        ERROR_LOG("KNCMessageHandling", "Provide session ID message has empty session ID");
+        return;
+    }
+
+    set_session_id(session_id);
+}
 void handle_update_categories_message(DictionaryIterator *iter)
 {
+    if (check_session_id(iter) == false)
+    {
+        return;
+    }
+
     Tuple *state_tuple = dict_find(iter, MESSAGE_KEY_state);
     if (!state_tuple)
     {
@@ -34,6 +77,11 @@ void handle_update_categories_message(DictionaryIterator *iter)
 
 void handle_get_category_names_message(DictionaryIterator *iter)
 {
+    if (check_session_id(iter) == false)
+    {
+        return;
+    }
+
     Tuple *state_tuple = dict_find(iter, MESSAGE_KEY_state);
     if (!state_tuple)
     {
@@ -71,6 +119,11 @@ void handle_get_category_names_message(DictionaryIterator *iter)
 
 void handle_get_story_titles_message(DictionaryIterator *iter)
 {
+    if (check_session_id(iter) == false)
+    {
+        return;
+    }
+
     Tuple *state_tuple = dict_find(iter, MESSAGE_KEY_state);
     if (!state_tuple)
     {
@@ -113,6 +166,11 @@ void handle_get_story_titles_message(DictionaryIterator *iter)
 
 void handle_get_short_summary_message(DictionaryIterator *iter)
 {
+    if (check_session_id(iter) == false)
+    {
+        return;
+    }
+
     Tuple *state_tuple = dict_find(iter, MESSAGE_KEY_state);
     if (!state_tuple)
     {
@@ -142,6 +200,11 @@ void handle_get_short_summary_message(DictionaryIterator *iter)
 
 void handle_get_qr_code_bitmap_message(DictionaryIterator *iter)
 {
+    if (check_session_id(iter) == false)
+    {
+        return;
+    }
+
     Tuple *state_tuple = dict_find(iter, MESSAGE_KEY_state);
     if (!state_tuple)
     {
@@ -190,6 +253,11 @@ void handle_get_qr_code_bitmap_message(DictionaryIterator *iter)
 
 void handle_get_story_available_details_message(DictionaryIterator *iter)
 {
+    if (check_session_id(iter) == false)
+    {
+        return;
+    }
+
     Tuple *state_tuple = dict_find(iter, MESSAGE_KEY_state);
     if (!state_tuple)
     {
@@ -216,6 +284,11 @@ void handle_get_story_available_details_message(DictionaryIterator *iter)
 
 void handle_get_story_detail_message(DictionaryIterator *iter)
 {
+    if (check_session_id(iter) == false)
+    {
+        return;
+    }
+
     Tuple *state_tuple = dict_find(iter, MESSAGE_KEY_state);
     if (!state_tuple)
     {
@@ -313,6 +386,11 @@ void handle_get_story_detail_message(DictionaryIterator *iter)
 
 void handle_get_story_detail_sources_message(DictionaryIterator *iter)
 {
+    if (check_session_id(iter) == false)
+    {
+        return;
+    }
+
     Tuple *state_tuple = dict_find(iter, MESSAGE_KEY_state);
     if (!state_tuple)
     {
@@ -339,6 +417,11 @@ void handle_get_story_detail_sources_message(DictionaryIterator *iter)
 
 void handle_set_debug_mode_message(DictionaryIterator *iter)
 {
+    if (check_session_id(iter) == false)
+    {
+        return;
+    }
+
     Tuple *enabled_tuple = dict_find(iter, MESSAGE_KEY_isDebugMode);
     if (!enabled_tuple)
     {
@@ -352,12 +435,22 @@ void handle_set_debug_mode_message(DictionaryIterator *iter)
 
 void handle_restart_app_message(DictionaryIterator *iter)
 {
+    if (check_session_id(iter) == false)
+    {
+        return;
+    }
+
     INFO_LOG("KNCMessageHandling", "Received restart_app message from phone, restarting app");
     app_restart();
 }
 
 void handle_send_interface_strings_message(DictionaryIterator *iter)
 {
+    if (check_session_id(iter) == false)
+    {
+        return;
+    }
+
     Tuple *strings_tuple = dict_find(iter, MESSAGE_KEY_interfaceStrings);
     if (!strings_tuple)
     {
@@ -372,6 +465,11 @@ void handle_send_interface_strings_message(DictionaryIterator *iter)
 
 void handle_set_text_size_message(DictionaryIterator *iter)
 {
+    if (check_session_id(iter) == false)
+    {
+        return;
+    }
+
     Tuple *text_size_tuple = dict_find(iter, MESSAGE_KEY_textSize);
     if (!text_size_tuple)
     {
@@ -388,6 +486,11 @@ void handle_set_text_size_message(DictionaryIterator *iter)
 
 void handle_show_tension_index_message(DictionaryIterator *iter)
 {
+    if (check_session_id(iter) == false)
+    {
+        return;
+    }
+
     Tuple *tension_index_tuple = dict_find(iter, MESSAGE_KEY_tensionIndex);
 
     if (!tension_index_tuple)

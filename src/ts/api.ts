@@ -205,11 +205,11 @@ const updateStories = async ({
           quote:
             story.quote && story.quote_attribution
               ? {
-                text: story.quote ?? "",
-                author: story.quote_author ?? "",
-                source: story.quote_attribution ?? "",
-                url: story.quote_source_url ?? "",
-              }
+                  text: story.quote ?? "",
+                  author: story.quote_author ?? "",
+                  source: story.quote_attribution ?? "",
+                  url: story.quote_source_url ?? "",
+                }
               : undefined,
           international_reactions: story.international_reactions ?? [],
           user_action_items: story.user_action_items ?? [],

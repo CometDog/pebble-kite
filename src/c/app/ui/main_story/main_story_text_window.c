@@ -42,7 +42,7 @@ static void on_select_handler(void)
     mark_story_as_read();
     const StoryListData *list_data = get_story_list_data();
     const StoryData *story_data = get_story_data();
-    if (strncmp(list_data->selected_category, "TensionIndex", 12) == 0)
+    if (strcmp(list_data->selected_category, "TensionIndex") == 0)
     {
         navigation_open_detail_text("TensionIndex", story_data->story_short_summary);
     }

@@ -29,6 +29,7 @@ module.exports = [
   "page",
   "qrData",
   "qrSize",
+  "sessionId",
   "shortData",
   "state",
   "storyId",

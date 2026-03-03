@@ -38,7 +38,7 @@ void navigation_open_story_summary(const char *category, const char *story_title
 
     clear_story_data();
 
-    if (strncmp(category, "TensionIndex", 12) == 0)
+    if (strcmp(category, "TensionIndex") == 0)
     {
         set_selected_category((char *)category);
         send_get_tension_index_reason();

@@ -38,14 +38,23 @@ import { setServerLang } from "./server/localeManager";
 import { updateCachedBatchInfo } from "./server/cache/cacheManager";
 import { batchesRequest } from "./server/request/batches";
 import * as timeline from "./timeline";
+import {
+  sendAppMessageWithSession,
+  setSessionId,
+} from "./sessionBasedAppMessage";
 
 const log = createLogger("KNJS");
 
 Pebble.addEventListener("ready", async () => {
+  setSessionId(Date.now().toString());
   initDebugMode();
   log.info("PebbleKit JS ready");
 
-  PebbleTS.sendAppMessage({
+  await sendAppMessageWithSession({
+    type: "provide_session_id",
+  });
+
+  sendAppMessageWithSession({
     type: "set_debug_mode",
     isDebugMode: isDebugMode() ? 1 : 0,
   });
@@ -66,7 +75,7 @@ Pebble.addEventListener("ready", async () => {
       }
 
       const textSize = getConfig("selectedTextSize");
-      PebbleTS.sendAppMessage({
+      sendAppMessageWithSession({
         type: "set_text_size",
         textSize: textSize,
       });
@@ -87,7 +96,6 @@ Pebble.addEventListener("ready", async () => {
       handlers.setAdditionalFeeds(...selectedAdditionalFeeds);
 
       const showTensionIndex = getConfig("isTensionIndexEnabled");
-      handlers.updateTensionIndex(showTensionIndex);
 
       const interfaceLanguage = getConfig("selectedInterfaceLanguage");
       const interfaceStrings = flattenInterfaceStrings(
@@ -99,14 +107,19 @@ Pebble.addEventListener("ready", async () => {
         }),
       );
       log.debug("Sending interface strings:", JSON.stringify(interfaceStrings));
-      PebbleTS.sendAppMessage({
+      sendAppMessageWithSession({
         type: "send_interface_strings",
         interfaceStrings: JSON.stringify(interfaceStrings),
       });
 
       await handlers.handleUpdateCategories();
+      handlers.updateTensionIndex(showTensionIndex);
+
       log.info("Notifying watch that data is ready");
-      PebbleTS.sendAppMessage({ type: "update_categories", state: "success" });
+      sendAppMessageWithSession({
+        type: "update_categories",
+        state: "success",
+      });
     } else {
       log.warn("Kagi News API is unhealthy");
     }
@@ -134,7 +147,7 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
 
   try {
     if (!event || !event.response) return;
-    PebbleTS.sendAppMessage({ type: "restart_app" });
+    sendAppMessageWithSession({ type: "restart_app" });
 
     const settings = clay.getSettings(event.response);
     log.debug("Clay settings received:", JSON.stringify(settings));
@@ -144,7 +157,7 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
     const debugModeValue = rawDebugValue === true || rawDebugValue === 1;
 
     setDebugMode(debugModeValue);
-    PebbleTS.sendAppMessage({
+    sendAppMessageWithSession({
       type: "set_debug_mode",
       isDebugMode: debugModeValue ? 1 : 0,
     });
@@ -191,7 +204,7 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
         featureKeys: selectedAdditionalFeeds ?? defaultCategories,
       }),
     );
-    PebbleTS.sendAppMessage({
+    sendAppMessageWithSession({
       type: "send_interface_strings",
       interfaceStrings: JSON.stringify(interfaceStrings),
     });
@@ -209,7 +222,7 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
     // Text size is key 10403
     const newTextSize = settings["10403"] as number;
     setConfig("selectedTextSize", newTextSize);
-    PebbleTS.sendAppMessage({
+    sendAppMessageWithSession({
       type: "set_text_size",
       textSize: newTextSize,
     });
@@ -253,14 +266,14 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
       }
     }
   } catch (err) {
-    PebbleTS.sendAppMessage({ type: "update_categories", state: "success" });
+    sendAppMessageWithSession({ type: "update_categories", state: "success" });
     log.error(
       "Error in webviewclosed handler",
       err instanceof Error ? err.message : String(err),
     );
   } finally {
     await handlers.handleUpdateCategories();
-    PebbleTS.sendAppMessage({ type: "update_categories", state: "success" });
+    sendAppMessageWithSession({ type: "update_categories", state: "success" });
   }
 });
 
@@ -282,7 +295,7 @@ Pebble.addEventListener("appmessage", async (event) => {
           shortData: payload.shortData === 1,
         });
       } else {
-        PebbleTS.sendAppMessage({
+        sendAppMessageWithSession({
           type: "get_story_titles",
           state: "error",
           error: "categoryName required for get_story_titles but none provided",
@@ -296,7 +309,7 @@ Pebble.addEventListener("appmessage", async (event) => {
           storyTitle: payload.storyTitle,
         });
       } else {
-        PebbleTS.sendAppMessage({
+        sendAppMessageWithSession({
           type: "get_short_summary",
           state: "error",
           error: "storyTitle required for get_short_summary but none provided",
@@ -310,7 +323,7 @@ Pebble.addEventListener("appmessage", async (event) => {
           storyId: payload.storyId,
         });
       } else {
-        PebbleTS.sendAppMessage({
+        sendAppMessageWithSession({
           type: "get_available_details",
           state: "error",
           error: "storyId required for get_available_details but none provided",
@@ -324,7 +337,7 @@ Pebble.addEventListener("appmessage", async (event) => {
           detailKey: payload.detailKey,
         });
       } else {
-        PebbleTS.sendAppMessage({
+        sendAppMessageWithSession({
           type: "get_story_detail",
           state: "error",
           error: "detailType required for get_story_detail but none provided",
@@ -342,7 +355,7 @@ Pebble.addEventListener("appmessage", async (event) => {
           });
         }
       } else {
-        PebbleTS.sendAppMessage({
+        sendAppMessageWithSession({
           type: "get_story_detail_sources",
           state: "error",
           error:
@@ -359,7 +372,7 @@ Pebble.addEventListener("appmessage", async (event) => {
           handlers.handleUpdateQrCode({ domain: payload.articleDomain });
         }
       } else {
-        PebbleTS.sendAppMessage({
+        sendAppMessageWithSession({
           type: "get_qr_code_bitmap",
           state: "error",
           error:
@@ -371,7 +384,7 @@ Pebble.addEventListener("appmessage", async (event) => {
       if ("chunk" in payload) {
         handlers.handleGetQrCodeChunk({ chunk: payload.chunk });
       } else {
-        PebbleTS.sendAppMessage({
+        sendAppMessageWithSession({
           type: "get_next_qr_code_bitmap",
           state: "error",
           error: "chunk required for get_next_qr_code_bitmap but none provided",
@@ -382,7 +395,7 @@ Pebble.addEventListener("appmessage", async (event) => {
       if ("storyId" in payload) {
         handlers.handleAddReadStory(payload.storyId);
       } else {
-        PebbleTS.sendAppMessage({
+        sendAppMessageWithSession({
           type: "mark_story_read",
           state: "error",
           error: "storyId required for mark_story_read but not provided",
