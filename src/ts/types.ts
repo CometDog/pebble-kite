@@ -76,129 +76,9 @@ export type ReadStoriesStorageObject = {
   readStoryIds: string[];
 };
 
-export const availableCategories = [
-  "3D Printing",
-  "Africa",
-  "AI",
-  "Apple",
-  "Argentina",
-  "Asia",
-  "Australia",
-  "Austria",
-  "Bay Area",
-  "Belgium",
-  "Bitcoin",
-  "Brazil",
-  "Business",
-  "Canada",
-  "Catholic",
-  "China",
-  "Climate Change",
-  "Colombia",
-  "Costa Rica",
-  "Croatia",
-  "Cryptocurrency",
-  "Cybersecurity",
-  "Cycling",
-  "Czech Republic",
-  "Defense",
-  "Denmark",
-  "Economy",
-  "Estonia",
-  "Europe",
-  "Finland | Helsinki",
-  "Finland",
-  "Formula 1",
-  "France",
-  "French Music",
-  "Gaming",
-  "Germany | Baden-Württemberg",
-  "Germany | Hamburg",
-  "Germany | Hesse",
-  "Germany",
-  "Google",
-  "Greece",
-  "Healthcare | USA",
-  "Hong Kong",
-  "Hungary",
-  "India",
-  "Iran",
-  "Ireland",
-  "Israel",
-  "Italy",
-  "Japan",
-  "Linux & OSS",
-  "Lithuania",
-  "Metal Music",
-  "Mexico",
-  "Microsoft",
-  "Middle East",
-  "MLB",
-  "MMA",
-  "Morocco",
-  "Movies",
-  "Music",
-  "New Zealand",
-  "NFL",
-  "NHL",
-  "Nintendo",
-  "North Macedonia",
-  "Norway",
-  "Pakistan",
-  "Palestine",
-  "Philippines",
-  "Podcasting",
-  "Poland",
-  "Portugal",
-  "Privacy",
-  "Professional Wrestling",
-  "Romania",
-  "Russia",
-  "Science",
-  "Serbia",
-  "Simulation Games",
-  "Singapore",
-  "Slovakia",
-  "Slovenia",
-  "South Korea",
-  "Spain",
-  "Sports",
-  "Sweden",
-  "Switzerland (DE)",
-  "Switzerland (FR)",
-  "Switzerland (IT)",
-  "Taiwan",
-  "Technology",
-  "Thailand",
-  "The Netherlands",
-  "Turkey",
-  "U.S. Soccer",
-  "UK",
-  "Ukraine",
-  "USA | Boston",
-  "USA | Chicago",
-  "USA | Colorado",
-  "USA | Florida",
-  "USA | Michigan",
-  "USA | Minnesota",
-  "USA | Nevada",
-  "USA | New Mexico",
-  "USA | New York City",
-  "USA | Ohio",
-  "USA | Oregon",
-  "USA | Utah",
-  "USA | Vermont",
-  "USA | Virginia",
-  "USA | Washington",
-  "USA",
-  "Venezuela",
-  "Watches & Horology",
-  "World",
-] as const;
+export type AvailableCategory = string;
 
-export type AvailableCategory = (typeof availableCategories)[number];
-
-export const defaultCategories: Partial<AvailableCategory>[] = [
+export const defaultCategories: AvailableCategory[] = [
   "World",
   "USA",
   "Business",
@@ -206,7 +86,7 @@ export const defaultCategories: Partial<AvailableCategory>[] = [
   "Science",
   "Sports",
   "Gaming",
-] as const;
+];
 
 export const availableSections = [
   "Highlights",
@@ -237,3 +117,32 @@ export const additionalFeeds = ["Small Web"] as const;
 export type AdditionalFeature = (typeof additionalFeeds)[number];
 
 export const defaultMaxStories = 12;
+
+// Categories to exclude when setting available categories from Kagi News API
+const EXCLUDED_CATEGORIES = ["OnThisDay"];
+
+export const availableCategories: AvailableCategory[] = [...defaultCategories];
+
+// Map of English category name -> { langCode: localizedName }
+// Populated from the /api/categories/metadata endpoint
+export const categoryDisplayNames = new Map<string, Record<string, string>>();
+
+export const setAvailableCategories = (
+  categories: AvailableCategory[],
+  displayNames?: Map<string, Record<string, string>>,
+) => {
+  const filtered = categories.filter(
+    (category) => !EXCLUDED_CATEGORIES.includes(category),
+  );
+  availableCategories.length = 0;
+  availableCategories.push(...filtered);
+
+  categoryDisplayNames.clear();
+  if (displayNames) {
+    for (const [name, names] of displayNames) {
+      if (!EXCLUDED_CATEGORIES.includes(name)) {
+        categoryDisplayNames.set(name, names);
+      }
+    }
+  }
+};

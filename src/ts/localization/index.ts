@@ -8,6 +8,7 @@ import { strings as ruStrings } from "./definitions/ru";
 import { strings as jaStrings } from "./definitions/ja";
 import { InterfaceStrings } from "./type";
 import { createLogger } from "../../lib";
+import { categoryDisplayNames } from "../types";
 
 const log = createLogger("KNJSLocalization");
 
@@ -40,16 +41,44 @@ export const getInterfaceStrings = (lang?: string): InterfaceStrings => {
   }
 };
 
+const getLocalizedCategoryName = (
+  englishName: string,
+  lang: string,
+  strings: InterfaceStrings,
+): string => {
+  const langCode = lang.split("_")[0].split("-")[0];
+
+  // Check API-provided display names first (community categories)
+  const displayNames = categoryDisplayNames.get(englishName);
+  if (displayNames) {
+    return (
+      displayNames[lang] ??
+      displayNames[langCode] ??
+      displayNames["en"] ??
+      englishName
+    );
+  }
+
+  // Fallback to hardcoded translations in definition files (core categories)
+  if (englishName in strings.category) {
+    return strings.category[englishName];
+  }
+
+  return englishName;
+};
+
 export const filterInterfaceStringOptionals = ({
   strings,
   sectionKeys,
   categoryKeys,
   featureKeys,
+  lang,
 }: {
   strings: InterfaceStrings;
   sectionKeys: string[];
   categoryKeys: string[];
   featureKeys: string[];
+  lang?: string;
 }): DeepPartial<InterfaceStrings> => {
   const filteredStrings: DeepPartial<InterfaceStrings> = {
     general: { ...strings.general },
@@ -57,6 +86,8 @@ export const filterInterfaceStringOptionals = ({
     section: { sources: strings.section.sources },
     category: {},
   };
+
+  const langToUse = lang || Pebble.getActiveWatchInfo?.()?.language || "en";
 
   log.debug(
     `Filtering interface strings with sections: ${sectionKeys} and categories: ${categoryKeys}`,
@@ -70,13 +101,14 @@ export const filterInterfaceStringOptionals = ({
     }
   }
 
-  // Filter categories to only include those in categoryKeys
-  for (const [key, value] of Object.entries(enStrings.category)) {
-    if (categoryKeys.includes(value)) {
-      // Force unwrap, we know it exists from initialization above
-      filteredStrings!.category![key as keyof typeof strings.category] =
-        strings.category[key as keyof typeof strings.category];
-    }
+  // Build localized category names from API display names
+  for (const englishName of categoryKeys) {
+    const localizedName = getLocalizedCategoryName(
+      englishName,
+      langToUse,
+      strings,
+    );
+    filteredStrings!.category![englishName] = localizedName;
   }
 
   // Filter feeds to only include those in featureKeys

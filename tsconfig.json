@@ -1,4 +1,4 @@
 {
   "extends": "pkts/config/tsconfig.json",
-  "include": ["src/ts/**/*", "node_modules/pkts/lib/**/*"]
+  "include": ["src/ts/**/*", "src/ts-config/**/*", "node_modules/pkts/lib/**/*"]
 }

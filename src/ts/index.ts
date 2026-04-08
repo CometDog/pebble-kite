@@ -1,9 +1,6 @@
-import { ClayConstructor } from "../lib/Clay";
+import { ClayConstructor, Clay as ClayInstance } from "../lib/Clay";
 // @ts-ignore
 const Clay: ClayConstructor = require("@rebble/clay");
-// @ts-ignore
-const clayConfig = require("../ts-build/config");
-const clay = new Clay(clayConfig, null, { autoHandleEvents: false });
 
 import {
   getConfig,
@@ -18,10 +15,12 @@ import * as handlers from "./handlers";
 import {
   additionalFeeds,
   availableCategories,
+  setAvailableCategories,
   availableSections,
   defaultCategories,
   defaultSections,
   StoryDetailEnum,
+  AvailableCategory,
 } from "./types";
 import {
   createLogger,
@@ -42,13 +41,44 @@ import {
   sendAppMessageWithSession,
   setSessionId,
 } from "./sessionBasedAppMessage";
+import { possibleCategoriesRequest } from "./server/request/possibleCategories";
 
 const log = createLogger("KNJS");
+
+// Mutable Clay instance that is updated based on runtime fetches of Kagi News data
+const buildClayConfig: (
+  categories: AvailableCategory[],
+  // @ts-ignore
+) => any[] = require("../ts-build/config");
+let clay: ClayInstance = new Clay(buildClayConfig(defaultCategories), null, {
+  autoHandleEvents: false,
+});
+
+const refreshPossibleCategories = async (): Promise<void> => {
+  const result = await possibleCategoriesRequest();
+  if (result.names.length > 0) {
+    setAvailableCategories(result.names, result.displayNamesMap);
+    log.info(
+      `Fetched ${availableCategories.length} categories from metadata API`,
+    );
+  } else {
+    setAvailableCategories(defaultCategories);
+    log.error(
+      "Failed to fetch categories from metadata API, using fallback list",
+    );
+  }
+  clay = new Clay(buildClayConfig(availableCategories), null, {
+    autoHandleEvents: false,
+  });
+};
 
 Pebble.addEventListener("ready", async () => {
   setSessionId(Date.now().toString());
   initDebugMode();
   log.info("PebbleKit JS ready");
+
+  // Refresh possible categories from Kagi News API
+  await refreshPossibleCategories();
 
   await sendAppMessageWithSession({
     type: "provide_session_id",
@@ -104,6 +134,7 @@ Pebble.addEventListener("ready", async () => {
           sectionKeys: selectedSectionNames ?? defaultSections,
           categoryKeys: selectedCategoryNames ?? defaultCategories,
           featureKeys: selectedAdditionalFeeds ?? defaultCategories,
+          lang: interfaceLanguage,
         }),
       );
       log.debug("Sending interface strings:", JSON.stringify(interfaceStrings));
@@ -129,8 +160,11 @@ Pebble.addEventListener("ready", async () => {
   }
 });
 
-Pebble.addEventListener("showConfiguration", () => {
+Pebble.addEventListener("showConfiguration", async () => {
   try {
+    // Refresh possible categories from Kagi News API
+    await refreshPossibleCategories();
+
     const claySettings = generateClaySettings(isDebugMode());
     log.debug("Generated Clay settings:", claySettings);
     localStorage.setItem("clay-settings", JSON.stringify(claySettings));
@@ -261,6 +295,7 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
           categoryKeys:
             handlers.getSelectedCategoryNames?.() ?? defaultCategories,
           featureKeys: handlers.getAdditionalFeeds?.() ?? defaultCategories,
+          lang: interfaceLanguage,
         }),
       );
       Promise.all([
