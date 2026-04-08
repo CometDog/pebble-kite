@@ -1,5 +1,8 @@
 #include "menu_handler.h"
 #include "ui_config.h"
+#include <string.h>
+
+#define MAX_CACHED_CELL_HEIGHTS 32
 
 typedef struct
 {
@@ -7,7 +10,13 @@ typedef struct
     MenuConfig config;
     bool use_multiline;
     bool never_multiline;
+    int16_t cached_heights[MAX_CACHED_CELL_HEIGHTS];
 } MenuData;
+
+static void invalidate_height_cache(MenuData *data)
+{
+    memset(data->cached_heights, 0, sizeof(data->cached_heights));
+}
 
 // Track active menu windows to detect stale pointers
 static Window *s_tracked_windows[UI_MAX_TRACKED_WINDOWS];
@@ -181,6 +190,13 @@ static int16_t get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_ind
         return UI_MENU_CELL_HEIGHT_DEFAULT + UI_MENU_CELL_PADDING_Y;
     }
 
+    // Use cached height if available
+    uint16_t cache_index = cell_index->section * 20 + cell_index->row;
+    if (cache_index < MAX_CACHED_CELL_HEIGHTS && data->cached_heights[cache_index] > 0)
+    {
+        return data->cached_heights[cache_index];
+    }
+
     char **items;
     uint16_t count;
     bool is_read = false;
@@ -211,16 +227,26 @@ static int16_t get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_ind
     // 1-2 lines: use default cell height
     // 3 lines: use 1.5x default cell height
     // 4+ lines: use 2x default cell height
+    int16_t height;
     if (num_lines >= 4)
     {
-        return UI_MENU_CELL_HEIGHT_FOUR_LINE + UI_MENU_CELL_PADDING_Y;
+        height = UI_MENU_CELL_HEIGHT_FOUR_LINE + UI_MENU_CELL_PADDING_Y;
     }
     else if (num_lines >= 3)
     {
-        return UI_MENU_CELL_HEIGHT_THREE_LINE + UI_MENU_CELL_PADDING_Y;
+        height = UI_MENU_CELL_HEIGHT_THREE_LINE + UI_MENU_CELL_PADDING_Y;
+    }
+    else
+    {
+        height = UI_MENU_CELL_HEIGHT_DEFAULT + UI_MENU_CELL_PADDING_Y;
     }
 
-    return UI_MENU_CELL_HEIGHT_DEFAULT + UI_MENU_CELL_PADDING_Y;
+    if (cache_index < MAX_CACHED_CELL_HEIGHTS)
+    {
+        data->cached_heights[cache_index] = height;
+    }
+
+    return height;
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context)
@@ -280,6 +306,7 @@ Window *s_menu_handler_create_window(MenuConfig config, bool never_multiline)
 
     menu_data->config = config;
     menu_data->never_multiline = never_multiline;
+    invalidate_height_cache(menu_data);
 
     bool exceeds_length = false;
     if (!never_multiline)
@@ -411,6 +438,7 @@ void menu_handler_request_update(Window *window)
         }
 
         menu_data->use_multiline = menu_data->never_multiline ? false : exceeds_length;
+        invalidate_height_cache(menu_data);
         menu_layer_reload_data(menu_data->menu_layer);
     }
 }
