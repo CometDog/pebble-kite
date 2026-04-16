@@ -9,6 +9,7 @@
 #include "../ui/main_story/main_story_list_window.h"
 #include "../ui/source/active_detail_source_list_window.h"
 #include "../ui/source/source_detail_list_window.h"
+#include "../ui/splash_screen.h"
 #include "../ui/ui_config.h"
 #include "../utils/debug_logger.h"
 
@@ -109,6 +110,11 @@ void handle_get_category_names_message(DictionaryIterator *iter)
         if (next_page_tuple)
         {
             send_get_category_names(next_page_tuple->value->int8);
+        }
+        else if (categories_loaded() && splash_screen_is_showing())
+        {
+            splash_screen_set_loading_progress(100, 100);
+            splash_screen_dismiss();
         }
     }
     else
@@ -461,6 +467,24 @@ void handle_send_interface_strings_message(DictionaryIterator *iter)
     const char *strings = strings_tuple->value->cstring;
     localization_set_strings(strings);
     INFO_LOG("KNCMessageHandling", "Interface strings changed, restarting app");
+}
+
+void handle_loading_state_message(DictionaryIterator *iter)
+{
+    if (check_session_id(iter) == false)
+    {
+        return;
+    }
+
+    Tuple *current_tuple = dict_find(iter, MESSAGE_KEY_loadingCurrent);
+    Tuple *max_tuple = dict_find(iter, MESSAGE_KEY_loadingMax);
+    if (!current_tuple || !max_tuple)
+    {
+        ERROR_LOG("KNCMessageHandling", "Loading state message missing progress values");
+        return;
+    }
+
+    splash_screen_set_loading_progress((uint16_t)current_tuple->value->int32, (uint16_t)max_tuple->value->int32);
 }
 
 void handle_set_text_size_message(DictionaryIterator *iter)

@@ -76,6 +76,8 @@
       "error": 10514,
       "interfaceStrings": 10515,
       "isDebugMode": 10516,
+      "loadingCurrent": 10536,
+      "loadingMax": 10537,
       "logLevel": 10517,
       "logMessage": 10518,
       "logTag": 10519,

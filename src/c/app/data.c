@@ -135,16 +135,10 @@ uint8_t get_additional_feeds_count(void)
 
 void push_local_categories(char *categories_string)
 {
-    bool was_empty = (level_1_categories.categories_count == 0);
     level_1_categories.categories_count += string_split_to_array(
         level_1_categories.categories, level_1_categories.categories_count, MAX_ITEMS, categories_string, "||");
 
-    // Dismiss splash screen on first category load
-    if (was_empty && level_1_categories.categories_count > 0 && splash_screen_is_showing())
-    {
-        splash_screen_dismiss();
-    }
-    else
+    if (!splash_screen_is_showing())
     {
         request_categories_menu_update();
     }

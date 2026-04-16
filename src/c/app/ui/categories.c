@@ -237,6 +237,11 @@ void categories_ui_deinit(void)
 
 void request_categories_menu_update(void)
 {
+    if (!s_main_window)
+    {
+        return;
+    }
+
     if (status_bar_text_layer)
     {
         static char tension_text[64];

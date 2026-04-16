@@ -5,12 +5,30 @@
 static Window *s_window;
 static Layer *s_canvas_layer;
 static bool s_is_showing = false;
+static uint16_t s_loading_current = 0;
+static uint16_t s_loading_max = 100;
 
 static GBitmap *s_splash_bitmap = NULL;
+
+static uint16_t get_loading_percent(void)
+{
+    if (s_loading_max == 0)
+    {
+        return 0;
+    }
+
+    if (s_loading_current >= s_loading_max)
+    {
+        return 100;
+    }
+
+    return (uint16_t)((s_loading_current * 100U) / s_loading_max);
+}
 
 static void canvas_update_proc(Layer *layer, GContext *ctx)
 {
     GRect bounds = layer_get_bounds(layer);
+    UISplashProgressLayout layout = ui_get_splash_progress_layout(bounds);
 
     graphics_context_set_fill_color(ctx, GColorClear);
     graphics_fill_rect(ctx, bounds, 0, GCornerNone);
@@ -20,6 +38,30 @@ static void canvas_update_proc(Layer *layer, GContext *ctx)
         graphics_context_set_compositing_mode(ctx, GCompOpSet);
         graphics_draw_bitmap_in_rect(ctx, s_splash_bitmap, bounds);
     }
+
+    uint16_t percent = get_loading_percent();
+    int16_t fill_width = (int16_t)((layout.bar_frame.size.w * percent) / 100U);
+
+    graphics_context_set_fill_color(ctx, UI_COLOR_SPLASH_PROGRESS_BACKGROUND);
+    graphics_fill_rect(ctx, layout.background_frame, layout.background_radius, GCornersAll);
+
+    graphics_context_set_stroke_color(ctx, UI_COLOR_SPLASH_PROGRESS_BORDER);
+    graphics_draw_round_rect(ctx, layout.bar_frame, layout.bar_radius);
+
+    if (fill_width > 0)
+    {
+        graphics_context_set_fill_color(ctx, UI_COLOR_SPLASH_PROGRESS_FILL);
+        graphics_fill_rect(ctx,
+                           GRect(layout.bar_frame.origin.x + 1, layout.bar_frame.origin.y + 1,
+                                 fill_width > 2 ? fill_width - 2 : 1, layout.bar_frame.size.h - 2),
+                           2, GCornersAll);
+    }
+
+    static char percent_text[8];
+    snprintf(percent_text, sizeof(percent_text), "%u%%", (unsigned int)percent);
+    graphics_context_set_text_color(ctx, UI_COLOR_SPLASH_PROGRESS_TEXT);
+    graphics_draw_text(ctx, percent_text, ui_get_system_font_splash_progress(), layout.label_frame,
+                       GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
 }
 
 static void window_load(Window *window)
@@ -51,6 +93,8 @@ static void window_unload(Window *window)
 void splash_screen_init(void)
 {
     s_window = window_create();
+    s_loading_current = 0;
+    s_loading_max = 100;
 
     window_set_window_handlers(s_window, (WindowHandlers){
                                              .load = window_load,
@@ -91,4 +135,18 @@ void splash_screen_dismiss(void)
 bool splash_screen_is_showing(void)
 {
     return s_is_showing;
+}
+
+void splash_screen_set_loading_progress(uint16_t current, uint16_t max)
+{
+    if (current > s_loading_current)
+    {
+        s_loading_current = current;
+    }
+    s_loading_max = max > 0 ? max : 100;
+
+    if (s_canvas_layer)
+    {
+        layer_mark_dirty(s_canvas_layer);
+    }
 }

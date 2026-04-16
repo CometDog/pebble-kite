@@ -21,6 +21,8 @@ module.exports = [
   "error",
   "interfaceStrings",
   "isDebugMode",
+  "loadingCurrent",
+  "loadingMax",
   "logLevel",
   "logMessage",
   "logTag",

@@ -38,6 +38,15 @@ void ui_unload_fonts(void);
  */
 void ui_reload_fonts(void);
 
+typedef struct
+{
+    GRect background_frame;
+    GRect bar_frame;
+    GRect label_frame;
+    uint16_t background_radius;
+    uint16_t bar_radius;
+} UISplashProgressLayout;
+
 // Colors
 #ifdef PBL_COLOR
 #define UI_COLOR_HIGHLIGHT GColorRajah
@@ -55,6 +64,16 @@ void ui_reload_fonts(void);
 
 #define UI_COLOR_TEXT_PRIMARY GColorBlack
 #define UI_COLOR_MENU_HEADER_TEXT GColorBlack
+
+#ifdef PBL_COLOR
+#define UI_COLOR_SPLASH_PROGRESS_FILL GColorKellyGreen
+#else
+#define UI_COLOR_SPLASH_PROGRESS_FILL GColorWhite
+#endif
+
+#define UI_COLOR_SPLASH_PROGRESS_BACKGROUND GColorBlack
+#define UI_COLOR_SPLASH_PROGRESS_BORDER GColorWhite
+#define UI_COLOR_SPLASH_PROGRESS_TEXT GColorBlack
 
 // Fonts
 #define UI_FONT_KEY_TITLE_SMALL FONT_KEY_GOTHIC_14_BOLD
@@ -86,6 +105,12 @@ void ui_reload_fonts(void);
 #define UI_FONT_KEY_STATUS_BAR_MEDIUM FONT_KEY_GOTHIC_14
 #define UI_FONT_KEY_STATUS_BAR_LARGE FONT_KEY_GOTHIC_18
 #define UI_FONT_KEY_STATUS_BAR_XLARGE FONT_KEY_GOTHIC_24
+
+#if defined(PBL_PLATFORM_EMERY) || defined(PBL_PLATFORM_GABBRO)
+#define UI_FONT_KEY_SPLASH_PROGRESS FONT_KEY_GOTHIC_24_BOLD
+#else
+#define UI_FONT_KEY_SPLASH_PROGRESS FONT_KEY_GOTHIC_18_BOLD
+#endif
 
 #define UI_FONT_KEY_FOR_SIZE(small, medium, large, xlarge)                                                             \
     ((ui_effective_preferred_content_size() == PreferredContentSizeSmall)        ? (small)                             \
@@ -258,6 +283,7 @@ extern GFont ui_font_menu_read;
 extern GFont ui_font_caption;
 extern GFont ui_font_menu_title;
 extern GFont ui_font_status_bar;
+extern GFont ui_font_splash_progress;
 
 static inline GFont ui_get_system_font_title(void)
 {
@@ -321,6 +347,17 @@ static inline GFont ui_get_system_font_status_bar(void)
     }
     return ui_font_status_bar;
 }
+
+static inline GFont ui_get_system_font_splash_progress(void)
+{
+    if (!ui_font_splash_progress)
+    {
+        ui_load_fonts();
+    }
+    return ui_font_splash_progress;
+}
+
+UISplashProgressLayout ui_get_splash_progress_layout(GRect bounds);
 
 // Configuration
 #define UI_MAX_TRACKED_WINDOWS 8

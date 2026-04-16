@@ -23,3 +23,10 @@ void splash_screen_dismiss(void);
  * @return true if splash screen is visible
  */
 bool splash_screen_is_showing(void);
+
+/**
+ * Update the splash screen progress bar.
+ * @param current Current progress value
+ * @param max Maximum progress value
+ */
+void splash_screen_set_loading_progress(uint16_t current, uint16_t max);

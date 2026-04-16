@@ -44,6 +44,20 @@ import {
 import { possibleCategoriesRequest } from "./server/request/possibleCategories";
 
 const log = createLogger("KNJS");
+const STARTUP_LOADING_MAX = 100;
+let startupLoadingCurrent = 0;
+
+// The percentage sent is arbitrary based on what seems right for how long each step takes, and is only meant to give a rough sense of progress rather than be exact.
+const sendStartupLoadingState = async (current: number) => {
+  if (current > startupLoadingCurrent) {
+    startupLoadingCurrent = current;
+    return sendAppMessageWithSession({
+      type: "loading_state",
+      loadingCurrent: current,
+      loadingMax: STARTUP_LOADING_MAX,
+    });
+  }
+};
 
 // Mutable Clay instance that is updated based on runtime fetches of Kagi News data
 const buildClayConfig: (
@@ -77,17 +91,21 @@ Pebble.addEventListener("ready", async () => {
   initDebugMode();
   log.info("PebbleKit JS ready");
 
-  // Refresh possible categories from Kagi News API
-  await refreshPossibleCategories();
-
   await sendAppMessageWithSession({
     type: "provide_session_id",
   });
 
-  sendAppMessageWithSession({
+  await sendStartupLoadingState(5);
+
+  // Refresh possible categories from Kagi News API
+  await refreshPossibleCategories();
+  await sendStartupLoadingState(startupLoadingCurrent + 10);
+
+  await sendAppMessageWithSession({
     type: "set_debug_mode",
     isDebugMode: isDebugMode() ? 1 : 0,
   });
+  await sendStartupLoadingState(startupLoadingCurrent + 10);
 
   try {
     const response = await healthRequest();
@@ -98,6 +116,7 @@ Pebble.addEventListener("ready", async () => {
         `Current batch ID: ${batchInfo.id}, created at ${batchInfo.createdAt}`,
       );
       updateCachedBatchInfo(batchInfo);
+      await sendStartupLoadingState(startupLoadingCurrent + 15);
 
       const newsRefreshPinEnabled = getConfig("newsRefreshPinSetting");
       if (newsRefreshPinEnabled) {
@@ -105,7 +124,7 @@ Pebble.addEventListener("ready", async () => {
       }
 
       const textSize = getConfig("selectedTextSize");
-      sendAppMessageWithSession({
+      await sendAppMessageWithSession({
         type: "set_text_size",
         textSize: textSize,
       });
@@ -126,6 +145,7 @@ Pebble.addEventListener("ready", async () => {
       handlers.setAdditionalFeeds(...selectedAdditionalFeeds);
 
       const showTensionIndex = getConfig("isTensionIndexEnabled");
+      await sendStartupLoadingState(startupLoadingCurrent + 15);
 
       const interfaceLanguage = getConfig("selectedInterfaceLanguage");
       const interfaceStrings = flattenInterfaceStrings(
@@ -138,17 +158,27 @@ Pebble.addEventListener("ready", async () => {
         }),
       );
       log.debug("Sending interface strings:", JSON.stringify(interfaceStrings));
-      sendAppMessageWithSession({
+      await sendAppMessageWithSession({
         type: "send_interface_strings",
         interfaceStrings: JSON.stringify(interfaceStrings),
       });
+      await sendStartupLoadingState(startupLoadingCurrent + 10);
 
       // Categories must update first before tension. Both should be finished before notifying the watch
-      await handlers.handleUpdateCategories();
+      await handlers.handleUpdateCategories((completedGroups, totalGroups) => {
+        const categoryProgress =
+          startupLoadingCurrent +
+          Math.round(
+            (completedGroups / totalGroups) *
+              (STARTUP_LOADING_MAX - startupLoadingCurrent - 10),
+          );
+        void sendStartupLoadingState(categoryProgress);
+      });
       await handlers.updateTensionIndex(showTensionIndex);
+      await sendStartupLoadingState(startupLoadingCurrent + 5);
 
       log.info("Notifying watch that data is ready");
-      sendAppMessageWithSession({
+      await sendAppMessageWithSession({
         type: "update_categories",
         state: "success",
       });

@@ -666,10 +666,13 @@ export const handleGetStoryDetail = ({
   }
 };
 
-export const handleUpdateCategories = async () => {
+export const handleUpdateCategories = async (
+  onProgress?: (completedGroups: number, totalGroups: number) => void,
+) => {
   await updateCategories({
     selectedCategoryNames,
     maxStoryCount: selectedMaxStoryCount,
+    onProgress,
   });
 };
 

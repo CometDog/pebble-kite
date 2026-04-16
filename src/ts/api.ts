@@ -242,9 +242,11 @@ const sortData = (data: CurrentData) => {
 export const updateCategories = async ({
   selectedCategoryNames,
   maxStoryCount,
+  onProgress,
 }: {
   selectedCategoryNames: string[];
   maxStoryCount: number;
+  onProgress?: (completedGroups: number, totalGroups: number) => void;
 }) => {
   const categoriesResponse = await batchCategoriesRequest({
     batchId: "latest",
@@ -272,6 +274,11 @@ export const updateCategories = async ({
   }
 
   const categorizedStories: CategorizedStories[] = [];
+  const totalGroups = Math.max(
+    1,
+    Math.ceil(filtered.categories.length / CONCURRENT_BATCH_SIZE),
+  );
+  let completedGroups = 0;
 
   for (let j = 0; j < filtered.categories.length; j += CONCURRENT_BATCH_SIZE) {
     const catGroup = filtered.categories.slice(j, j + CONCURRENT_BATCH_SIZE);
@@ -287,6 +294,13 @@ export const updateCategories = async ({
         });
       }),
     );
+
+    completedGroups += 1;
+    onProgress?.(completedGroups, totalGroups);
+  }
+
+  if (filtered.categories.length === 0) {
+    onProgress?.(totalGroups, totalGroups);
   }
 
   const newMap = {
