@@ -45,7 +45,10 @@ static void canvas_update_proc(Layer *layer, GContext *ctx)
     graphics_context_set_fill_color(ctx, UI_COLOR_SPLASH_PROGRESS_BACKGROUND);
     graphics_fill_rect(ctx, layout.background_frame, layout.background_radius, GCornersAll);
 
-    graphics_context_set_stroke_color(ctx, UI_COLOR_SPLASH_PROGRESS_BORDER);
+    graphics_context_set_stroke_color(ctx, UI_COLOR_SPLASH_PROGRESS_OUTER_BORDER);
+    graphics_draw_round_rect(ctx, layout.background_frame, layout.background_radius);
+
+    graphics_context_set_stroke_color(ctx, UI_COLOR_SPLASH_PROGRESS_INNER_BORDER);
     graphics_draw_round_rect(ctx, layout.bar_frame, layout.bar_radius);
 
     if (fill_width > 0)
