@@ -1,0 +1,132 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for version bump commit
+        id: version
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%s)
+          if [[ "$COMMIT_MSG" =~ ^Bump\ version\ ([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            echo "version=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Read version files
+        if: steps.version.outputs.should_release == 'true'
+        id: tool_versions
+        run: |
+          NODEJS_VERSION=$(grep '^nodejs' .tool-versions | awk '{print $2}')
+          PEBBLE_TOOL_VERSION=$(grep '^tool' .pebble-versions | awk '{print $2}')
+          PEBBLE_SDK_VERSION=$(grep '^sdk' .pebble-versions | awk '{print $2}')
+          echo "nodejs=$NODEJS_VERSION" >> "$GITHUB_OUTPUT"
+          echo "pebble_tool=$PEBBLE_TOOL_VERSION" >> "$GITHUB_OUTPUT"
+          echo "pebble_sdk=$PEBBLE_SDK_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Node.js
+        if: steps.version.outputs.should_release == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ steps.tool_versions.outputs.nodejs }}
+          cache: "npm"
+
+      - name: Install npm dependencies
+        if: steps.version.outputs.should_release == 'true'
+        run: npm ci
+
+      - name: Install Pebble SDK system dependencies
+        if: steps.version.outputs.should_release == 'true'
+        run: sudo apt-get install -y libsdl1.2debian libfdt1 libsdl2-2.0-0 libpixman-1-0
+
+      - name: Install uv
+        if: steps.version.outputs.should_release == 'true'
+        uses: astral-sh/setup-uv@v5
+
+      - name: Cache pebble-tool
+        if: steps.version.outputs.should_release == 'true'
+        id: cache_pebble_tool
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/uv/tools/pebble-tool
+          key: pebble-tool-${{ steps.tool_versions.outputs.pebble_tool }}
+
+      - name: Install pebble-tool
+        if: steps.version.outputs.should_release == 'true' && steps.cache_pebble_tool.outputs.cache-hit != 'true'
+        run: uv tool install pebble-tool==${{ steps.tool_versions.outputs.pebble_tool }} --python 3.13
+
+      - name: Cache Pebble SDK
+        if: steps.version.outputs.should_release == 'true'
+        id: cache_pebble_sdk
+        uses: actions/cache@v4
+        with:
+          path: ~/.pebble-sdk
+          key: pebble-sdk-${{ steps.tool_versions.outputs.pebble_sdk }}
+
+      - name: Install Pebble SDK
+        if: steps.version.outputs.should_release == 'true' && steps.cache_pebble_sdk.outputs.cache-hit != 'true'
+        run: pebble sdk install ${{ steps.tool_versions.outputs.pebble_sdk }}
+
+      - name: Build
+        if: steps.version.outputs.should_release == 'true'
+        run: pebble build
+
+      - name: Set version label in appinfo.json
+        if: steps.version.outputs.should_release == 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          jq --arg v "$VERSION" '.versionLabel = $v' build/appinfo.json > build/appinfo.tmp.json
+          mv build/appinfo.tmp.json build/appinfo.json
+
+      - name: Patch .pbw with updated appinfo.json
+        if: steps.version.outputs.should_release == 'true'
+        run: |
+          cd build
+          zip -u *.pbw appinfo.json
+
+      - name: Generate release notes
+        if: steps.version.outputs.should_release == 'true'
+        id: release_notes
+        run: |
+          PREV_BUMP=$(git log --pretty=format:"%H %s" \
+            | grep -E "^[0-9a-f]+ Bump version [0-9]+\.[0-9]+\.[0-9]+" \
+            | sed -n '2p' \
+            | awk '{print $1}')
+
+          if [ -z "$PREV_BUMP" ]; then 
+            NOTES=$(git log --pretty=format:"- %s" | grep -vE "^- Bump version [0-9]+\.[0-9]+\.[0-9]+$")
+          else
+            NOTES=$(git log --pretty=format:"- %s" "${PREV_BUMP}..HEAD" | grep -vE "^- Bump version [0-9]+\.[0-9]+\.[0-9]+$")
+          fi
+
+          {
+            echo "notes<<EOF"
+            echo "$NOTES"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        if: steps.version.outputs.should_release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: v${{ steps.version.outputs.version }}
+          name: v${{ steps.version.outputs.version }}
+          body: ${{ steps.release_notes.outputs.notes }}
+          files: build/*.pbw
+          fail_on_unmatched_files: true
