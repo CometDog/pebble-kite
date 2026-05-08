@@ -79,25 +79,12 @@ jobs:
 
       - name: Install Pebble SDK
         if: steps.version.outputs.should_release == 'true' && steps.cache_pebble_sdk.outputs.cache-hit != 'true'
-        run: pebble sdk install ${{ steps.tool_versions.outputs.pebble_sdk }}
+        run: pebble sdk install ${{ steps.tool_versions.outputs.pebble_sdk }} \
+          && pebble sdk activate ${{ steps.tool_versions.outputs.pebble_sdk }}
 
       - name: Build
         if: steps.version.outputs.should_release == 'true'
         run: pebble build
-
-      - name: Set version label in appinfo.json
-        if: steps.version.outputs.should_release == 'true'
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          jq --arg v "$VERSION" '.versionLabel = $v' build/appinfo.json > build/appinfo.tmp.json
-          mv build/appinfo.tmp.json build/appinfo.json
-
-      - name: Patch .pbw with updated appinfo.json
-        if: steps.version.outputs.should_release == 'true'
-        run: |
-          cd build
-          zip -u *.pbw appinfo.json
 
       - name: Generate release notes
         if: steps.version.outputs.should_release == 'true'
