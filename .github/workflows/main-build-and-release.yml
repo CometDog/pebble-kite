@@ -66,7 +66,7 @@ jobs:
           key: pebble-tool-${{ steps.tool_versions.outputs.pebble_tool }}
 
       - name: Install pebble-tool
-        if: steps.version.outputs.should_release == 'true' && steps.cache_pebble_tool.outputs.cache-hit != 'true'
+        if: steps.version.outputs.should_release == 'true'
         run: uv tool install pebble-tool==${{ steps.tool_versions.outputs.pebble_tool }} --python 3.13
 
       - name: Cache Pebble SDK
@@ -77,27 +77,17 @@ jobs:
           path: ~/.pebble-sdk
           key: pebble-sdk-${{ steps.tool_versions.outputs.pebble_sdk }}
 
+      - name: Add pebble-tool to PATH
+        if: steps.version.outputs.should_release == 'true'
+        run: echo "$HOME/.local/share/uv/tools/pebble-tool/bin" >> $GITHUB_PATH
+
       - name: Install Pebble SDK
         if: steps.version.outputs.should_release == 'true' && steps.cache_pebble_sdk.outputs.cache-hit != 'true'
-        run: pebble sdk install ${{ steps.tool_versions.outputs.pebble_sdk }}
+        run: pebble sdk install ${{ steps.tool_versions.outputs.pebble_sdk }} && pebble sdk activate ${{ steps.tool_versions.outputs.pebble_sdk }}
 
       - name: Build
         if: steps.version.outputs.should_release == 'true'
         run: pebble build
-
-      - name: Set version label in appinfo.json
-        if: steps.version.outputs.should_release == 'true'
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          jq --arg v "$VERSION" '.versionLabel = $v' build/appinfo.json > build/appinfo.tmp.json
-          mv build/appinfo.tmp.json build/appinfo.json
-
-      - name: Patch .pbw with updated appinfo.json
-        if: steps.version.outputs.should_release == 'true'
-        run: |
-          cd build
-          zip -u *.pbw appinfo.json
 
       - name: Generate release notes
         if: steps.version.outputs.should_release == 'true'
