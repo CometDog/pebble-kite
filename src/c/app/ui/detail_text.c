@@ -4,6 +4,9 @@
 #include "ui_config.h"
 #include <stdlib.h>
 #include <string.h>
+#ifdef PBL_TOUCH
+#include "rotary_kit.h"
+#endif
 
 typedef struct
 {
@@ -145,6 +148,21 @@ static void update_content_for_window(Window *window)
     scroll_layer_set_content_offset(ctx->scroll_layer, GPoint(0, 0), false);
 }
 
+#ifdef PBL_TOUCH
+static void rotary_click_handler(int direction, int click_num, void *context)
+{
+    Window *window = (Window *)context;
+    DetailTextContext *ctx = get_context_for_window(window);
+    if (!ctx || !ctx->scroll_layer)
+        return;
+    GPoint offset = scroll_layer_get_content_offset(ctx->scroll_layer);
+    offset.y -= direction * UI_LINE_HEIGHT_REGULAR * 2;
+    if (offset.y > 0)
+        offset.y = 0;
+    scroll_layer_set_content_offset(ctx->scroll_layer, offset, true);
+}
+#endif
+
 static void detail_window_load(Window *window)
 {
     DetailTextContext *ctx = get_context_for_window(window);
@@ -188,6 +206,14 @@ static void detail_window_load(Window *window)
     layer_set_update_proc(ctx->indicator_layer, indicator_layer_update_proc);
     layer_set_hidden(ctx->indicator_layer, !ctx->on_select);
     layer_add_child(window_layer, ctx->indicator_layer);
+
+#ifdef PBL_TOUCH
+    RotaryConfig rotary_config = rotary_kit_default_config();
+    rotary_config.on_click = rotary_click_handler;
+    rotary_config.context = window;
+    rotary_config.degrees_per_click = 15;
+    rotary_kit_set_window_config(window, &rotary_config);
+#endif
 }
 
 static void detail_window_appear(Window *window)
@@ -205,6 +231,10 @@ static void detail_window_unload(Window *window)
     DetailTextContext *ctx = get_context_for_window(window);
     if (!ctx)
         return;
+
+#ifdef PBL_TOUCH
+    rotary_kit_clear_window_config(window);
+#endif
 
     if (ctx->text_layer)
     {

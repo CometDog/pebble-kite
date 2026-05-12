@@ -1,0 +1,3 @@
+[submodule "vendor/pebble-rotary-kit"]
+	path = vendor/pebble-rotary-kit
+	url = https://github.com/BrianEnders/pebble-rotary-kit

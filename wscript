@@ -56,7 +56,9 @@ def build(ctx):
             ctx.env.append_value('CFLAGS', ['-O2'])
 
         app_elf = '{}/pebble-app.elf'.format(ctx.env.BUILD_DIR)
-        ctx.pbl_build(source=ctx.path.ant_glob('src/c/**/*.c'), target=app_elf, bin_type='app')
+        sources = ctx.path.ant_glob('src/c/**/*.c') + [ctx.path.find_node('vendor/pebble-rotary-kit/src/c/rotary_kit.c')]
+        ctx.env.append_value('INCLUDES', [ctx.path.find_dir('vendor/pebble-rotary-kit/src/c').abspath()])
+        ctx.pbl_build(source=sources, target=app_elf, bin_type='app')
 
         if build_worker:
             worker_elf = '{}/pebble-worker.elf'.format(ctx.env.BUILD_DIR)

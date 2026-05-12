@@ -1,6 +1,9 @@
 #include "menu_handler.h"
 #include "ui_config.h"
 #include <string.h>
+#ifdef PBL_TOUCH
+#include "rotary_kit.h"
+#endif
 
 #define MAX_CACHED_CELL_HEIGHTS 32
 
@@ -291,6 +294,14 @@ static void click_config_provider(void *context)
     window_single_repeating_click_subscribe(BUTTON_ID_DOWN, 300, selection_will_change_down_click_handler);
 }
 
+#ifdef PBL_TOUCH
+static void rotary_click_handler(int direction, int click_num, void *context)
+{
+    MenuData *data = context;
+    menu_layer_set_selected_next(data->menu_layer, direction < 0, MenuRowAlignCenter, true);
+}
+#endif
+
 Window *s_menu_handler_create_window(MenuConfig config, bool never_multiline)
 {
     Window *window = window_create();
@@ -363,6 +374,14 @@ Window *s_menu_handler_create_window(MenuConfig config, bool never_multiline)
 
     window_set_user_data(window, menu_data);
 
+#ifdef PBL_TOUCH
+    RotaryConfig rotary_config = rotary_kit_default_config();
+    rotary_config.on_click = rotary_click_handler;
+    rotary_config.context = menu_data;
+    rotary_config.degrees_per_click = 45;
+    rotary_kit_set_window_config(window, &rotary_config);
+#endif
+
     track_window(window);
     return window;
 }
@@ -383,6 +402,9 @@ void menu_handler_destroy_window(Window *window)
         return;
 
     untrack_window(window);
+#ifdef PBL_TOUCH
+    rotary_kit_clear_window_config(window);
+#endif
     window_set_window_handlers(window, (WindowHandlers){0});
 
     MenuData *menu_data = window_get_user_data(window);
