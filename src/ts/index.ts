@@ -42,6 +42,7 @@ import {
   setSessionId,
 } from "./sessionBasedAppMessage";
 import { possibleCategoriesRequest } from "./server/request/possibleCategories";
+import { getCategoryBatchMap } from "./api";
 
 const log = createLogger("KNJS");
 const STARTUP_LOADING_MAX = 100;
@@ -148,20 +149,24 @@ Pebble.addEventListener("ready", async () => {
       await sendStartupLoadingState(startupLoadingCurrent + 15);
 
       const interfaceLanguage = getConfig("selectedInterfaceLanguage");
-      const interfaceStrings = flattenInterfaceStrings(
-        filterInterfaceStringOptionals({
-          strings: getInterfaceStrings(interfaceLanguage),
-          sectionKeys: selectedSectionNames ?? defaultSections,
-          categoryKeys: selectedCategoryNames ?? defaultCategories,
-          featureKeys: selectedAdditionalFeeds ?? defaultCategories,
-          lang: interfaceLanguage,
-        }),
-      );
-      log.debug("Sending interface strings:", JSON.stringify(interfaceStrings));
-      await sendAppMessageWithSession({
-        type: "send_interface_strings",
-        interfaceStrings: JSON.stringify(interfaceStrings),
-      });
+      const sendInterfaceStrings = async (categoryKeys: string[]) => {
+        const strings = flattenInterfaceStrings(
+          filterInterfaceStringOptionals({
+            strings: getInterfaceStrings(interfaceLanguage),
+            sectionKeys: selectedSectionNames ?? defaultSections,
+            categoryKeys,
+            featureKeys: selectedAdditionalFeeds ?? defaultCategories,
+            lang: interfaceLanguage,
+          }),
+        );
+        log.debug("Sending interface strings:", JSON.stringify(strings));
+        await sendAppMessageWithSession({
+          type: "send_interface_strings",
+          interfaceStrings: JSON.stringify(strings),
+        });
+      };
+
+      await sendInterfaceStrings(selectedCategoryNames ?? defaultCategories);
       await sendStartupLoadingState(startupLoadingCurrent + 10);
 
       // Categories must update first before tension. Both should be finished before notifying the watch
@@ -174,6 +179,19 @@ Pebble.addEventListener("ready", async () => {
           );
         void sendStartupLoadingState(categoryProgress);
       });
+
+      // TODO: This should be cleaned up a lot. I don't like that I have to repeat the additionalFeeds removal here.
+      // Re-send with only categories that actually have stories today; empty categories
+      // (e.g. "Bitcoin" on a slow news day) would otherwise occupy a localization slot
+      // and shift every subsequent category's display name by one position on the watch.
+      // Additional feeds should be removed here
+      const actualCategoryNames = getCategoryBatchMap()
+        .categorizedStories.map((cs) => cs.category.name)
+        .filter(
+          (name) => !(additionalFeeds as readonly string[]).includes(name),
+        );
+      await sendInterfaceStrings(actualCategoryNames);
+
       await handlers.updateTensionIndex(showTensionIndex);
       await sendStartupLoadingState(startupLoadingCurrent + 5);
 
