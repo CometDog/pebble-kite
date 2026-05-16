@@ -287,6 +287,7 @@ static void selection_will_change_down_click_handler(ClickRecognizerRef recogniz
     menu_layer_set_selected_next(data->menu_layer, false, MenuRowAlignCenter, true);
 }
 
+
 static void click_config_provider(void *context)
 {
     window_single_repeating_click_subscribe(BUTTON_ID_UP, 300, selection_will_change_up_click_handler);
@@ -299,6 +300,12 @@ static void rotary_click_handler(int direction, int click_num, void *context)
 {
     MenuData *data = context;
     menu_layer_set_selected_next(data->menu_layer, direction < 0, MenuRowAlignCenter, true);
+}
+static void on_swipe(RotarySwipeDirection dir, void *context) {
+    if (dir == RotarySwipeDirection_Left) {
+        window_stack_pop(true);  // same slide-out animation as the physical button
+        return;                  // return immediately — don't touch window state
+    }
 }
 #endif
 
@@ -379,6 +386,8 @@ Window *s_menu_handler_create_window(MenuConfig config, bool never_multiline)
     rotary_config.on_click = rotary_click_handler;
     rotary_config.context = menu_data;
     rotary_config.degrees_per_click = 45;
+    rotary_config.on_center_tap     = select_click_handler;
+    rotary_config.on_swipe          = on_swipe;
     rotary_kit_set_window_config(window, &rotary_config);
 #endif
 
