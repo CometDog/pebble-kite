@@ -4,8 +4,8 @@ import { buildClayConfig } from "./clayConfig";
 const Clay: ClayConstructor = require("@rebble/clay");
 
 import {
-  getConfig,
-  setConfig,
+  getAppConfig,
+  saveAppConfig,
   booleanToCategories,
   booleanToSections,
   generateClaySettings,
@@ -129,36 +129,39 @@ Pebble.addEventListener("ready", async () => {
       updateCachedBatchInfo(batchInfo);
       await sendStartupLoadingState(LOADING_MILESTONES.BATCH_INFO);
 
-      const newsRefreshPinEnabled = getConfig("newsRefreshPinSetting");
+      const {
+        newsRefreshPinSetting: newsRefreshPinEnabled,
+        selectedTextSize: textSize,
+        selectedContentLanguage: contentLanguage,
+        selectedMaxStoryCount: maxStoryCount,
+        selectedSectionNames,
+        selectedCategoryNames,
+        selectedAdditionalFeeds,
+        isTensionIndexEnabled: showTensionIndex,
+        selectedInterfaceLanguage: interfaceLanguage,
+      } = getAppConfig();
+
       if (newsRefreshPinEnabled) {
         timeline.pushNewsRefreshPinToTimeline();
       }
 
-      const textSize = getConfig("selectedTextSize");
       await sendAppMessageWithSession({
         type: "set_text_size",
-        textSize: textSize,
+        textSize,
       });
 
-      const contentLanguage = getConfig("selectedContentLanguage");
       setServerLang(contentLanguage);
 
-      const maxStoryCount = getConfig("selectedMaxStoryCount");
       handlers.setMaxStoryCount(maxStoryCount);
 
-      const selectedSectionNames = getConfig("selectedSectionNames");
       handlers.setSelectedSections(selectedSectionNames);
 
-      const selectedCategoryNames = getConfig("selectedCategoryNames");
       handlers.setSelectedCategories(selectedCategoryNames);
 
-      const selectedAdditionalFeeds = getConfig("selectedAdditionalFeeds");
       handlers.setAdditionalFeeds(...selectedAdditionalFeeds);
 
-      const showTensionIndex = getConfig("isTensionIndexEnabled");
       await sendStartupLoadingState(LOADING_MILESTONES.CONFIG);
 
-      const interfaceLanguage = getConfig("selectedInterfaceLanguage");
       const sendInterfaceStrings = async (categoryKeys: string[]) => {
         const strings = flattenInterfaceStrings(
           filterInterfaceStringOptionals({
@@ -260,7 +263,6 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
     });
     handlers.setSelectedCategoriesFromBoolean(newSelected);
     const selectedNames = booleanToCategories(newSelected);
-    setConfig("selectedCategoryNames", selectedNames);
 
     // Sections are at keys 10200-10299
     const newSelectedSections: boolean[] = availableSections.map((_, idx) => {
@@ -270,7 +272,6 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
     });
     handlers.setSelectedSectionsFromBoolean(newSelectedSections);
     const selectedSectionNames = booleanToSections(newSelectedSections);
-    setConfig("selectedSectionNames", selectedSectionNames);
 
     // Additional Feeds are at keys 10300-10399
     const newSelectedFeeds: boolean[] = additionalFeeds.map((_, idx) => {
@@ -279,38 +280,46 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
       return val === true || val === 1;
     });
     const selectedAdditionalFeeds = booleanToFeeds(newSelectedFeeds);
-    setConfig("selectedAdditionalFeeds", selectedAdditionalFeeds);
     handlers.setAdditionalFeeds(...selectedAdditionalFeeds);
 
     // Interface language is key 10400
     const newInterfaceLanguage = settings["10400"] as string;
-    setConfig("selectedInterfaceLanguage", newInterfaceLanguage);
 
     // Content language is key 10401
     const newContentLanguage = settings["10401"] as string;
     setServerLang(newContentLanguage);
-    setConfig("selectedContentLanguage", newContentLanguage);
 
     // Max story count is key 10402
     const newMaxStoryCount = settings["10402"] as number;
     handlers.setMaxStoryCount(newMaxStoryCount);
-    setConfig("selectedMaxStoryCount", newMaxStoryCount);
 
     // Text size is key 10403
     const newTextSize = settings["10403"] as number;
-    setConfig("selectedTextSize", newTextSize);
 
     // News refresh timeline pin setting is key 10404
     const newsRefreshPinSetting = settings["10404"] as boolean;
-    setConfig("newsRefreshPinSetting", newsRefreshPinSetting);
+
+    // Show tension index setting is key 10405
+    const showTensionIndex = settings["10405"] as boolean;
+
+    // Save all settings as one atomic write
+    saveAppConfig({
+      selectedCategoryNames: selectedNames,
+      selectedSectionNames,
+      selectedAdditionalFeeds,
+      selectedInterfaceLanguage: newInterfaceLanguage,
+      selectedContentLanguage: newContentLanguage,
+      selectedMaxStoryCount: newMaxStoryCount,
+      selectedTextSize: newTextSize,
+      newsRefreshPinSetting,
+      isTensionIndexEnabled: showTensionIndex,
+    });
+
     if (newsRefreshPinSetting) {
       timeline.pushNewsRefreshPinToTimeline();
     }
 
-    // Show tension index setting is key 10405
-    const showTensionIndex = settings["10405"] as boolean;
-    setConfig("isTensionIndexEnabled", showTensionIndex);
-    // Do not update here, do it in the finally after categories are updated
+    // Do not update tension here, do it in the finally after categories are updated
 
     // Clear full cache on save is key 10407
     const clearFullCacheOnSave = settings["10407"] as boolean;
@@ -346,7 +355,11 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
   } finally {
     // TODO: The order of operations for restarting the app should be consolidated
     sendAppMessageWithSession({ type: "restart_app" }).then(async () => {
-      const interfaceLanguage = getConfig("selectedInterfaceLanguage");
+      const {
+        selectedInterfaceLanguage: interfaceLanguage,
+        selectedTextSize,
+        isTensionIndexEnabled,
+      } = getAppConfig();
       const interfaceStrings = flattenInterfaceStrings(
         filterInterfaceStringOptionals({
           strings: getInterfaceStrings(interfaceLanguage),
@@ -368,11 +381,11 @@ Pebble.addEventListener("webviewclosed", async (event: any) => {
         }),
         sendAppMessageWithSession({
           type: "set_text_size",
-          textSize: getConfig("selectedTextSize"),
+          textSize: selectedTextSize,
         }),
       ]).then(async () => {
         await handlers.handleUpdateCategories();
-        await handlers.updateTensionIndex(getConfig("isTensionIndexEnabled"));
+        await handlers.updateTensionIndex(isTensionIndexEnabled);
         sendAppMessageWithSession({
           type: "update_categories",
           state: "success",

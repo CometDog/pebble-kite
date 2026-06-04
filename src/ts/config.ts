@@ -37,18 +37,6 @@ export interface AppConfig {
   isTensionIndexEnabled: boolean;
 }
 
-const CONFIG_KEYS: Record<keyof AppConfig, string> = {
-  selectedAdditionalFeeds: "selectedAdditionalFeeds",
-  newsRefreshPinSetting: "newsRefreshPinSetting",
-  selectedTextSize: "selectedTextSize",
-  selectedInterfaceLanguage: "selectedInterfaceLanguage",
-  selectedContentLanguage: "selectedContentLanguage",
-  selectedMaxStoryCount: "selectedMaxStoryCount",
-  selectedSectionNames: "selectedSectionNames",
-  selectedCategoryNames: "selectedCategoryNames",
-  isTensionIndexEnabled: "isTensionIndexEnabled",
-};
-
 const CONFIG_DEFAULTS: AppConfig = {
   selectedAdditionalFeeds: [],
   newsRefreshPinSetting: false,
@@ -61,66 +49,75 @@ const CONFIG_DEFAULTS: AppConfig = {
   isTensionIndexEnabled: true,
 };
 
-/**
- * Get a configuration value from localStorage with proper typing and fallback to defaults
- * @param key The configuration key to retrieve
- * @returns The configuration value
- */
-export const getConfig = <K extends keyof AppConfig>(key: K): AppConfig[K] => {
-  try {
-    const stored = localStorage.getItem(CONFIG_KEYS[key]);
-    if (!stored) {
-      log.debug(`No stored value for ${String(key)}, using default`);
-      return CONFIG_DEFAULTS[key];
-    }
+const CONFIG_KEY = "kagi_news_config";
 
-    const parsed = JSON.parse(stored);
-    log.debug(`Retrieved ${String(key)}: ${JSON.stringify(parsed)}`);
-    return parsed;
+// Legacy per-key storage used before the config was unified into a single blob.
+// Property names match the old CONFIG_KEYS entries, which were identical to the property names.
+const LEGACY_KEYS: (keyof AppConfig)[] = [
+  "selectedAdditionalFeeds",
+  "newsRefreshPinSetting",
+  "selectedTextSize",
+  "selectedInterfaceLanguage",
+  "selectedContentLanguage",
+  "selectedMaxStoryCount",
+  "selectedSectionNames",
+  "selectedCategoryNames",
+  "isTensionIndexEnabled",
+];
+
+const migrateFromLegacyStorage = (): AppConfig => {
+  const migrated: Partial<AppConfig> = {};
+  let didMigrate = false;
+  for (const key of LEGACY_KEYS) {
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      try {
+        (migrated as any)[key] = JSON.parse(raw);
+        didMigrate = true;
+      } catch {}
+    }
+  }
+  const config = { ...CONFIG_DEFAULTS, ...migrated };
+  if (didMigrate) {
+    localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+    LEGACY_KEYS.forEach((key) => localStorage.removeItem(key));
+    log.info("Migrated config from per-key storage to single blob");
+  }
+  return config;
+};
+
+export const getAppConfig = (): AppConfig => {
+  try {
+    const stored = localStorage.getItem(CONFIG_KEY);
+    if (stored) {
+      // Merge with defaults to handle new keys added in future versions
+      return { ...CONFIG_DEFAULTS, ...JSON.parse(stored) };
+    }
+    return migrateFromLegacyStorage();
   } catch (err) {
     log.warn(
-      `Failed to retrieve ${String(key)}, using default`,
+      "Failed to read config, using defaults",
       err instanceof Error ? err.message : String(err),
     );
-    return CONFIG_DEFAULTS[key];
+    return { ...CONFIG_DEFAULTS };
   }
 };
 
 /**
- * Set a configuration value to localStorage
- * @param key The configuration key to set
- * @param value The configuration value to set
+ * Save a configuration to localStorage
+ * @param config The configuration to save
  */
-export const setConfig = <K extends keyof AppConfig>(
-  key: K,
-  value: AppConfig[K],
-): void => {
+export const saveAppConfig = (config: AppConfig): void => {
   try {
-    localStorage.setItem(CONFIG_KEYS[key], JSON.stringify(value));
-    log.info(`Saved ${String(key)}: ${JSON.stringify(value)}`);
+    localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+    log.debug("Config saved");
   } catch (err) {
     log.error(
-      `Failed to save ${String(key)}`,
+      "Failed to save config",
       err instanceof Error ? err.message : String(err),
     );
   }
 };
-
-/**
- * Get all configuration values at once
- * @returns The complete application configuration
- */
-export const getAllConfig = (): AppConfig => ({
-  isTensionIndexEnabled: getConfig("isTensionIndexEnabled"),
-  selectedAdditionalFeeds: getConfig("selectedAdditionalFeeds"),
-  newsRefreshPinSetting: getConfig("newsRefreshPinSetting"),
-  selectedTextSize: getConfig("selectedTextSize"),
-  selectedInterfaceLanguage: getConfig("selectedInterfaceLanguage"),
-  selectedContentLanguage: getConfig("selectedContentLanguage"),
-  selectedMaxStoryCount: getConfig("selectedMaxStoryCount"),
-  selectedSectionNames: getConfig("selectedSectionNames"),
-  selectedCategoryNames: getConfig("selectedCategoryNames"),
-});
 
 /**
  * Convert category names to boolean array for Clay
@@ -130,7 +127,7 @@ export const getAllConfig = (): AppConfig => ({
 export const categoriesToBoolean = (
   categoryNames?: AvailableCategory[],
 ): boolean[] => {
-  const names = categoryNames ?? getConfig("selectedCategoryNames");
+  const names = categoryNames ?? getAppConfig().selectedCategoryNames;
   return availableCategories.map((cat) => names.includes(cat));
 };
 
@@ -142,7 +139,7 @@ export const categoriesToBoolean = (
 export const sectionsToBoolean = (
   sectionNames?: AvailableSection[],
 ): boolean[] => {
-  const names = sectionNames ?? getConfig("selectedSectionNames");
+  const names = sectionNames ?? getAppConfig().selectedSectionNames;
   return availableSections.map((sec) => names.includes(sec));
 };
 
@@ -154,7 +151,7 @@ export const sectionsToBoolean = (
 export const feedsToBoolean = (
   featureNames?: AdditionalFeature[],
 ): boolean[] => {
-  const names = featureNames ?? getConfig("selectedAdditionalFeeds");
+  const names = featureNames ?? getAppConfig().selectedAdditionalFeeds;
   return additionalFeeds.map((feat) => names.includes(feat));
 };
 
@@ -195,7 +192,7 @@ export const booleanToFeeds = (booleans: boolean[]): AdditionalFeature[] => {
 export const generateClaySettings = (
   debugMode: boolean,
 ): Record<string, any> => {
-  const config = getAllConfig();
+  const config = getAppConfig();
 
   return {
     UserCategories: categoriesToBoolean(config.selectedCategoryNames),

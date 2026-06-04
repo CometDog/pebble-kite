@@ -11,6 +11,18 @@ const root = path.resolve(__dirname, "..");
 const require = createRequire(import.meta.url);
 const keyNames = require("./message-keys.js");
 
+// Detect duplicate key names
+const seen = new Set();
+for (const name of keyNames) {
+  if (seen.has(name)) {
+    console.error(
+      `[generate-message-keys] ERROR: Duplicate key "${name}" in message-keys.js`,
+    );
+    process.exit(1);
+  }
+  seen.add(name);
+}
+
 const pkgPath = path.join(root, "package.json");
 const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
 
