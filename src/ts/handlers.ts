@@ -6,8 +6,8 @@ import {
   updateTension,
 } from "./api";
 import { updateQrCodeBitmap, getQrCodeChunk } from "./qr";
-import { clearCache, updateCachedBatchInfo } from "./server/cache/cacheManager";
-import { batchesRequest } from "./server/request/batches";
+import { clearCache, updateCachedBatchInfo } from "./server/cache";
+import { batchesRequest } from "./server/request/batchRequests";
 import { sendAppMessageWithSession } from "./sessionBasedAppMessage";
 
 import {

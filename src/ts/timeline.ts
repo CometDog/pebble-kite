@@ -1,5 +1,5 @@
 import { createLogger } from "../lib";
-import { onThisDayRequest } from "./server/request/onThisDay";
+import { onThisDayRequest } from "./server/request/contentRequests";
 
 const log = createLogger("KNJSTimeline");
 

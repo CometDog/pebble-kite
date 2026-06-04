@@ -1,5 +1,20 @@
-import { cacheFirstFetchText } from "../cache/cacheFirstFetch";
+import { cacheFirstFetchJSON, cacheFirstFetchText } from "../cache";
+import { getServerLang } from "../localeManager";
+import { OnThisDayEvents } from "../type/OnThisDayEvents";
 import { Story } from "../type/Story";
+
+// MARK: onThisDay
+
+export const onThisDayRequest = ({
+  batchId = "latest",
+}: {
+  batchId?: string;
+} = {}) =>
+  cacheFirstFetchJSON<OnThisDayEvents>(
+    `https://news.kagi.com/api/batches/${batchId}/onthisday${getServerLang() && `?lang=${getServerLang()}`}`,
+  );
+
+// MARK: smallWebFeed
 
 export type SmallWebEntry = Pick<
   Story,
@@ -93,3 +108,16 @@ export const smallWebFeedRequest = async (
       .slice(0, limit),
   };
 };
+
+// MARK: tension
+
+type TensionResponse = {
+  chaosIndex: number;
+  chaosDescription: string;
+  chaosLastUpdated: string;
+};
+
+export const tensionRequest = ({ batchId = "latest" }: { batchId?: string }) =>
+  cacheFirstFetchJSON<TensionResponse>(
+    `https://news.kagi.com/api/batches/${batchId}/chaos${getServerLang() && `?lang=${getServerLang()}`}`,
+  );

@@ -1,8 +1,8 @@
-import { batchCategoriesRequest } from "./server/request/batchCategories";
+import { batchCategoriesRequest } from "./server/request/batchRequests";
 import {
   batchCategoryStoriesRequest,
   BatchCategoryStoriesResponse,
-} from "./server/request/batchCategoryStories";
+} from "./server/request/batchRequests";
 import type {
   CurrentData,
   CategorizedStories,
@@ -15,8 +15,8 @@ import { getAdditionalFeeds } from "./handlers";
 import {
   smallWebFeedRequest,
   SmallWebFeedResponse,
-} from "./server/request/smallWebFeed";
-import { tensionRequest } from "./server/request/tension";
+} from "./server/request/contentRequests";
+import { tensionRequest } from "./server/request/contentRequests";
 
 let categoryBatchMap: CurrentData = {
   batchId: "",

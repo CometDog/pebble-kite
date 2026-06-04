@@ -1,5 +1,24 @@
-import { cacheFirstFetchJSON } from "../cache/cacheFirstFetch";
 import { fetchJSON } from "../fetchUtils";
+import { cacheFirstFetchJSON } from "../cache";
+import { getServerLang } from "../localeManager";
+import { CategoryMetadata } from "../type/CategoryMetadata";
+
+type HealthResponse = {
+  health: boolean;
+  hasBatch: boolean;
+  hasCategories: boolean;
+  hasTranslations: boolean;
+  isRecent: boolean;
+  batchId: string;
+  createdAt: string;
+};
+
+export const healthRequest = () =>
+  fetchJSON<HealthResponse>("https://news.kagi.com/api/health");
+
+// Normalize encoding and remove zero-width characters
+const normalizeCategoryName = (name: string): string =>
+  name.normalize("NFC").replace(/[\u200B-\u200D\uFEFF]/g, "");
 
 type CategoryMetadataResponse = {
   categories: {
@@ -9,10 +28,6 @@ type CategoryMetadataResponse = {
     sourceLanguage: string;
   }[];
 };
-
-// Normalize encoding and remove zero-width characters
-const normalizeCategoryName = (name: string): string =>
-  name.normalize("NFC").replace(/[\u200B-\u200D\uFEFF]/g, "");
 
 export type PossibleCategoriesResult = {
   names: string[];
@@ -46,3 +61,12 @@ export const possibleCategoriesRequest =
       names.sort();
       return { names, displayNamesMap };
     });
+
+type CategoriesMetadataResponse = {
+  categories: CategoryMetadata[];
+};
+
+export const categoriesMetadataRequest = () =>
+  cacheFirstFetchJSON<CategoriesMetadataResponse>(
+    `https://news.kagi.com/api/categories/metadata${getServerLang() && `?lang=${getServerLang()}`}`,
+  );

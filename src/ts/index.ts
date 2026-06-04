@@ -1,4 +1,5 @@
 import { ClayConstructor, Clay as ClayInstance } from "../lib/Clay";
+import { buildClayConfig } from "./clayConfig";
 // @ts-ignore
 const Clay: ClayConstructor = require("@rebble/clay");
 
@@ -10,7 +11,10 @@ import {
   generateClaySettings,
   booleanToFeeds,
 } from "./config";
-import { healthRequest } from "./server/request/health";
+import {
+  healthRequest,
+  possibleCategoriesRequest,
+} from "./server/request/metaRequests";
 import * as handlers from "./handlers";
 import {
   additionalFeeds,
@@ -34,37 +38,43 @@ import {
   getInterfaceStrings,
 } from "./localization";
 import { setServerLang } from "./server/localeManager";
-import { updateCachedBatchInfo } from "./server/cache/cacheManager";
-import { batchesRequest } from "./server/request/batches";
+import { updateCachedBatchInfo } from "./server/cache";
+import { batchesRequest } from "./server/request/batchRequests";
 import * as timeline from "./timeline";
 import {
   sendAppMessageWithSession,
   setSessionId,
 } from "./sessionBasedAppMessage";
-import { possibleCategoriesRequest } from "./server/request/possibleCategories";
 import { getCategoryBatchMap } from "./api";
 
 const log = createLogger("KNJS");
-const STARTUP_LOADING_MAX = 100;
-let startupLoadingCurrent = 0;
+
+const LOADING_MILESTONES = {
+  READY: 5,
+  POSSIBLE_CATEGORIES: 15,
+  DEBUG_MODE: 25,
+  BATCH_INFO: 40,
+  CONFIG: 55,
+  INTERFACE_STRINGS: 65,
+  TENSION: 95,
+} as const;
 
 // The percentage sent is arbitrary based on what seems right for how long each step takes, and is only meant to give a rough sense of progress rather than be exact.
-const sendStartupLoadingState = async (current: number) => {
-  if (current > startupLoadingCurrent) {
-    startupLoadingCurrent = current;
-    return sendAppMessageWithSession({
-      type: "loading_state",
-      loadingCurrent: current,
-      loadingMax: STARTUP_LOADING_MAX,
-    });
-  }
-};
+const sendStartupLoadingState = (() => {
+  let lastSent = 0;
+  return async (current: number) => {
+    if (current > lastSent) {
+      lastSent = current;
+      return sendAppMessageWithSession({
+        type: "loading_state",
+        loadingCurrent: current,
+        loadingMax: 100,
+      });
+    }
+  };
+})();
 
 // Mutable Clay instance that is updated based on runtime fetches of Kagi News data
-const buildClayConfig: (
-  categories: AvailableCategory[],
-  // @ts-ignore
-) => any[] = require("../ts-build/config");
 let clay: ClayInstance = new Clay(buildClayConfig(defaultCategories), null, {
   autoHandleEvents: false,
 });
@@ -96,17 +106,17 @@ Pebble.addEventListener("ready", async () => {
     type: "provide_session_id",
   });
 
-  await sendStartupLoadingState(5);
+  await sendStartupLoadingState(LOADING_MILESTONES.READY);
 
   // Refresh possible categories from Kagi News API
   await refreshPossibleCategories();
-  await sendStartupLoadingState(startupLoadingCurrent + 10);
+  await sendStartupLoadingState(LOADING_MILESTONES.POSSIBLE_CATEGORIES);
 
   await sendAppMessageWithSession({
     type: "set_debug_mode",
     isDebugMode: isDebugMode() ? 1 : 0,
   });
-  await sendStartupLoadingState(startupLoadingCurrent + 10);
+  await sendStartupLoadingState(LOADING_MILESTONES.DEBUG_MODE);
 
   try {
     const response = await healthRequest();
@@ -117,7 +127,7 @@ Pebble.addEventListener("ready", async () => {
         `Current batch ID: ${batchInfo.id}, created at ${batchInfo.createdAt}`,
       );
       updateCachedBatchInfo(batchInfo);
-      await sendStartupLoadingState(startupLoadingCurrent + 15);
+      await sendStartupLoadingState(LOADING_MILESTONES.BATCH_INFO);
 
       const newsRefreshPinEnabled = getConfig("newsRefreshPinSetting");
       if (newsRefreshPinEnabled) {
@@ -146,7 +156,7 @@ Pebble.addEventListener("ready", async () => {
       handlers.setAdditionalFeeds(...selectedAdditionalFeeds);
 
       const showTensionIndex = getConfig("isTensionIndexEnabled");
-      await sendStartupLoadingState(startupLoadingCurrent + 15);
+      await sendStartupLoadingState(LOADING_MILESTONES.CONFIG);
 
       const interfaceLanguage = getConfig("selectedInterfaceLanguage");
       const sendInterfaceStrings = async (categoryKeys: string[]) => {
@@ -167,15 +177,16 @@ Pebble.addEventListener("ready", async () => {
       };
 
       await sendInterfaceStrings(selectedCategoryNames ?? defaultCategories);
-      await sendStartupLoadingState(startupLoadingCurrent + 10);
+      await sendStartupLoadingState(LOADING_MILESTONES.INTERFACE_STRINGS);
 
       // Categories must update first before tension. Both should be finished before notifying the watch
       await handlers.handleUpdateCategories((completedGroups, totalGroups) => {
         const categoryProgress =
-          startupLoadingCurrent +
+          LOADING_MILESTONES.INTERFACE_STRINGS +
           Math.round(
             (completedGroups / totalGroups) *
-              (STARTUP_LOADING_MAX - startupLoadingCurrent - 10),
+              (LOADING_MILESTONES.TENSION -
+                LOADING_MILESTONES.INTERFACE_STRINGS),
           );
         void sendStartupLoadingState(categoryProgress);
       });
@@ -193,7 +204,7 @@ Pebble.addEventListener("ready", async () => {
       await sendInterfaceStrings(actualCategoryNames);
 
       await handlers.updateTensionIndex(showTensionIndex);
-      await sendStartupLoadingState(startupLoadingCurrent + 5);
+      await sendStartupLoadingState(LOADING_MILESTONES.TENSION);
 
       log.info("Notifying watch that data is ready");
       await sendAppMessageWithSession({
