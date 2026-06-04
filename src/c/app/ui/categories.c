@@ -6,6 +6,7 @@
 #include "../data.h"
 #include "../data_manager.h"
 #include "../localization/localization.h"
+#include "../utils/pagination.h"
 #include "./navigation.h"
 #include "menu_handler.h"
 #include "ui_config.h"
@@ -56,10 +57,12 @@ static uint16_t get_num_sections(void)
 static uint16_t get_num_items_in_section(uint16_t section_index)
 {
     uint8_t additional_feeds_count = get_additional_feeds_count();
+    const CategoriesData *category_data = get_categories_data();
+    uint16_t total = category_data->categories_count;
 
     if (additional_feeds_count == 0)
     {
-        return get_categories_data()->categories_count;
+        return total;
     }
 
     if (section_index == 0)
@@ -68,8 +71,7 @@ static uint16_t get_num_items_in_section(uint16_t section_index)
     }
     else
     {
-        const CategoriesData *category_data = get_categories_data();
-        return category_data->categories_count - additional_feeds_count;
+        return total - additional_feeds_count;
     }
 }
 
@@ -84,14 +86,7 @@ static char **get_items_in_section(uint16_t section_index)
         return s_translated_categories;
     }
 
-    if (section_index == 0)
-    {
-        return s_translated_categories;
-    }
-    else
-    {
-        return &s_translated_categories[additional_feeds_count];
-    }
+    return &s_translated_categories[page_start(section_index, additional_feeds_count)];
 }
 
 static const char *get_section_title(uint16_t section_index)
@@ -128,15 +123,7 @@ static void category_select_handler_in_section(uint16_t section_index, uint16_t 
     const CategoriesData *cat_data = get_categories_data();
     uint8_t additional_feeds_count = get_additional_feeds_count();
 
-    uint16_t actual_index;
-    if (additional_feeds_count > 0 && section_index == 1)
-    {
-        actual_index = additional_feeds_count + row_index;
-    }
-    else
-    {
-        actual_index = row_index;
-    }
+    uint16_t actual_index = page_start(section_index, additional_feeds_count) + row_index;
 
     if (actual_index < cat_data->categories_count)
     {
