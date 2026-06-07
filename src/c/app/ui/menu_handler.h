@@ -67,3 +67,15 @@ void menu_handler_request_update(Window *window);
  * @param new_title The new title string
  */
 void menu_handler_update_title(Window *window, const char *new_title);
+
+/**
+ * Notify that the menu handler window has appeared
+ * @param window The menu window that appeared
+ */
+void menu_handler_window_appeared(Window *window);
+
+/**
+ * Notify that the menu handler window has disappeared
+ * @param window The menu window that disappeared
+ */
+void menu_handler_window_disappeared(Window *window);

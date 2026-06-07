@@ -1,4 +1,5 @@
 #include "menu_handler.h"
+#include "../utils/touch_event.h"
 #include "ui_config.h"
 #include <string.h>
 
@@ -291,6 +292,44 @@ static void click_config_provider(void *context)
     window_single_repeating_click_subscribe(BUTTON_ID_DOWN, 300, selection_will_change_down_click_handler);
 }
 
+static void on_menu_swipe_up(void *context)
+{
+    Window *window = (Window *)context;
+    MenuData *data = window_get_user_data(window);
+    if (!data || !data->menu_layer)
+        return;
+    selection_will_change_down_click_handler(NULL, data);
+}
+
+static void on_menu_swipe_down(void *context)
+{
+    Window *window = (Window *)context;
+    MenuData *data = window_get_user_data(window);
+    if (!data || !data->menu_layer)
+        return;
+    selection_will_change_up_click_handler(NULL, data);
+}
+
+static void menu_window_appear(Window *window)
+{
+    touch_event_subscribe(on_menu_swipe_up, on_menu_swipe_down, window);
+}
+
+static void menu_window_disappear(Window *window)
+{
+    touch_event_unsubscribe();
+}
+
+void menu_handler_window_appeared(Window *window)
+{
+    menu_window_appear(window);
+}
+
+void menu_handler_window_disappeared(Window *window)
+{
+    menu_window_disappear(window);
+}
+
 Window *s_menu_handler_create_window(MenuConfig config, bool never_multiline)
 {
     Window *window = window_create();
@@ -362,6 +401,10 @@ Window *s_menu_handler_create_window(MenuConfig config, bool never_multiline)
     layer_add_child(window_layer, menu_layer_get_layer(menu_data->menu_layer));
 
     window_set_user_data(window, menu_data);
+    window_set_window_handlers(window, (WindowHandlers){
+                                           .appear = menu_window_appear,
+                                           .disappear = menu_window_disappear,
+                                       });
 
     track_window(window);
     return window;

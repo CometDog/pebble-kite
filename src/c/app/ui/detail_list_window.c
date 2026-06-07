@@ -110,7 +110,12 @@ static void detail_list_window_select_handler(int index)
 
 static void detail_list_window_appear(Window *window)
 {
-    // Placeholder for any actions needed when the window appears
+    menu_handler_window_appeared(window);
+}
+
+static void detail_list_window_disappear(Window *window)
+{
+    menu_handler_window_disappeared(window);
 }
 
 static void detail_list_window_unload(Window *window)
@@ -198,8 +203,9 @@ void detail_list_window_ui_init(Window **window, DataResource resource_requireme
 
         // Note: we can't use window_set_user_data because menu_handler uses it for MenuData
 
-        window_set_window_handlers(
-            *window, (WindowHandlers){.appear = detail_list_window_appear, .unload = detail_list_window_unload});
+        window_set_window_handlers(*window, (WindowHandlers){.appear = detail_list_window_appear,
+                                                             .disappear = detail_list_window_disappear,
+                                                             .unload = detail_list_window_unload});
         window_stack_push(*window, true);
     }
     else

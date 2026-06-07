@@ -1,6 +1,7 @@
 #include "detail_text.h"
 #include "../data.h"
 #include "../localization/localization.h"
+#include "../utils/touch_event.h"
 #include "ui_config.h"
 #include <stdlib.h>
 #include <string.h>
@@ -74,6 +75,35 @@ static void click_config_provider(void *context)
     window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
 }
 
+static void detail_scroll_page(void *context, int16_t direction)
+{
+    // TODO: Handle this for both scroll and button as it is refined
+    Window *window = (Window *)context;
+    DetailTextContext *ctx = get_context_for_window(window);
+    if (!ctx || !ctx->scroll_layer)
+        return;
+    Layer *scroll_layer_layer = scroll_layer_get_layer(ctx->scroll_layer);
+    GRect frame = layer_get_frame(scroll_layer_layer);
+    GSize content_size = scroll_layer_get_content_size(ctx->scroll_layer);
+    GPoint offset = scroll_layer_get_content_offset(ctx->scroll_layer);
+    int16_t new_y = offset.y + (direction * (frame.size.h * PBL_IF_ROUND_ELSE(0.5, 0.66)));
+    int16_t min_y = -(content_size.h - frame.size.h);
+    if (new_y < min_y)
+        new_y = min_y;
+    if (new_y > 0)
+        new_y = 0;
+    scroll_layer_set_content_offset(ctx->scroll_layer, GPoint(0, new_y), true);
+}
+
+static void detail_scroll_page_up(void *context)
+{
+    detail_scroll_page(context, -1);
+}
+static void detail_scroll_page_down(void *context)
+{
+    detail_scroll_page(context, 1);
+}
+
 static void indicator_layer_update_proc(Layer *layer, GContext *ctx)
 {
     // Logic attempts to mirror that of the firmware handling of the action button indicator
@@ -97,8 +127,8 @@ static void update_content_for_window(Window *window)
     const char *title = ctx->get_title ? ctx->get_title() : "";
     const char *text = ctx->get_text ? ctx->get_text() : "";
 
-    Layer *scroll_layer_l = scroll_layer_get_layer(ctx->scroll_layer);
-    GRect scroll_bounds = layer_get_bounds(scroll_layer_l);
+    Layer *scroll_layer_layer = scroll_layer_get_layer(ctx->scroll_layer);
+    GRect scroll_bounds = layer_get_bounds(scroll_layer_layer);
 
     int side_padding = UI_DETAIL_SIDE_PADDING + UI_DETAIL_SIDE_PADDING_EXTRA;
     const int between_padding = UI_DETAIL_BETWEEN_PADDING;
@@ -153,12 +183,6 @@ static void detail_window_load(Window *window)
     Layer *window_layer = window_get_root_layer(window);
     GRect bounds = layer_get_bounds(window_layer);
 
-    // TODO: Remove this. Current there is a bug in the firmware where width can't be greater than 255
-    if (bounds.size.w > 255)
-    {
-        bounds.origin.x = bounds.size.w - 255;
-        bounds.size.w = 255;
-    }
     ctx->scroll_layer = scroll_layer_create(bounds);
     scroll_layer_set_click_config_onto_window(ctx->scroll_layer, window);
     scroll_layer_set_callbacks(ctx->scroll_layer,
@@ -193,11 +217,12 @@ static void detail_window_load(Window *window)
 static void detail_window_appear(Window *window)
 {
     update_content_for_window(window);
+    touch_event_subscribe(detail_scroll_page_up, detail_scroll_page_down, window);
 }
 
 static void detail_window_disappear(Window *window)
 {
-    // No-op
+    touch_event_unsubscribe();
 }
 
 static void detail_window_unload(Window *window)

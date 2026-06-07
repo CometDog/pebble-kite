@@ -48,6 +48,16 @@ char **get_modified_item_names(void)
     return modified_details;
 }
 
+static void story_details_window_appear(Window *window)
+{
+    menu_handler_window_appeared(window);
+}
+
+static void story_details_window_disappear(Window *window)
+{
+    menu_handler_window_disappeared(window);
+}
+
 static void story_details_window_unload(Window *window)
 {
     story_details_ui_deinit();
@@ -63,7 +73,9 @@ void story_details_ui_init(void)
     s_main_window = menu_handler_create_window(config);
     if (s_main_window)
     {
-        window_set_window_handlers(s_main_window, (WindowHandlers){.unload = story_details_window_unload});
+        window_set_window_handlers(s_main_window, (WindowHandlers){.appear = story_details_window_appear,
+                                                                   .disappear = story_details_window_disappear,
+                                                                   .unload = story_details_window_unload});
     }
     DataResource resources[] = {DATA_RESOURCE_STORY_DETAILS};
     s_registration = data_manager_register_window_requirements(s_main_window, resources, 1);
