@@ -264,11 +264,10 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context)
     }
 }
 
-static void selection_will_change_up_click_handler(ClickRecognizerRef recognizer, void *context)
+static void menu_scroll_up(bool is_repeating, MenuData *data)
 {
-    MenuData *data = context;
     MenuIndex selected_index = menu_layer_get_selected_index(data->menu_layer);
-    if (!click_recognizer_is_repeating(recognizer) && selected_index.section == 0 && selected_index.row == 0 &&
+    if (!is_repeating && selected_index.section == 0 && selected_index.row == 0 &&
         data->config.up_press_handler_from_top_of_list)
     {
         data->config.up_press_handler_from_top_of_list();
@@ -279,10 +278,23 @@ static void selection_will_change_up_click_handler(ClickRecognizerRef recognizer
     }
 }
 
+static void menu_scroll_down(bool is_repeating, MenuData *data)
+{
+    menu_layer_set_selected_next(data->menu_layer, false, MenuRowAlignCenter, true);
+}
+
+static void selection_will_change_up_click_handler(ClickRecognizerRef recognizer, void *context)
+{
+    MenuData *data = context;
+    bool is_repeating = recognizer ? click_recognizer_is_repeating(recognizer) : false;
+    menu_scroll_up(is_repeating, data);
+}
+
 static void selection_will_change_down_click_handler(ClickRecognizerRef recognizer, void *context)
 {
     MenuData *data = context;
-    menu_layer_set_selected_next(data->menu_layer, false, MenuRowAlignCenter, true);
+    bool is_repeating = recognizer ? click_recognizer_is_repeating(recognizer) : false;
+    menu_scroll_down(is_repeating, data);
 }
 
 static void click_config_provider(void *context)
@@ -298,7 +310,7 @@ static void on_menu_swipe_up(void *context)
     MenuData *data = window_get_user_data(window);
     if (!data || !data->menu_layer)
         return;
-    selection_will_change_down_click_handler(NULL, data);
+    menu_scroll_down(false, data);
 }
 
 static void on_menu_swipe_down(void *context)
@@ -307,7 +319,7 @@ static void on_menu_swipe_down(void *context)
     MenuData *data = window_get_user_data(window);
     if (!data || !data->menu_layer)
         return;
-    selection_will_change_up_click_handler(NULL, data);
+    menu_scroll_up(false, data);
 }
 
 static void menu_window_appear(Window *window)
