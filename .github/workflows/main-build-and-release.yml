@@ -69,20 +69,12 @@ jobs:
         if: steps.version.outputs.should_release == 'true'
         run: uv tool install pebble-tool==${{ steps.tool_versions.outputs.pebble_tool }} --python 3.13
 
-      - name: Cache Pebble SDK
-        if: steps.version.outputs.should_release == 'true'
-        id: cache_pebble_sdk
-        uses: actions/cache@v4
-        with:
-          path: ~/.pebble-sdk
-          key: pebble-sdk-${{ steps.tool_versions.outputs.pebble_sdk }}
-
       - name: Add pebble-tool to PATH
         if: steps.version.outputs.should_release == 'true'
         run: echo "$HOME/.local/share/uv/tools/pebble-tool/bin" >> $GITHUB_PATH
 
       - name: Install Pebble SDK
-        if: steps.version.outputs.should_release == 'true' && steps.cache_pebble_sdk.outputs.cache-hit != 'true'
+        if: steps.version.outputs.should_release == 'true'
         run: pebble sdk install ${{ steps.tool_versions.outputs.pebble_sdk }} && pebble sdk activate ${{ steps.tool_versions.outputs.pebble_sdk }}
 
       - name: Build
