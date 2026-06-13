@@ -250,20 +250,6 @@ static int16_t get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_ind
     return height;
 }
 
-static void select_click_handler(ClickRecognizerRef recognizer, void *context)
-{
-    MenuData *data = context;
-    MenuIndex cell_index = menu_layer_get_selected_index(data->menu_layer);
-    if (data->config.select_callback_in_section)
-    {
-        data->config.select_callback_in_section(cell_index.section, cell_index.row);
-    }
-    else if (data->config.select_callback)
-    {
-        data->config.select_callback(cell_index.row);
-    }
-}
-
 static void menu_scroll_up(bool is_repeating, MenuData *data)
 {
     MenuIndex selected_index = menu_layer_get_selected_index(data->menu_layer);
@@ -283,6 +269,19 @@ static void menu_scroll_down(bool is_repeating, MenuData *data)
     menu_layer_set_selected_next(data->menu_layer, false, MenuRowAlignCenter, true);
 }
 
+static void menu_select(MenuData *data)
+{
+    MenuIndex cell_index = menu_layer_get_selected_index(data->menu_layer);
+    if (data->config.select_callback_in_section)
+    {
+        data->config.select_callback_in_section(cell_index.section, cell_index.row);
+    }
+    else if (data->config.select_callback)
+    {
+        data->config.select_callback(cell_index.row);
+    }
+}
+
 static void selection_will_change_up_click_handler(ClickRecognizerRef recognizer, void *context)
 {
     MenuData *data = context;
@@ -295,6 +294,12 @@ static void selection_will_change_down_click_handler(ClickRecognizerRef recogniz
     MenuData *data = context;
     bool is_repeating = recognizer ? click_recognizer_is_repeating(recognizer) : false;
     menu_scroll_down(is_repeating, data);
+}
+
+static void select_click_handler(ClickRecognizerRef recognizer, void *context)
+{
+    MenuData *data = context;
+    menu_select(data);
 }
 
 static void click_config_provider(void *context)
@@ -322,9 +327,23 @@ static void on_menu_swipe_down(void *context)
     menu_scroll_up(false, data);
 }
 
+static void on_menu_swipe_right(void *context)
+{
+    window_stack_pop(true);
+}
+
+static void on_menu_swipe_left(void *context)
+{
+    Window *window = (Window *)context;
+    MenuData *data = window_get_user_data(window);
+    if (!data || !data->menu_layer)
+        return;
+    menu_select(data);
+}
+
 static void menu_window_appear(Window *window)
 {
-    touch_event_subscribe(on_menu_swipe_up, on_menu_swipe_down, window);
+    touch_event_subscribe(on_menu_swipe_up, on_menu_swipe_down, on_menu_swipe_left, on_menu_swipe_right, window);
 }
 
 static void menu_window_disappear(Window *window)

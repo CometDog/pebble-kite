@@ -3,6 +3,7 @@
 #include "../data_manager.h"
 #include "../localization/localization.h"
 #include "../utils/debug_logger.h"
+#include "../utils/touch_event.h"
 #include "ui_config.h"
 
 static Window *s_qr_window;
@@ -120,6 +121,11 @@ static void qr_layer_update_proc(Layer *layer, GContext *ctx)
     }
 }
 
+static void qr_window_exit(void *context)
+{
+    window_stack_pop(true);
+}
+
 static void qr_window_load(Window *window)
 {
     Layer *window_layer = window_get_root_layer(window);
@@ -131,6 +137,16 @@ static void qr_window_unload(Window *window)
     qr_view_deinit();
 }
 
+static void qr_window_appear(Window *window)
+{
+    touch_event_subscribe(NULL, NULL, NULL, qr_window_exit, window);
+}
+
+static void qr_window_disappear(Window *window)
+{
+    touch_event_unsubscribe();
+}
+
 void qr_view_init(void)
 {
     if (s_qr_window)
@@ -140,6 +156,8 @@ void qr_view_init(void)
     window_set_window_handlers(s_qr_window, (WindowHandlers){
                                                 .load = qr_window_load,
                                                 .unload = qr_window_unload,
+                                                .appear = qr_window_appear,
+                                                .disappear = qr_window_disappear,
                                             });
     DataResource resources[] = {DATA_RESOURCE_QR_CODE};
     s_registration = data_manager_register_window_requirements(s_qr_window, resources, 1);

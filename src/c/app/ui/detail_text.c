@@ -58,7 +58,7 @@ static void free_context(DetailTextContext *ctx)
     ctx->on_select = NULL;
 }
 
-static void select_click_handler(ClickRecognizerRef recognizer, void *context)
+static void detail_select(void *context)
 {
     Window *window = (Window *)context;
     DetailTextContext *ctx = get_context_for_window(window);
@@ -68,6 +68,16 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context)
     {
         ctx->on_select();
     }
+}
+
+static void detail_exit(void *context)
+{
+    window_stack_pop(true);
+}
+
+static void select_click_handler(ClickRecognizerRef recognizer, void *context)
+{
+    detail_select(context);
 }
 
 static void click_config_provider(void *context)
@@ -99,6 +109,7 @@ static void detail_scroll_page_up(void *context)
 {
     detail_scroll_page(context, -1);
 }
+
 static void detail_scroll_page_down(void *context)
 {
     detail_scroll_page(context, 1);
@@ -217,7 +228,7 @@ static void detail_window_load(Window *window)
 static void detail_window_appear(Window *window)
 {
     update_content_for_window(window);
-    touch_event_subscribe(detail_scroll_page_up, detail_scroll_page_down, window);
+    touch_event_subscribe(detail_scroll_page_up, detail_scroll_page_down, detail_select, detail_exit, window);
 }
 
 static void detail_window_disappear(Window *window)
