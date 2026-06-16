@@ -362,6 +362,12 @@ void handle_get_story_detail_message(DictionaryIterator *iter)
                 set_detail = set_detail_options;
                 ui_update_callback = detail_window_registry_update_list;
             }
+            else if (info->has_text && !info->has_list)
+            {
+                // Text-only types (e.g. Quote) that send detailContentType for the title
+                set_detail = set_detail_text;
+                ui_update_callback = detail_window_registry_update_text;
+            }
             else
             {
                 ERROR_LOG("KNCMessageHandling", "Unknown detail data type: %s for %s", data_type, detail_type_name);

@@ -15,11 +15,14 @@ static void on_active_source_select(int index)
         const char *source = sources_data->sources[index];
         if (source && strcmp(source, localization_get_string(STRING_LOADING)) != 0)
         {
-            set_detail_title((char *)source, NULL);
-
-            // For Quote detail type, send "Type_Quote" so JS knows to use the quote URL
+            // For Quote detail type, don't overwrite the title (which is the author name)
             const DetailListData *list_data = get_detail_list_data();
-            if (list_data->detail_type && strcmp(list_data->detail_type, "Quote") == 0)
+            if (!list_data->detail_type || strcmp(list_data->detail_type, "Quote") != 0)
+            {
+                set_detail_title((char *)source, NULL);
+            }
+
+            if (list_data && list_data->detail_type && strcmp(list_data->detail_type, "Quote") == 0)
             {
                 navigation_open_qr_code("Type_Quote");
             }

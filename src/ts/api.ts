@@ -202,15 +202,14 @@ const updateStories = async ({
           humanitarian_impact: story.humanitarian_impact,
           travel_advisory: story.travel_advisory ?? [],
           did_you_know: story.did_you_know ?? [],
-          quote:
-            story.quote && story.quote_attribution
-              ? {
-                  text: story.quote ?? "",
-                  author: story.quote_author ?? "",
-                  source: story.quote_attribution ?? "",
-                  url: story.quote_source_url ?? "",
-                }
-              : undefined,
+          quote: story.quote
+            ? {
+                text: story.quote ?? "",
+                author: story.quote_author ?? "",
+                source: story.quote_attribution ?? "",
+                url: story.quote_source_url ?? "",
+              }
+            : undefined,
           international_reactions: story.international_reactions ?? [],
           user_action_items: story.user_action_items ?? [],
           scientific_significance: story.scientific_significance ?? [],
