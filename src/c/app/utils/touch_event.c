@@ -60,29 +60,21 @@ static void touch_handler(const TouchEvent *event, void *context)
             int16_t delta_x = event->x - s_reference_x;
             if (s_on_swipe_up && delta_y < -TOUCH_SCROLL_Y_THRESHOLD)
             {
-                touch_event_debounce();
-                s_on_swipe_up(s_context);
                 s_last_dir = TouchDir_Up;
                 s_reference_y = event->y;
             }
             else if (s_on_swipe_down && delta_y > TOUCH_SCROLL_Y_THRESHOLD)
             {
-                touch_event_debounce();
-                s_on_swipe_down(s_context);
                 s_last_dir = TouchDir_Down;
                 s_reference_y = event->y;
             }
             else if (s_on_swipe_left && delta_x < -TOUCH_SCROLL_X_THRESHOLD)
             {
-                touch_event_debounce();
-                s_on_swipe_left(s_context);
                 s_last_dir = TouchDir_Left;
                 s_reference_x = event->x;
             }
             else if (s_on_swipe_right && delta_x > TOUCH_SCROLL_X_THRESHOLD)
             {
-                touch_event_debounce();
-                s_on_swipe_right(s_context);
                 s_last_dir = TouchDir_Right;
                 s_reference_x = event->x;
             }
@@ -90,6 +82,36 @@ static void touch_handler(const TouchEvent *event, void *context)
         break;
     }
     case TouchEvent_Liftoff:
+        touch_event_debounce();
+        switch (s_last_dir)
+        {
+        case TouchDir_Up:
+            if (s_on_swipe_up != NULL)
+            {
+                s_on_swipe_up(s_context);
+            }
+            break;
+        case TouchDir_Down:
+            if (s_on_swipe_down != NULL)
+            {
+                s_on_swipe_down(s_context);
+            }
+            break;
+        case TouchDir_Left:
+            if (s_on_swipe_left != NULL)
+            {
+                s_on_swipe_left(s_context);
+            }
+            break;
+        case TouchDir_Right:
+            if (s_on_swipe_right != NULL)
+            {
+                s_on_swipe_right(s_context);
+            }
+            break;
+        default:
+            break;
+        }
         s_last_dir = TouchDir_None;
         break;
     }
